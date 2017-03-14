@@ -1,0 +1,6 @@
+{
+  "name": "hpcc-info",
+  "short_name": "hpcc-info",
+  "start_url": "/",
+  "display": "standalone"
+}
