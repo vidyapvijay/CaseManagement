@@ -9,6 +9,7 @@
 
 <link rel="import" href="../../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../bower_components/paper-toolbar/paper-toolbar.html">
 
 
 <link rel="import" href="info-plugins.html">
@@ -22,6 +23,7 @@
             width: 100%;
             text-transform: uppercase;
             margin-bottom: 1px;
+            color: white;
         }
         
         iron-pages {
@@ -37,6 +39,20 @@
             height: 100%;
             padding: 80px 0;
         }
+
+        app-toolbar {
+                background-color: #4285f4;
+                height: 40px;
+                color: #fff;
+            }
+
+        paper-icon-button {
+                --paper-icon-button: {
+                    width: 40px;
+                    height: 40px;
+                }
+            }
+
     </style>
 
     <template>
@@ -49,7 +65,6 @@
             </paper-menu-button>
         </app-toolbar>
         <iron-pages id="pages" selected="{{selected}}"></iron-pages>
-
         <info-plugin-dialog id="plugininfo"></info-plugin-dialog>
     </template>
 
@@ -68,6 +83,13 @@
                     type: Number,
                     value: 0
                 }
+            },
+
+            ready: function() {
+                this.addTab("input", "Input", "common-input");
+                this.addPlugin("common-filter", "Filter", "common");
+                this.addPlugin("common-aggregate", "Aggregate", "common");
+                this.addPlugin("common-sort", "Sort", "common");
             },
 
             addPlugin: function (id, label, category) {
@@ -96,7 +118,6 @@
                 tab.id = id;
                 tab.textContent = label;
                 
-
                 view.id = id;
                 view.pluginId = pluginId;
                 view.label = label;
@@ -192,6 +213,7 @@
             },
 
             _pluginEditOpenHandler: function (e) {
+                
                 view = this.getActiveView();
                 view.editor.open();
             },
