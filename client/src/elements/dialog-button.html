@@ -1,0 +1,52 @@
+<link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../../bower_components/paper-styles/color.html">
+
+<!--- ---------------------------------------------dialog button element------------------------------------------------>
+
+<dom-module id="dialog-button">
+    <template>
+        <paper-icon-button icon="[[icon]]" on-tap="clickHandler"></paper-icon-button>
+    </template>
+    <script>
+        Polymer({
+            is: 'dialog-button',
+            properties: {
+
+                dialogId: {
+                    type: String
+                },
+
+                icon: {
+                    type: String
+                }
+            },
+
+            clickHandler: function (e) {
+                var button = e.target;
+                
+                while (!button.hasAttribute('dialogId') && button !== document.body) {
+                    button = button.parentElement;
+                }
+
+                if (!button.hasAttribute('dialogId')) {
+                    console.log("you have no element with 'dialogId' defined");
+                    return;
+                }
+
+
+                var id = button.getAttribute('dialogId');
+                console.log("dialog " + id + " requested");
+                var dialog = document.getElementById(id);
+                if (dialog) {
+
+                    dialog.open();
+                } else {
+                    console.log("dialog " + id + " does not exist")
+                }
+            }
+        });
+    </script>
+
+</dom-module>
