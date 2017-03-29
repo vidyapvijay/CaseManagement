@@ -1,0 +1,95 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+
+<link rel="import" href="../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+
+
+<!--- ---------------------------------------------filter dialog------------------------------------------------>
+
+
+<dom-module id="open-worksheet-dialog">
+
+    <template>
+
+        <style>
+            paper-button.green {
+                background-color: var(--paper-green-500);
+                color: white;
+            }
+            
+            paper-button.indigo {
+                background-color: var(--paper-indigo-500);
+                color: white;
+                --paper-button-raised-keyboard-focus: {
+                    background-color: var(--paper-pink-a200) !important;
+                    color: white !important;
+                }
+                ;
+            }
+            
+            paper-button.indigo:hover {
+                background-color: var(--paper-indigo-400);
+            }
+            
+            
+            paper-dialog {
+                width: 500px;
+            }
+        </style>
+
+        <paper-dialog id="dialog" modal style="width:700px;height:400px">
+
+            <vaadin-grid  id="worksheet-list" style="height:80%">
+                <table>
+                    <col name="title">
+                    <col name="file">
+                    <col name="updatedby">
+                    <col name="dateupdated">
+
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>File</th>
+                            <th>Updated By</th>
+                            <th>Date Updated</th>
+                        </tr>
+                    </thead>
+
+                </table>
+            </vaadin-grid>
+
+            <div class="buttons">
+                <paper-button dialog-confirm raised class="indigo">Ok</paper-button>
+                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'open-worksheet-dialog',
+
+            open: function () {
+                this.$.dialog.open();
+            }
+
+        });
+
+
+        document.addEventListener("WebComponentsReady", function () {
+
+            // Reference to the grid element.
+            var grid = document.querySelector("#worksheet-list");
+
+            // Add some example data as an array.
+           
+        });
+    </script>
+
+
+</dom-module>

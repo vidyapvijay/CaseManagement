@@ -1,3 +1,4 @@
+                this.listen(this.$.dialog, 'complete', infobox._pluginNewTabHandler(e));
 <link rel="import" href="../../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 
 <link rel="import" href="../../../bower_components/paper-tabs/paper-tabs.html">
@@ -82,11 +83,18 @@
                 selected: {
                     type: Number,
                     value: 0
-                }
+                },
+                cluster_address : String,
+                cluster_name : String,
+                port : String,
+                httpSecured : Boolean,
+                username    : String,
+                password  : String,
+
             },
 
             ready: function() {
-                this.addTab("input", "Input", "common-input");
+                // this.addTab("input", "Input", "common-input");
                 this.addPlugin("common-filter", "Filter", "common");
                 this.addPlugin("common-aggregate", "Aggregate", "common");
                 this.addPlugin("common-sort", "Sort", "common");

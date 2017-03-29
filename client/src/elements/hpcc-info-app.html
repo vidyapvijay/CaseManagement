@@ -14,17 +14,22 @@
 <link rel="import" href="../../../bower_components/vaadin-grid/vaadin-grid.html">
 <link rel="import" href="../../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../../../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../../bower_components/iron-label/iron-label.html">
 <link rel="import" href="../../../bower_components/paper-styles/color.html">
-
+<link rel="import" href="../../../bower_components/iron-ajax/iron-ajax.html" />
 <link rel="import" href="info-box.html">
+<link rel="import" href="info-plugin-dialog.html">
+
 <link rel="import" href="filter-dialog.html">
+<link rel="import" href="new-worksheet-dialog.html">
 <link rel="import" href="dialog-button.html"> 
 
 <dom-module id="hpcc-info-app">
 
     <template>
+
 
         <style>
             
@@ -39,13 +44,6 @@
                 font-size: 18px;
             }
 
-            paper-icon-button {
-                --paper-icon-button: {
-                    width: 36px;
-                    height: 36px;
-                }
-            }
-            
             app-drawer {
                 --app-drawer-scrim-background: rgba(0, 0, 100, 0.8);
                 --app-drawer-content-container: {
@@ -54,49 +52,108 @@
                 width: 100%;
             }
 
+            paper-icon-button {
+                --paper-icon-button: {
+                    width: 36px;
+                    height: 36px;
+                }
+            }
+            
+
+
+
         </style>
 
 
         <!-- ----------------------- App Header ---------------------------->
-        <app-header-layout>
-            <app-header reveals effects="waterfall">
-                <app-toolbar>
-                    <paper-icon-button icon="menu" onclick="drawer.toggle()"></paper-icon-button>
-                    <div main-title>Dataset - Sales Revenue</div>
-                    <paper-icon-button icon="create" onclick="modal.open()" class="my-button"></paper-icon-button>
-                    <dialog-button dialog-id="filter-dialog" icon="search"></dialog-button>
-                    <filter-dialog id="filter-dialog"></filter-dialog>
+            <!-- ----------------------- Custom Tab Element ---------------------------->
 
-                    <paper-icon-button icon="code" onclick="modal.open()"></paper-icon-button>
-                    <paper-icon-button icon="cloud-download" onclick="modal.open()"></paper-icon-button>
-                </app-toolbar>
-            </app-header>
-        </app-header-layout>
-
-        <!-- ----------------------- Custom Tab Element ---------------------------->
-        <info-box></info-box>
 
         <!-- ----------------------- App Drawer Left Position ---------------------------->
 
-        <app-drawer id="drawer" swipe-open>
+        <app-toolbar>
+            <paper-icon-button icon="menu" onclick="drawer.toggle()"></paper-icon-button>
+
+            <div main-title>Sales Revenue</div>
+
+            <dialog-icon-button dialogId="filter-dialog" icon="search"></dialog-icon-button>
+     
+            <paper-icon-button icon="edit" on-tap="filterDialog"></paper-icon-button>
+            <paper-icon-button icon="cloud-download" onclick="modal.open()"></paper-icon-button>
+        </app-toolbar>
+
+
+          <app-drawer id="drawer">
             <div role="listbox">
-                <paper-button>
-                     <iron-icon icon="inbox" item-icon></iron-icon> <span style="padding-left: 10px">New Project</span>             
-                </paper-button>
-                <paper-button>
-                     <iron-icon icon="drafts" item-icon></iron-icon> <span style="padding-left: 10px">Open Project</span>             
-                </paper-button>
-                <paper-button>
-                     <iron-icon icon="query-builder" item-icon></iron-icon> <span style="padding-left: 10px">Settingss</span>             
-                </paper-button>
+                <dialog-button dialogId="new-worksheet-dialog" icon="create" label="New Worksheet"></dialog-button>
+                <dialog-button dialogId="open-worksheet-dialog" icon="mail" label="Open Worksheet"></dialog-button>
+
+                <paper-input style="padding-left: 5px"  on-change="addMeToSession" id='cluster_name' label="Cluster Name"></paper-input>
+                <paper-input style="padding-left: 5px" on-change="addMeToSession" id='cluster_address' label="Cluster Address"></paper-input>
+                <paper-input style="padding-left: 5px" on-change="addMeToSession" id='port' label="Port"></paper-input>
+                <paper-input style="padding-left: 5px" on-change="addMeToSession" id='username' label="Username"></paper-input>
+                <paper-input style="padding-left: 5px" on-change="addMeToSession" id='password' label="Password"></paper-input>
+                 <paper-toggle-button  id="httpSecured" on-change="addMeToSession">HTTP Secured</paper-toggle-button>
+
+
             </div>
         </app-drawer>
+
+        
+        <new-worksheet-dialog id="new-worksheet-dialog"></new-worksheet-dialog>
+        <open-worksheet-dialog id="open-worksheet-dialog"></open-worksheet-dialog>
+
+                <info-box id="infobox"></info-box>
+<!--
+        <app-drawer id="drawer">
+            <div role="listbox">
+                <dialog-button dialogId="new-worksheet-dialog" icon="create" label="New Worksheet"></dialog-button>
+                <dialog-button dialogId="open-worksheet-dialog" icon="mail" label="Open Worksheet"></dialog-button>
+
+                <paper-input style="padding-left: 5px" id='cluster_name' label="Cluster Name"></paper-input>
+                <paper-input style="padding-left: 5px" id='cluster_address' label="Cluster Address"></paper-input>
+                <paper-input style="padding-left: 5px" id='user' label="User"></paper-input>
+                <paper-input style="padding-left: 5px" id='password' label="Password"></paper-input>
+                <paper-toggle-button  id="httpSecured" on-change="addMeToSession">HTTP Secured</paper-toggle-button>
+
+                <new-worksheet-dialog id="new-worksheet-dialog"></new-worksheet-dialog>
+                <open-worksheet-dialog id="open-worksheet-dialog"></open-worksheet-dialog> 
+            </div>
+        </app-drawer>-->
 
     </template>
 
     <script>
         Polymer({
             is: 'hpcc-info-app',
+             addMeToSession : function(event){
+
+                var infoBox = document.querySelector("#infobox");
+                switch(event.currentTarget.id){
+                    case 'cluster_name' : 
+                        infoBox.properties.cluster_name = event.currentTarget.value;
+                        break;
+                    case 'cluster_address' : 
+                        infoBox.properties.cluster_address = event.currentTarget.value;
+                        break;
+                    case 'port':
+                        infoBox.properties.port = event.currentTarget.value;
+                        break;
+                    case 'username':
+                        infoBox.properties.username = event.currentTarget.value;
+                        break;
+                    case 'password':
+                        infoBox.properties.password = event.currentTarget.value;
+                        break;
+                    case 'httpSecured':
+                        infoBox.properties.httpSecured = event.currentTarget.value;
+                        break;
+                    default:
+                        break;
+                }
+                console.log(event);
+             }
+
         });
     </script>
 

@@ -9,6 +9,57 @@
 <dom-module id="common-input-editor">
     <template>
 
+    		<iron-ajax
+		id="ajaxwuCreate"
+		method = "POST"
+		params = "{QueryText : OUTPUT('raja');}"
+		handle-as="json" 
+		on-response="WUCreateResponse">
+	</iron-ajax>
+	
+	<iron-ajax
+		id="ajaxwuUpdate"
+		method = "POST"
+		handle-as="json" 
+		on-response="WUUpdateResponse">
+	</iron-ajax>
+	
+	<iron-ajax
+		id="ajaxwuSubmit"
+		method = "POST"
+		handle-as="json" 
+		on-response="WUSubmitResponse">
+	</iron-ajax>
+	
+	<iron-ajax
+		id="ajaxwuStatus"
+		method = "POST"
+		handle-as="json" 
+		on-response="WUInfoResponse">
+	</iron-ajax>
+	
+	<iron-ajax
+		id="ajaxwuResult"
+		method = "POST"
+		handle-as="json" 
+		on-response="WUResultResponse">
+	</iron-ajax>
+	
+	<iron-ajax
+		id="ajaxdfuFileInfo"
+		method = "POST"
+		handle-as="json" 
+		on-response="DFUFileResponse">
+	</iron-ajax>
+
+
+    <iron-ajax
+		id="ajaxdfuFilesListInfo"
+		method = "POST"
+		handle-as="json" 
+		on-response="DFUFilesListResponse">
+	</iron-ajax>
+
         <style>
             paper-button.green {
                 background-color: var(--paper-green-500);
@@ -37,7 +88,8 @@
 
         <paper-dialog id="dialog" modal>
             <paper-input id='scope' label="Scope"></paper-input>
-            <vaadin-combo-box id='file' required label="File" items='["Revenue", "Flight"]'></vaadin-combo-box>
+            
+            <vaadin-combo-box id='subfilesgrid' class='subfilesgrid' required label="File" items='["Revenue", "Flight"]'></vaadin-combo-box>
             <div class="buttons">
                 <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
                 <paper-button dialog-dismiss raised class="green" on-tap="_cancelHandler">Cancel</paper-button>
@@ -50,8 +102,27 @@
         Polymer({
             is: 'common-input-editor',
 
-            properties: {
+            listeners: {
+              'scope.change': '_loadFilesOnScopeChange'
+             },
 
+            properties: {
+                eclIP : String,
+                hpccuser : String
+            },
+
+            ready : function(e){
+                 var infoBox = document.querySelector("#infobox");
+            var username = infoBox.properties.username;
+            var password = infoBox.properties.password;
+            var credentials = username === null || username === "" ? "" : (
+                password === null || password === "" ?  (username + '@') :
+                (username + ':' + password + '@')               
+            );
+            var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") +  infoBox.properties.cluster_address +
+                ":" + infoBox.properties.port;
+            this.properties.eclIP = eclIP;
+            this.properties.hpccuser = username;
             },
 
             open: function () {
@@ -59,7 +130,13 @@
             },
 
             _okHandler: function (e) {
-                this.fire('complete');
+
+                var selectedFile = event.currentTarget.parentElement.parentElement.getElementsByClassName("subfilesgrid")[0].value;
+                sessionStorage.setItem('FilterCriteria', '');
+                sessionStorage.setItem('selecteFile', selectedFile);
+                this.$.ajaxwuCreate.url=this.properties.eclIP + "/WsWorkunits/WUCreate.json?Owner=" + this.properties.hpccuser;
+			    this.$.ajaxwuCreate.generateRequest();
+  			    this.fire('complete');
             },
 
             _cancelHandler: function (e) {
@@ -75,10 +152,150 @@
             },
 
             getViewProperties: function() {
-
             },
 
+		  WUCreateResponse: function(request) {
+		    console.log(this.$.ajaxwuCreate.lastResponse.WUCreateResponse.Workunit.Wuid + 'create');
+            this.$.ajaxdfuFileInfo.url=this.properties.eclIP+ "/WsDfu/DFUInfo.json";
+		    this.$.ajaxdfuFileInfo.params = {Name:sessionStorage.getItem("selecteFile")};
+		    this.$.ajaxdfuFileInfo.generateRequest();
+            return;
+		  },
+		  WUUpdateResponse: function(request) {
+			    console.log(this.$.ajaxwuUpdate.lastResponse.WUUpdateResponse.Workunit.Wuid + 'update');
+			    console.log(request.detail.response);
+                this.$.ajaxwuSubmit.url=this.properties.eclIP+ "/WsWorkunits/WUSubmit.json";
+			    this.$.ajaxwuSubmit.params = {Wuid:this.$.ajaxwuUpdate.lastResponse.WUUpdateResponse.Workunit.Wuid, Cluster : "thor"};
+		    	this.$.ajaxwuStatus.params = {Wuid:request.detail.response.WUUpdateResponse.Workunit.Wuid, Cluster : "thor"};
+			    this.$.ajaxwuSubmit.generateRequest();
+		    	return;
+
+		  },		  
+		  WUSubmitResponse: function(request) {
+			    console.log(this.$.ajaxwuSubmit.lastResponse);
+                this.$.ajaxwuStatus.url=this.properties.eclIP+ "/WsWorkunits/WUInfo.json";
+			    this.$.ajaxwuStatus.generateRequest();
+                return;
+		  },
+		  WUInfoResponse : function(request){
+			  
+			  var wuState = request.detail.response.WUInfoResponse.Workunit.State;
+
+			  if(wuState === "submitted" || wuState === 'compiling'|| wuState === 'running' || wuState === 'compiled' || wuState === 'blocked'){
+				 this.$.ajaxwuStatus.generateRequest();
+			  }else if(wuState === 'completed'){
+				  this.$.ajaxwuResult.url=this.properties.eclIP+ "/WsWorkunits/WUResult.json";
+				  this.$.ajaxwuResult.params = {Wuid:request.detail.response.WUInfoResponse.Workunit.Wuid};
+				  this.$.ajaxwuResult.generateRequest();
+			  }else{
+                  console.log(wuState);
+                  console.log('Something went wrong while fetching the data, Please try again or check you filter query again!');
+                  var grid =  document.querySelector("#worksheet");
+
+                  grid.items = [];
+                  var cols = grid.columns;    
+                    for(;cols.length > 0;){
+                        console.log(cols[0].name);
+                        grid.removeColumn(cols[0].name);
+                    }
+                  grid.addColumn({name: "<b>Something went wrong while fetching the data, Please try again or check you filter query again!</b>"});
+                  alert('Something went wrong while fetching the data, Please try again or check you filter query again!');
+              }
+              return;
+			  
+		  },
+		  WUResultResponse: function(request) {
+
+            if(this.$.ajaxwuResult.lastResponse.WUResultResponse.Name === "SUPERFILECONTENTS"){
+                var subfilename = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row[0].name;
+                this.$.ajaxdfuFileInfo.url=this.properties.eclIP+ "/WsDfu/DFUInfo.json";
+                this.$.ajaxdfuFileInfo.params = {Name:subfilename};
+                return this.$.ajaxdfuFileInfo.generateRequest();
+            }
+			console.log(this.$.ajaxwuResult.lastResponse);
+            var grid = document.querySelector("#worksheet");
+            var cols = grid.columns;    
+            var colArray = [];
+            for(;cols.length > 0;){
+                console.log(cols[0].name);
+                grid.removeColumn(cols[0].name);
+            }
+           
+            var obj = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row[0];
+            var cnt = 0;
+            Object.keys(obj).forEach(function(key) {
+            grid.addColumn({name: key, resizable:true});
+            
+             colArray[cnt] = key;
+             cnt++;
+            });
+
+             sessionStorage.setItem('gridColumns', colArray);
+            // Add some example data as an array.
+            grid.items = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row;
+            return;// Polish.resovle();
+            // this.createGrid(this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row);
+        },
+		  DFUFileResponse: function(request) {
+			    console.log(request.detail.response.DFUInfoResponse);
+                
+                if(request.detail.response.DFUInfoResponse.FileDetail.isSuperfile){
+                    var QueryStr = "IMPORT STD;OUTPUT(STD.FILE.SUPERFILECONTENTS('~" + sessionStorage.getItem("selecteFile") + "', TRUE)[1], NAMED('SUPERFILECONTENTS'));"
+                }else{
+                    var QueryStr = "#OPTION(\'OUTPUTLIMIT\',2000);\nrecLayout := " + request.detail.response.DFUInfoResponse.FileDetail.Ecl + "\n" + "ds := DATASET(\'~" + sessionStorage.getItem("selecteFile") + "\'," +  "recLayout, THOR);\n" + 
+                "Output(DS" +  "(" + (sessionStorage.getItem('FilterCriteria') === null ? "" : sessionStorage.getItem('FilterCriteria'))+ ")"+ ");";
+                }
+			    console.log(QueryStr);
+                this.$.ajaxwuUpdate.url=this.properties.eclIP+ "/WsWorkunits/WUUpdate.json";
+			    this.$.ajaxwuUpdate.params = {Wuid:this.$.ajaxwuCreate.lastResponse.WUCreateResponse.Workunit.Wuid, QueryText : QueryStr, ResultLimit : 1000, Jobname : "HPCCInfoRequest", Owner : sessionStorage.getItem("user")};
+			    this.$.ajaxwuUpdate.generateRequest();
+                console.log("Workunit is Executed");
+                return;
+          },
+
+            _loadFilesOnScopeChange: function(event){
+                 this.$.ajaxdfuFilesListInfo.url= this.properties.eclIP + "/WsDfu/DFUQuery.json";
+                this.$.ajaxdfuFilesListInfo.params = {LogicalName: event.currentTarget.value + '*', "Access-Control-Allow-Origin": this.properties.eclIP };
+                this.$.ajaxdfuFilesListInfo.headers = {user:username, pass:(password === null ? "" : password)};
+			    this.$.ajaxdfuFilesListInfo.generateRequest();
+		    },
+            selectfilename : function(event){
+                sessionStorage.setItem("selecteFile", subfilesgrid.value);
+                var filterText = document.querySelector('#filterformulas');
+                filterText.value = "";
+                sessionStorage.setItem("FilterCriteria", '');
+                sessionStorage.setItem('worksheetTitle', title.value);
+                var divtag = document.querySelector("#homepagediv");
+                divtag.innerText = title.value;
+                var grid = document.querySelector('#worksheet');
+                grid.fire('tap');
+
+            
+            },
+             DFUFilesListResponse: function(request) {
+			    console.log(request.detail.response.DFUQueryResponse.NumFiles);
+                var subfilesgrid = document.querySelector("#subfilesgrid");
+                if(request.detail.response.DFUQueryResponse.NumFiles === 0){
+                    subfilesgrid.items = [];
+                    subfilesgrid.selectedItem = null;
+                    alert('The scope does not have any sub files in it! Please choose any!');
+                    return;
+                }
+                var subfiles = request.detail.response.DFUQueryResponse.DFULogicalFiles.DFULogicalFile;
+                var subfilesstrnames = "";
+                var fileArray = [];
+                for(var cnt = 0; cnt < subfiles.length; cnt++){
+                    subfilesstrnames = subfilesstrnames + "," +subfiles[cnt].Name;
+                    fileArray[cnt] = subfiles[cnt].Name;
+                }
+                
+                subfilesgrid.items = fileArray;// subfilesstrnames.split(",");
+                subfilesgrid.selectedItem = fileArray[0];
+		  }
+
         });
+    </script>
+
     </script>
 
 </dom-module>
@@ -86,7 +303,7 @@
 <dom-module id="common-input-view">
 
     <template>
-        <div> Common Input </div>
+        <div><vaadin-grid class="projectworksheet" name="worksheet" id="worksheet"></</div>
     </template>
 
     <script>
