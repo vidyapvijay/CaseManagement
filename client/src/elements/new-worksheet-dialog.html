@@ -1,12 +1,13 @@
-<link rel="import" href="../../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../../bower_components/iron-ajax/iron-ajax.html" />
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html" />
 
-<link rel="import" href="../../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 
-<link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
-<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/iron-label/iron-label.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
 
 
 <!--- ---------------------------------------------filter dialog------------------------------------------------>
@@ -41,21 +42,17 @@
             }
         </style>
 
-        <!--<paper-dialog id="dialog" modal>
-
-            <paper-input id='title' label="Title"></paper-input>
-            <paper-input id='scope' label="Scope" on-change="loadsubfiles"></paper-input>
-            <vaadin-combo-box id='subfilesgrid' required label="Sub Files" items='["Revenue", "Flight"]'></vaadin-combo-box>
-
-            <div class="buttons">
-                <paper-button dialog-confirm raised class="indigo" on-click="selectfilename">Ok</paper-button>
-                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
-            </div>
-        </paper-dialog>-->
-
         <paper-dialog id="dialog" modal>
-            <paper-input id='pluginId' label="Id" class="pluginId" value="{{pluginId}}" readonly></paper-input>
-            <paper-input id='label' label="label"  class="projectlabel" ></paper-input>
+            <iron-label>
+                <div style="text-align: center;">
+                    <span style="font-size: x-large;">
+                            New Worksheet
+                    </span>
+                </div>
+
+                </iron-label>
+                <paper-input id='worksheettitle' label="WorkSheet Title"  class="worksheettitle" ></paper-input>
+            <!--<paper-input id='label' label="label"  class="projectlabel" ></paper-input>-->
 
             <div class="buttons">
                 <paper-button dialog-confirm raised class="indigo" on-tap="_addNewTab">Ok</paper-button>
@@ -68,17 +65,38 @@
 
         Polymer({
             is: 'new-worksheet-dialog',
-
+            properties : {
+               pluginId: {
+                    type: String,
+                    value: 'common-input'
+                },
+             },
             open: function (e) {
                this.$.dialog.open();
             },
-            _addNewTab : function(event){
-               var infobox = document.querySelector("#infobox");
+        _addNewTab : function(event){
+                 //var infobox = document.querySelector("#infobox");
+                 var infobox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
 
-               var pluginId = "common-input";
-                var label = event.currentTarget.parentElement.parentElement.getElementsByClassName("projectlabel")[0].value;
-               infobox.addTab(pluginId, label, pluginId);
-           }
+                 var projecttitlediv = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#projecttitle');
+
+                 projecttitlediv.textContent = this.$.worksheettitle.value;
+
+                 var pluginId = "common-input";
+                 //var label = event.currentTarget.parentElement.parentElement.getElementsByClassName("projectlabel")[0].value;
+
+                 infobox.addTab(pluginId, "Input", pluginId);
+                 this.toggleAppDrawer(); //Toggle the app-drawer
+            },
+ 
+            handleCancel: function() {
+                 this.toggleAppDrawer();
+            },
+ 
+            toggleAppDrawer: function() {
+                 Polymer.dom(Polymer.dom(this).parentNode).querySelector('#drawer').toggle();
+             }
+ 
         });
 
 

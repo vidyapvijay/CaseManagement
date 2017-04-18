@@ -27,7 +27,13 @@
 
     <template>
         <paper-dialog id="dialog" modal>
-            <paper-input id='plugin' label="Id" value="{{pluginId}}" readonly></paper-input>
+            <iron-label>
+                <div style="text-align: center;">
+                    <span style="font-size: x-large;">
+                             {{plugintitle}} 
+                    </span>
+                </div>
+                </iron-label>
             <paper-input id='label' label="label"></paper-input>
 
             <div class="buttons">
@@ -44,10 +50,14 @@
             properties: {
                 pluginId: {
                     type: String
+                },
+                plugintitle: {
+                    type: String
                 }
             },
 
             open: function () {
+                this.$.label.value = '';
                 this.$.dialog.open();
             },
 
