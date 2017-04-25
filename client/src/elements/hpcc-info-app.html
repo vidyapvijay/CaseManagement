@@ -19,9 +19,9 @@
 <link rel="import" href="../../bower_components/iron-label/iron-label.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html" />
+
 <link rel="import" href="info-box.html">
 <link rel="import" href="info-plugin-dialog.html">
-
 <link rel="import" href="filter-dialog.html">
 <link rel="import" href="new-worksheet-dialog.html">
 <link rel="import" href="open-worksheet-dialog.html">
@@ -40,7 +40,7 @@
                 color: #fff;
             }
             
-            [main-title] {
+            main-title {
                 margin-left: 15px;
                 font-size: 18px;
             }
@@ -62,9 +62,11 @@
         </style>
 
         <!-- ----------------------- App Drawer Left Position ---------------------------->
-
         <app-toolbar>
-            <paper-icon-button icon="menu" onclick="drawer.toggle()"></paper-icon-button><div main-title id="projecttitle">Welcome to Info-Sec Application</div></app-toolbar> <new-worksheet-dialog></new-worksheet-dialog>
+            <paper-icon-button icon="menu" onclick="drawer.toggle()" ></paper-icon-button>
+            <div class="main-title" id="projecttitle">Welcome to Info-Sec Application</div>
+        </app-toolbar> 
+        <new-worksheet-dialog></new-worksheet-dialog>
         <open-worksheet-dialog></open-worksheet-dialog>
         <info-box id="infobox"></info-box>
          <app-drawer id="drawer">
@@ -82,8 +84,7 @@
     
     <script>
    
-        Polymer(
-    {
+        Polymer({
             is: 'hpcc-info-app',
             properties: {
                 clusteraddress : {
@@ -103,19 +104,22 @@
                 password  : String,
 
             },
-            ready : function(e){
 
+            ready : function(){
                 var infoBox = this.$$('#infobox');
-                try{
-                infoBox.properties.cluster_name =  "4-way";
-                infoBox.properties.cluster_address = "10.173.147.1";
-                infoBox.properties.port = "8010";
-                infoBox.properties.username = "";
-                infoBox.properties.password = "";
-                infoBox.properties.httpSecured = false;
-                }catch(e2){
+                try {
+                    infoBox.properties.cluster_name =  "4-way";
+                    infoBox.properties.cluster_address = "10.173.147.1";
+                    infoBox.properties.port = "8010";
+                    infoBox.properties.username = "";
+                    infoBox.properties.password = "";
+                    infoBox.properties.httpSecured = false;
+                } catch(e2) {
                     console.log("Error occurred");
                 }
+
+                //Initialize projecttitle handler for inline editing of projecttitle
+                editProjectTitleHandler();
 
             },
              addMeToSession : function(event){
@@ -144,7 +148,7 @@
                         break;
                 }
                 console.log(event);
-             }
+             }     
 
         });
     </script>
