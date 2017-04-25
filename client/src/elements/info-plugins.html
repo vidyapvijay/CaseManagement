@@ -4,9 +4,10 @@
 <link rel="import" href="../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/iron-label/iron-label.html">
-<link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html"><dom-module id="common-input-editor">
+<link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
 
- <template>
+<dom-module id="common-input-editor">
+  <template>
     <iron-ajax
     id="ajaxwuWUCreateAndUpdate"  method = "POST"
         handle-as="json"
@@ -125,7 +126,7 @@
 
 
         <paper-dialog id="dialog" modal>
-            <paper-input id='TabTitle' label="[[editortitle]]" disabled="true"></paper-input>
+            <paper-input id='TabTitle' label="[[editortitle]]"></paper-input>
             <paper-input id='scope' label="File Scope" ></paper-input>
             <vaadin-combo-box id='subfilesgrid' class='subfilesgrid' required label="File" items='[]'></vaadin-combo-box>
             <div class="buttons">
@@ -173,7 +174,7 @@
             },
 
             _okHandler: function (e) {
-                
+                document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
                 var selectedFile = this.$.subfilesgrid.value;
                 sessionStorage.setItem('FilterCriteria', '');
                 sessionStorage.setItem('selecteFile', selectedFile);
@@ -551,7 +552,7 @@
 
 
         <paper-dialog id="dialog" modal>
-            <paper-input id='TabTitle' label="[[editortitle]]" disabled="true"></paper-input>
+            <paper-input id='TabTitle' label="[[editortitle]]"></paper-input>
             <vaadin-combo-box id='filterInputTab' on-change='changeInput' required label="Input Dataset" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
             <vaadin-combo-box id='field' required label="Field" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
             <vaadin-combo-box id='operation' required label="Operation" items='["=", ">", "<",">=","<=","IN","BETWEEN"]'></vaadin-combo-box>
@@ -639,7 +640,7 @@
             },
 
             _okHandler: function (e) {
-                
+                document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
                 var currentPage = document.querySelector("#pages").selectedItem;
 
              currentPage.properties.outputdsname = 'filterdsName'  + '_' +  Math.random().toString(36).substr(2, 4);
@@ -1021,7 +1022,7 @@
 
 
         <paper-dialog id="dialog" modal>
-            <paper-input id='TabTitle' label="[[editortitle]]" disabled="true"></paper-input>
+            <paper-input id='TabTitle' label="[[editortitle]]"></paper-input>
             <vaadin-combo-box id='sortInputtab' on-change='changeSortInput' required label="Input Dataset" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
             <vaadin-combo-box id='sortfield' required label="Field" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
             <vaadin-combo-box id='fieldOrder' required label="Field Order" items='["ASC", "DSC"]'></vaadin-combo-box>
@@ -1102,7 +1103,7 @@
 
             _okHandler: function (e) {
 
-
+                document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
                 var currentPage = document.querySelector("#pages").selectedItem;
 
                 currentPage.properties.outputdsname = 'sortdsName'  + '_' +  Math.random().toString(36).substr(2, 4);
@@ -1421,7 +1422,7 @@
 
 
         <paper-dialog id="dialog" modal>
-             <paper-input id='TabTitle' label="[[editortitle]]" disabled="true"></paper-input>
+             <paper-input id='TabTitle' label="[[editortitle]]"></paper-input>
              <vaadin-combo-box id='aggregateInputtab' on-change='changeAggregateInput' required label="Input Dataset" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
              <paper-toggle-button  id="forFreqTable" on-change="changeLayoutforFrequency">Frequency Table</paper-toggle-button>
             <vaadin-combo-box id='crosstabfield' required label="GroupBy Field" items='["Product", "Year", "Revenue"]'></vaadin-combo-box>
@@ -1556,7 +1557,7 @@
             },
 
             _okHandler: function (e) {
-
+                document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
                 var currentPage = document.querySelector("#pages").selectedItem;
 
                 currentPage.properties.outputdsname = 'aggregatedsName'  + '_' +  Math.random().toString(36).substr(2, 4);
