@@ -15,6 +15,7 @@
 <link rel="import" href="info-plugins.html">
 
 
+
 <dom-module id="info-box">
     <template>
     <style>
@@ -57,9 +58,9 @@
         <app-toolbar>
             <paper-tabs id="tabs" selected="{{selected}}"></paper-tabs>
             <paper-icon-button icon="create" on-tap="_pluginEditOpenHandler"></paper-icon-button>
-            <paper-menu-button horizontal-align="right">
+            <paper-menu-button horizontal-align="right" disabled id="pluginMenu">
                 <paper-icon-button icon="add" class="dropdown-trigger"></paper-icon-button>
-                <paper-menu id="pluginmenu" class="dropdown-content"></paper-menu>
+                <paper-menu id="pluginmenu" class="dropdown-content"> </paper-menu>
             </paper-menu-button>
         </app-toolbar>
         <iron-pages id="pages" selected="{{selected}}"></iron-pages>
@@ -92,10 +93,10 @@
             },
 
             ready: function() {
-                // this.addTab("input", "Input", "common-input");
                 this.addPlugin("common-filter", "Filter", "common");
                 this.addPlugin("common-aggregate", "Aggregate", "common");
                 this.addPlugin("common-sort", "Sort", "common");
+                this.addPlugin("common-sample", "Sample", "common");
             },
 
             addPlugin: function (id, label, category) {

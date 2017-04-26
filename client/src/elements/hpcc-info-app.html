@@ -73,12 +73,13 @@
             <div role="listbox">
                 <dialog-button id="new-worksheet-dialog" icon="create" title="New Worksheet"></dialog-button>
                 <dialog-button id="open-worksheet-dialog" icon="mail" title="Open Worksheet"></dialog-button>
-                <paper-input style="padding-left: 5px" on-change="addMeToSession" id='cluster_name' label="Cluster Name" value="[[clustername]]"></paper-input>
-                <paper-input style="padding-left: 5px" on-change="addMeToSession" id='cluster_address' label="Cluster Address" value="[[clusteraddress]]"></paper-input>
-                <paper-input style="padding-left: 5px" on-change="addMeToSession" id='port' label="Port" value="[[port]]"></paper-input>
-                <paper-input style="padding-left: 5px" on-change="addMeToSession" id='username' label="Username" value="[[username]]"></paper-input>
-                <paper-input style="padding-left: 5px" on-change="addMeToSession" id='password' label="Password" value="[[password]]"></paper-input>
-                <paper-toggle-button  id="httpSecured" on-change="addMeToSession">HTTP Secured</paper-toggle-button>
+                <paper-input style="padding-left: 5px"  id='cluster_name' label="Cluster Name" value="[[clustername]]"></paper-input>
+                <paper-input style="padding-left: 5px"  id='cluster_address' label="Cluster Address" value="[[clusteraddress]]"></paper-input>
+                <paper-input style="padding-left: 5px"  id='port' label="Port" value="[[port]]"></paper-input>
+                <paper-input style="padding-left: 5px"  id='username' label="Username" value="[[username]]"></paper-input>
+                <paper-input style="padding-left: 5px"  id='password' label="Password" value="[[password]]"></paper-input>
+                <paper-toggle-button  id="httpSecured" >HTTP Secured</paper-toggle-button></br>
+                <paper-button style="background-color: #4caf50;;color: white;text-transform: none;"  on-tap="addAllToSession">Save Cluster Details</paper-button>
                 </div></app-drawer>
     </template>
     
@@ -107,14 +108,18 @@
 
             ready : function(){
                 var infoBox = this.$$('#infobox');
-                try {
-                    infoBox.properties.cluster_name =  "4-way";
-                    infoBox.properties.cluster_address = "10.173.147.1";
-                    infoBox.properties.port = "8010";
-                    infoBox.properties.username = "";
-                    infoBox.properties.password = "";
-                    infoBox.properties.httpSecured = false;
-                } catch(e2) {
+                try{
+                infoBox.properties.cluster_name =  "4-way";
+                infoBox.properties.cluster_address = "10.173.147.1";
+                infoBox.properties.port = "8010";
+                infoBox.properties.username = "";
+                infoBox.properties.password = "";
+                infoBox.properties.httpSecured = false;
+
+                var pluginId = "common-input";
+                infobox.addTab(pluginId, "Input", pluginId);    
+
+                }catch(e2){
                     console.log("Error occurred");
                 }
 
@@ -122,6 +127,21 @@
                 editProjectTitleHandler();
 
             },
+
+            addAllToSession  : function(event){
+
+                 var infoBox = this.$$('#infobox');
+
+                infoBox.properties.cluster_name = this.$.cluster_name.value;
+                infoBox.properties.cluster_address = this.$.cluster_address.value;
+                infoBox.properties.port = this.$.port.value;
+                infoBox.properties.username = this.$.username.value;
+                infoBox.properties.password = this.$.password.value;
+                infoBox.properties.httpSecured = this.$.httpSecured.value;
+                
+            },
+
+
              addMeToSession : function(event){
 
                  var infoBox = this.$$('#infobox');
