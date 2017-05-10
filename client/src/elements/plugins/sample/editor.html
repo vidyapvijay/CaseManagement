@@ -59,249 +59,274 @@
     Polymer({
         is: 'common-sample-editor',
 
-        properties: {
-            eclcode: String,
-            outputdsname: String,
-            inputdsname: String,
-            eclIP: String,
-            hpccuser: String,
-            editortitle: {
-                type: String,
-                value: "Editor Title"
-            }
-
-
-        },
+	properties: {
+		eclcode : String,
+		outputdsname : String,
+		inputdsname : String,
+		eclIP : String,
+		hpccuser : String,
+		displayFields : String,
+		editortitle : String,
+		expression : String,
+		title : String
+	},
 
         ready: function() {
             var selpage = document.querySelector("#pages").querySelector("#common-input");
 
-            this.properties.eclcode = selpage.properties.eclcode;
+	this.properties.eclcode = selpage.editor.properties.eclcode;
 
-            this.properties.inputdsname = selpage.properties.outputdsname;
+	this.properties.inputdsname = selpage.editor.properties.outputdsname;
 
+	var infoBox = document.querySelector('#infobox');
 
-            var infoBox = document.querySelector("#infobox");
-            var username = infoBox.properties.username;
-            var password = infoBox.properties.password;
-            var credentials = username === null || username === "" ? "" : (
-                password === null || password === "" ? (username + '@') :
-                (username + ':' + password + '@')
-            );
-            var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + infoBox.properties.cluster_address +
-                ":" + infoBox.properties.port;
-            this.properties.eclIP = eclIP;
-            this.properties.hpccuser = username;
+	var username = infoBox.properties.username;
 
-        },
+	var password = infoBox.properties.password;
 
-        open: function() {
+	var credentials = username === null || username === "" ? "" : (
 
-            Polymer.dom(this.$.dialog).querySelector("#TabTitle").label = document.querySelector("#tabs").selectedItem.textContent;
+		password === null || password === "" ?  (username + '@') :
 
-            var pages = document.querySelector("#tabs");
+		(username + ':' + password + '@')               
 
-            var tabnames = "";
+	);
 
-            for (var cnt = 0; cnt < document.getElementsByTagName("paper-tab").length; cnt++) {
-                if (pages.selectedItem.id === document.getElementsByTagName("paper-tab")[cnt].id) {
-                    break;
-                }
-                tabnames += (tabnames === "" ? "" : ",") + document.getElementsByTagName("paper-tab")[cnt].textContent.trim();
-            }
-            sampleInputtab.items = tabnames.split(",");
+	var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") +  infoBox.properties.cluster_address +
+		":" + infoBox.properties.port;
 
-            this.$.dialog.open();
-        },
+	this.properties.eclIP = eclIP;
 
-        _okHandler: function(e) {
+	this.properties.hpccuser = username;
 
-            if (this.$.samplingInterval.value < this.$.ordinalNumber.value) {
-                alert('Ordinal Number should be a valid number and less than Interval !!!');
+	},
 
-                return;
-            }
+	open: function () {
 
-            var currentPage = document.querySelector("#pages").selectedItem;
+		 Polymer.dom(this.$.dialog).querySelector("#TabTitle").label = document.querySelector("#tabs").selectedItem.textContent;
 
-            currentPage.properties.outputdsname = 'sampledsName' + '_' + Math.random().toString(36).substr(2, 4);
+         this.$.TabTitle.value = document.querySelector("#tabs").selectedItem.textContent;
 
-            var QueryStr1 = this.properties.eclcode + "\n" + currentPage.properties.outputdsname + " := " + " SAMPLE(" +
-                this.properties.inputdsname + ", " +
-                this.$.samplingInterval.value + ", " +
-                this.$.ordinalNumber.value +
-                ");";
+		 var pages = document.querySelector("#tabs");
 
-            var QueryStr = QueryStr1 + "\n OUTPUT(" + currentPage.properties.outputdsname + ");";
+		var tabnames = "";
 
-            //    "#OPTION(\'OUTPUTLIMIT\',2000);\nrecLayout := " + request.detail.response.DFUInfoResponse.FileDetail.Ecl + "\n" + "inputds := DATASET(\'~" + sessionStorage.getItem("selecteFile") + "\'," +  "recLayout, THOR);\n" + 
-            //     "Output(inputds" +  "(" + (sessionStorage.getItem('FilterCriteria') === null ? "" : sessionStorage.getItem('FilterCriteria'))+ ")"+ ");";
+		for(var cnt =0 ; cnt < document.getElementsByTagName("paper-tab").length; cnt++){
+			if(pages.selectedItem.id === document.getElementsByTagName("paper-tab")[cnt].id){
+				break;
+			}
+			tabnames += (tabnames === "" ? "" : ",") + document.getElementsByTagName("paper-tab")[cnt].textContent.trim();
+		}
+		sampleInputtab.items = tabnames.split(",");
 
+		this.$.dialog.open();
+	},
 
+       serialize : function(){
+            var jsonStr = '{';
+            jsonStr += '\"displayFields\" : \"' + this.properties.displayFields + '\",';
+            jsonStr += '\"editortitle\" : \"' + this.properties.editortitle + '\",';
+            jsonStr += '\"eclcode\" : \"' + this.properties.eclcode.replace(/[\r\n]/g, '') + '\",';
+            jsonStr += '\"inputdsname\" :\" ' + this.properties.inputdsname + '\",';
+            jsonStr += '\"outputdsname\" : \"' + this.properties.outputdsname + '\",';
+            jsonStr += '\"expression\" : \"' + this.properties.expression + '\",';
+            jsonStr += '\"title\" : \"' + this.properties.title + '\",';
+            jsonStr += '\"pluginId\" : \"' + 'common-input' + '\"}';
 
-            currentPage.properties.eclcode = QueryStr1;
-            console.log(QueryStr);
-            this.$.ajaxwuWUCreateAndUpdate.url = this.properties.eclIP + "/WsWorkunits/WUCreateAndUpdate.json";
+            return jsonStr;
+         },
 
-            this.$.ajaxwuWUCreateAndUpdate.params = {
-                QueryText: QueryStr,
-                ResultLimit: 10000,
-                Jobname: "HPCCInfoRequest",
-                Owner: sessionStorage.getItem("user")
-            };
-            this.$.ajaxwuWUCreateAndUpdate.generateRequest();
-            console.log("Workunit is Executed");
-            this.fire('complete');
-            return;
+          deSerialize : function(tabTtitle){
+              console.log(tabTtitle);
+                  
+              var jsonTabContent  = null;
 
-        },
+              var infoBox = document.querySelector('#infobox');
 
-        _cancelHandler: function(e) {
-            this.fire('cancel');
-        },
+              var tabs = infoBox.properties.tabsdata.Tabs;
 
-        setGeneralProperties: function(properties) {
+              for(var cnt = 0; cnt < tabs.length; cnt++){
+                      if( tabTtitle === tabs[cnt].title){
+                          jsonTabContent = tabs[cnt];
+                          this.properties.displayFields = jsonTabContent.displayFields;
+                          this.properties.eclcode = jsonTabContent.eclcode;
+                          this.properties.editortitle = jsonTabContent.title;
+                          this.$.TabTitle.value = jsonTabContent.title;
+                          this.properties.inputdsname = jsonTabContent.inputdsname;
+                          this.properties.pluginId = jsonTabContent.pluginId;
+                          this.properties.title = jsonTabContent.title;
+                          this.properties.outputdsname = jsonTabContent.outputdsname;
+                          this.properties.expression = jsonTabContent.expression;
+                          this.$.subfilesgrid.selectedItem = jsonTabContent.expression;
+                          this.$.ajaxdfuFileInfo.url=this.properties.eclIP+ "/WsDfu/DFUInfo.json";
+                          this.$.ajaxdfuFileInfo.params = {Name:jsonTabContent.expression};
+                          this.$.ajaxdfuFileInfo.generateRequest();
+                          break;
+                      }
+              }
+            },
 
-        },
+      loadgrid : function(tabTtitle){
+		var QueryStr1 =  this.properties.eclcode;
+		if(QueryStr1.trim() === ''){
+			return;
+		}                var QueryStr1 =  this.properties.eclcode;
+		var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.properties.outputdsname + ");";
+		this.$.ajaxwuWUCreateAndUpdate.url = this.properties.eclIP+ "/WsWorkunits/WUCreateAndUpdate.json";
+		this.$.ajaxwuWUCreateAndUpdate.params = {QueryText : QueryStr, ResultLimit : 10000, Jobname : "HPCCInfoRequest", Owner : this.properties.hpccuser};
+		this.$.ajaxwuWUCreateAndUpdate.generateRequest();
+		return;
+   },
 
-        setViewProperties: function(properties) {
+	_okHandler: function (e) {
 
-        },
+		if(this.$.samplingInterval.value < this.$.ordinalNumber.value){
+			alert('Ordinal Number should be a valid number and less than Interval !!!');
 
-        getViewProperties: function() {
+			return;
+		}
+		this.properties.title  = this.$.TabTitle.value;
+		var currentPage = document.querySelector("#pages").selectedItem;
 
-        },
-        WUCreateAndUpdateResponse: function(request) {
-            console.log(this.$.ajaxwuWUCreateAndUpdate.lastResponse.WUUpdateResponse.Workunit.Wuid + 'CreateAndUpdate');
-            console.log(request.detail.response);
-            this.$.ajaxwuSubmit.url = this.properties.eclIP + "/WsWorkunits/WUSubmit.json";
-            this.$.ajaxwuSubmit.params = {
-                Wuid: this.$.ajaxwuWUCreateAndUpdate.lastResponse.WUUpdateResponse.Workunit.Wuid,
-                Cluster: "thor"
-            };
-            this.$.ajaxwuStatus.params = {
-                Wuid: request.detail.response.WUUpdateResponse.Workunit.Wuid,
-                Cluster: "thor"
-            };
-            this.$.ajaxwuSubmit.generateRequest();
-            return;
-        },
-        WUSubmitResponse: function(request) {
-            console.log(this.$.ajaxwuSubmit.lastResponse);
-            this.$.ajaxwuStatus.url = this.properties.eclIP + "/WsWorkunits/WUInfo.json";
-            this.$.ajaxwuStatus.generateRequest();
-            return;
-        },
-        WUInfoResponse: function(request) {
+		currentPage.properties.outputdsname = 'sampledsName'  + '_' +  Math.random().toString(36).substr(2, 4);
 
-            var wuState = request.detail.response.WUInfoResponse.Workunit.State;
+		this.properties.outputdsname = currentPage.properties.outputdsname;
 
-            if (wuState === "submitted" || wuState === 'compiling' || wuState === 'running' || wuState === 'compiled' || wuState === 'blocked') {
-                this.$.ajaxwuStatus.generateRequest();
-            } else if (wuState === 'completed') {
-                this.$.ajaxwuResult.url = this.properties.eclIP + "/WsWorkunits/WUResult.json";
-                this.$.ajaxwuResult.params = {
-                    Wuid: request.detail.response.WUInfoResponse.Workunit.Wuid,
-                    "BypassCachedResult": 1,
-                    "Count": this.$.sampleoutputlimit.value
-                };
-                this.$.ajaxwuResult.generateRequest();
-            } else {
-                console.log(wuState);
-                console.log('Something went wrong while fetching the data, Please try again or check you filter query again!');
-                var grid = document.querySelector("#worksheet");
+	   var QueryStr1 =  this.properties.eclcode + "\n" +  currentPage.properties.outputdsname + " := " + " SAMPLE(" +
+						this.properties.inputdsname + ", " + 
+						this.$.samplingInterval.value + ", " + 
+						this.$.ordinalNumber.value +                                 
+						  ");";
 
-                var currentPage = document.querySelector("#pages").selectedItem;
+		 var QueryStr =    QueryStr1 +  "\n OUTPUT(" + currentPage.properties.outputdsname  + ");";
 
-                var grid = currentPage.querySelector(".projectworksheet");
+	//    "#OPTION(\'OUTPUTLIMIT\',2000);\nrecLayout := " + request.detail.response.DFUInfoResponse.FileDetail.Ecl + "\n" + "inputds := DATASET(\'~" + sessionStorage.getItem("selecteFile") + "\'," +  "recLayout, THOR);\n" + 
+	//     "Output(inputds" +  "(" + (sessionStorage.getItem('FilterCriteria') === null ? "" : sessionStorage.getItem('FilterCriteria'))+ ")"+ ");";
 
 
-                if (grid !== null) {
-                    var cols = grid.columns;
-                    for (; cols.length > 0;) {
-                        console.log(cols[0].name);
-                        grid.removeColumn(cols[0].name);
-                    }
-                }
-                grid.items = [];
-                grid.addColumn({
-                    name: "<b>Something went wrong while fetching the data, Please try again or check you filter query again!</b>"
-                });
-                alert('Something went wrong while fetching the data, Please try again or check you filter query again!');
-            }
-            return;
 
-        },
+		currentPage.properties.eclcode = QueryStr1;
+		this.properties.eclcode = QueryStr1;
+		 console.log(QueryStr);
+		this.$.ajaxwuWUCreateAndUpdate.url=this.properties.eclIP+ "/WsWorkunits/WUCreateAndUpdate.json";
 
-        WUResultResponse: function(request) {
+		this.$.ajaxwuWUCreateAndUpdate.params = {QueryText : QueryStr, ResultLimit : 10000, Jobname : "HPCCInfoRequest", Owner : this.properties.hpccuser};
+		this.$.ajaxwuWUCreateAndUpdate.generateRequest();
+		console.log("Workunit is Executed");
+		this.fire('complete');
+		return;
 
-            if (this.$.ajaxwuResult.lastResponse.WUResultResponse.Name === "SUPERFILECONTENTS") {
-                var subfilename = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row[0].name;
-                this.$.ajaxdfuFileInfo.url = this.properties.eclIP + "/WsDfu/DFUInfo.json";
-                this.$.ajaxdfuFileInfo.params = {
-                    Name: subfilename
-                };
-                return this.$.ajaxdfuFileInfo.generateRequest();
-            }
+	},
+
+   _cancelHandler: function (e) {
+		this.fire('cancel');
+	},
+
+	setGeneralProperties: function (properties) {
+
+	},
+
+	setViewProperties: function(properties) {
+
+	},
+
+	getViewProperties: function() {
+
+	},
+	WUCreateAndUpdateResponse: function(request) {
+       this.$.ajaxwuSubmit.url=this.properties.eclIP+ "/WsWorkunits/WUSubmit.json";
+       this.$.ajaxwuSubmit.params = {Wuid:this.$.ajaxwuWUCreateAndUpdate.lastResponse.WUUpdateResponse.Workunit.Wuid, Cluster : "thor"};
+       this.$.ajaxwuStatus.params = {Wuid:request.detail.response.WUUpdateResponse.Workunit.Wuid, Cluster : "thor"};
+       this.$.ajaxwuSubmit.generateRequest();
+       return; 
+    },
+    WUSubmitResponse: function(request) {
+       this.$.ajaxwuStatus.url=this.properties.eclIP+ "/WsWorkunits/WUInfo.json";
+       this.$.ajaxwuStatus.generateRequest();
+       return;
+    },
+    WUInfoResponse : function(request){
+     
+		 var wuState = request.detail.response.WUInfoResponse.Workunit.State;
+
+		 if(wuState === "submitted" || wuState === 'compiling'|| wuState === 'running' || wuState === 'compiled' || wuState === 'blocked'){
+		 this.$.ajaxwuStatus.generateRequest();
+		 }else if(wuState === 'completed'){
+		  this.$.ajaxwuResult.url=this.properties.eclIP+ "/WsWorkunits/WUResult.json";
+		  this.$.ajaxwuResult.params = {Wuid:request.detail.response.WUInfoResponse.Workunit.Wuid,"BypassCachedResult":1, "Count": this.$.sampleoutputlimit.value};
+		  this.$.ajaxwuResult.generateRequest();
+		 }else{
+            var grid =  document.querySelector("#worksheet");
 
             var currentPage = document.querySelector("#pages").selectedItem;
 
             var grid = currentPage.querySelector(".projectworksheet");
 
-            var cols = grid.columns;
-            var colArray = [];
-            for (; cols.length > 0;) {
-                console.log(cols[0].name);
-                grid.removeColumn(cols[0].name);
-            }
-            if (this.$.ajaxwuResult.lastResponse.WUResultResponse.Count === 0) {
-                grid.items = [];
-                grid.addColumn({
-                    name: "<b>There are no records for your Filter Query</b>"
-                });
-                return;
-            }
-            var obj = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row[0];
-            var cnt = 0;
 
-            var fieldnames = "";
-            Object.keys(obj).forEach(function(key) {
-                grid.addColumn({
-                    name: key,
-                    resizable: true
-                });
-                if (fieldnames === "") {
-                    fieldnames += key;
-                } else {
-                    fieldnames += "," + key;
-                }
-                colArray[cnt] = key;
-                cnt++;
-            });
+			if(grid !== null){
+			  var cols = grid.columns;    
+				for(;cols.length > 0;){
+					console.log(cols[0].name);
+					grid.removeColumn(cols[0].name);
+				}
+			}
+			grid.items = [];
+			grid.addColumn({name: "<b>Something went wrong while fetching the data, Please try again or check you filter query again!</b>"});
+			alert('Something went wrong while fetching the data, Please try again or check you filter query again!');
+		  }
+		  return;
+    },
 
-            currentPage.properties.fields = fieldnames;
+    WUResultResponse: function(request) {
 
-            sessionStorage.setItem('gridColumns', colArray);
-            // Add some example data as an array.
-            grid.items = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row;
+		if(this.$.ajaxwuResult.lastResponse.WUResultResponse.Name === "SUPERFILECONTENTS"){
+			var subfilename = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row[0].name;
+			this.$.ajaxdfuFileInfo.url=this.properties.eclIP+ "/WsDfu/DFUInfo.json";
+			this.$.ajaxdfuFileInfo.params = {Name:subfilename};
+			return this.$.ajaxdfuFileInfo.generateRequest();
+		}
 
+		var currentPage = document.querySelector("#pages").selectedItem;
 
-            return; // Polish.resovle();
-            // this.createGrid(this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row);
-        }
+		var grid = currentPage.querySelector(".projectworksheet");
 
+		var cols = grid.columns;    
+		var colArray = [];
+		for(;cols.length > 0;){
+			console.log(cols[0].name);
+			grid.removeColumn(cols[0].name);
+		}
+		if(this.$.ajaxwuResult.lastResponse.WUResultResponse.Count === 0){
+			grid.items = [];
+			 grid.addColumn({name: "<b>There are no records for your Filter Query</b>"});
+			 return;
+		}
+		var obj = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row[0];
+		var cnt = 0;
 
+		var fieldnames = "";
+		Object.keys(obj).forEach(function(key) {
+		grid.addColumn({name: key, resizable:true});
+		 if(fieldnames === ""){
+			 fieldnames += key;
+		 }else{
+			 fieldnames += "," + key;
+		 }
+		 colArray[cnt] = key;
+		 cnt++;
+		});
 
-    });
+		currentPage.editor.properties.displayFields = fieldnames;
 
-    document.addEventListener("WebComponentsReady", function() {
+		sessionStorage.setItem('gridColumns', colArray);
+		// Add some example data as an array.
+		grid.items = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row;
 
-        // Reference to the grid element.
-        // var grid = document.querySelector("#worksheet-list");
-        var currentPage = document.querySelector("#pages").selectedItem;
+		return;// Polish.resovle();
+		// this.createGrid(this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row);
+	}
 
-        // Add some example data as an array.
+});
 
-    });
     </script>
 </dom-module>

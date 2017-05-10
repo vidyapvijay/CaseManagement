@@ -84,7 +84,8 @@
 
                  var pluginId = "common-input";
                  //var label = event.currentTarget.parentElement.parentElement.getElementsByClassName("projectlabel")[0].value;
-
+                 infobox.properties.title = this.$.worksheettitle.value;
+                 infobox.properties.projectid = 'projectid' + '_' +  Math.random().toString(36).substr(2, 4); 
                  infobox.addTab(pluginId, "Input", pluginId);
                  this.toggleAppDrawer(); //Toggle the app-drawer
             },

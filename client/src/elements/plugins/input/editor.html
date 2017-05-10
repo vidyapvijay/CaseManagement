@@ -91,53 +91,109 @@
       },
 
       properties: {
-          eclIP : String,
-          hpccuser : String,
-          editortitle : {
-              type : String,
-              value : "Editor Title"
-          }
+                eclcode : String,
+                outputdsname : String,
+                inputdsname : String,
+                eclIP : String,
+                hpccuser : String,
+                editortitle : String,
+                displayFields : String,
+                expression : String,
+                title : String
       },
 
       ready : function(e) {
-        var infoBox = document.querySelector("#infobox");
-        var username = infoBox.properties.username;
-        var password = infoBox.properties.password;
-        var credentials = username === null || username === "" ? "" : (
-            password === null || password === "" ?  (username + '@') :
-            (username + ':' + password + '@')               
-        );
-        var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") +  infoBox.properties.cluster_address +
-            ":" + infoBox.properties.port;
-        this.properties.eclIP = eclIP;
-        this.properties.hpccuser = username;
+          var infoBox = document.querySelector("#infobox");
+          var username = infoBox.properties.username;
+          var password = infoBox.properties.password;
+          var credentials = username === null || username === "" ? "" : (
+              password === null || password === "" ?  (username + '@') :
+                  (username + ':' + password + '@'));
+
+          var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") +  infoBox.properties.cluster_address +
+          ":" + infoBox.properties.port;
+          this.properties.eclIP = eclIP;
+          this.properties.hpccuser = username;
+
+          this.properties.displayFields = '';
+          this.properties.eclcode = '';
+          this.properties.editortitle = '';
+          this.$.TabTitle.value = '';
+          this.properties.inputdsname = '';
+          this.properties.outputdsname = '';
+          this.properties.expression = '';
       },
 
-      open : function () {
-        Polymer.dom(this.$.dialog).querySelector("#TabTitle").label = document.querySelector("#tabs").selectedItem.textContent;
-        this.$.dialog.open();
-      },
+        serialize : function(){
+            var jsonStr = '{';
+            jsonStr += '\"displayFields\" : \"' + this.properties.displayFields + '\",';
+            jsonStr += '\"editortitle\" : \"' + this.properties.editortitle + '\",';
+            jsonStr += '\"eclcode\" : \"' + this.properties.eclcode.replace(/[\r\n]/g, '') + '\",';
+            jsonStr += '\"inputdsname\" :\" ' + this.properties.inputdsname + '\",';
+            jsonStr += '\"outputdsname\" : \"' + this.properties.outputdsname + '\",';
+            jsonStr += '\"expression\" : \"' + this.properties.expression + '\",';
+            jsonStr += '\"title\" : \"' + this.properties.title + '\",';
+            jsonStr += '\"pluginId\" : \"' + 'common-input' + '\"}';
+
+            return jsonStr;
+         },
+
+          deSerialize : function(tabTtitle){
+              console.log(tabTtitle);
+                  
+              var jsonTabContent  = null;
+
+              var infoBox = document.querySelector('#infobox');
+
+              var tabs = infoBox.properties.tabsdata.Tabs;
+
+              for(var cnt = 0; cnt < tabs.length; cnt++){
+                      if( tabTtitle === tabs[cnt].title){
+                          jsonTabContent = tabs[cnt];
+                          this.properties.displayFields = jsonTabContent.displayFields;
+                          this.properties.eclcode = jsonTabContent.eclcode;
+                          this.properties.editortitle = jsonTabContent.title;
+                          this.$.TabTitle.value = jsonTabContent.title;
+                          this.properties.inputdsname = jsonTabContent.inputdsname;
+                          this.properties.pluginId = jsonTabContent.pluginId;
+                          this.properties.title = jsonTabContent.title;
+                          this.properties.outputdsname = jsonTabContent.outputdsname;
+                          this.properties.expression = jsonTabContent.expression;
+                          this.$.subfilesgrid.selectedItem = jsonTabContent.expression;
+                          this.$.ajaxdfuFileInfo.url=this.properties.eclIP+ "/WsDfu/DFUInfo.json";
+                          this.$.ajaxdfuFileInfo.params = {Name:jsonTabContent.expression};
+                          this.$.ajaxdfuFileInfo.generateRequest();
+                          break;
+                      }
+              }
+            },
+            loadgrid : function(){
+                // console.log(' On Tap event of Tab : ' + tabTtitle);
+            },
+
+
+
+        open: function () {
+            this.$.TabTitle.value = document.querySelector("#tabs").selectedItem.textContent;
+            Polymer.dom(this.$.dialog).querySelector("#TabTitle").label = document.querySelector("#tabs").selectedItem.textContent;
+            this.$.dialog.open();
+        },
 
       _okHandler : function (e) {
+            document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
+            var infoBox = document.querySelector('#infobox');
+            this.properties.title  = this.$.TabTitle.value;
+            var selectedFile = this.$.subfilesgrid.value;
+            this.properties.expression = selectedFile;
+             infoBox.properties.file = selectedFile;
+            sessionStorage.setItem('FilterCriteria', '');
+            sessionStorage.setItem('selecteFile', selectedFile);
+            this.$.ajaxdfuFileInfo.url=this.properties.eclIP+ "/WsDfu/DFUInfo.json";
+            this.$.ajaxdfuFileInfo.params = {Name:selectedFile};
+            this.$.ajaxdfuFileInfo.generateRequest();
 
-        // If the Title field is empty assign the placeholder value to it.
-        var tabTitle = this.$.TabTitle.value;
-        if (tabTitle.trim() === ""){
-          tabTitle = this.$.TabTitle.label;
-        }
-
-        document.querySelector("#tabs").selectedItem.textContent = tabTitle;
-        var selectedFile = this.$.subfilesgrid.value;
-        sessionStorage.setItem('FilterCriteria', '');
-        sessionStorage.setItem('selecteFile', selectedFile);
-        this.$.ajaxdfuFileInfo.url=this.properties.eclIP+ "/WsDfu/DFUInfo.json";
-        this.$.ajaxdfuFileInfo.params = {Name:selectedFile};
-        this.$.ajaxdfuFileInfo.generateRequest();
-        var pluginMenu = document.querySelector('#pluginMenu');
-        pluginMenu.disabled = false;
-        this.fire('complete');
+            this.fire('complete');
       },
-
       _cancelHandler : function (e) {
         this.fire('cancel');
       },
@@ -159,114 +215,159 @@
       //3 - WUInfoResponse
       //4 - WUResultResponse
       // TODO: Write a single method to chain all the AJAX calls into one common method.
-      WUCreateAndUpdateResponse: function(request) {
-        this.$.ajaxwuSubmit.url=this.properties.eclIP+ "/WsWorkunits/WUSubmit.json";
-        this.$.ajaxwuSubmit.params = {Wuid:this.$.ajaxwuWUCreateAndUpdate.lastResponse.WUUpdateResponse.Workunit.Wuid, Cluster : "thor"};
-        this.$.ajaxwuStatus.params = {Wuid:request.detail.response.WUUpdateResponse.Workunit.Wuid, Cluster : "thor"};
-        this.$.ajaxwuSubmit.generateRequest();
-        return;
-      },
+		          WUCreateAndUpdateResponse: function(request) {
+                this.$.ajaxwuSubmit.url=this.properties.eclIP+ "/WsWorkunits/WUSubmit.json";
+                this.$.ajaxwuSubmit.params = {Wuid:this.$.ajaxwuWUCreateAndUpdate.lastResponse.WUUpdateResponse.Workunit.Wuid, Cluster : "thor"};
+                this.$.ajaxwuStatus.params = {Wuid:request.detail.response.WUUpdateResponse.Workunit.Wuid, Cluster : "thor"};
+                this.$.ajaxwuSubmit.generateRequest();
+                return; 
+            },
+         WUSubmitResponse: function(request) {
+            this.$.ajaxwuStatus.url=this.properties.eclIP+ "/WsWorkunits/WUInfo.json";
+            this.$.ajaxwuStatus.generateRequest();
+                        return;
+         },  
+         WUInfoResponse : function(request){
+            
+            var wuState = request.detail.response.WUInfoResponse.Workunit.State;
 
-      WUSubmitResponse: function(request) {
-        this.$.ajaxwuStatus.url=this.properties.eclIP+ "/WsWorkunits/WUInfo.json";
-        this.$.ajaxwuStatus.generateRequest();
-        return;
-      },
-
-      WUInfoResponse : function(request) {
-        var wuState = request.detail.response.WUInfoResponse.Workunit.State;
-        if(wuState === "submitted" || wuState === 'compiling'|| wuState === 'running' || wuState === 'compiled' || wuState === 'blocked') {
-          this.$.ajaxwuStatus.generateRequest();
-        } else if(wuState === 'completed') {
-          this.$.ajaxwuResult.url=this.properties.eclIP+ "/WsWorkunits/WUResult.json";
-          this.$.ajaxwuResult.params = {Wuid:request.detail.response.WUInfoResponse.Workunit.Wuid,"BypassCachedResult":1, "Count":10000};
-          this.$.ajaxwuResult.generateRequest();
-        } else {
-          var currentPage = document.querySelector("#pages").selectedItem;
-          var grid = currentPage.querySelector(".projectworksheet");
-          if(grid !== null) {
-            var cols = grid.columns;    
-            for(;cols.length > 0;) {
-              grid.removeColumn(cols[0].name);
+            if(wuState === "submitted" || wuState === 'compiling'|| wuState === 'running' || wuState === 'compiled' || wuState === 'blocked'){
+            this.$.ajaxwuStatus.generateRequest();
+            }else if(wuState === 'completed'){
+                 this.$.ajaxwuResult.url=this.properties.eclIP+ "/WsWorkunits/WUResult.json";
+                 this.$.ajaxwuResult.params = {Wuid:request.detail.response.WUInfoResponse.Workunit.Wuid,"BypassCachedResult":1, "Count":10000};
+                 this.$.ajaxwuResult.generateRequest();
+            }else{
+                 var currentPage = document.querySelector("#pages").selectedItem;
+                 var grid = currentPage.querySelector(".projectworksheet");
+                if(grid !== null){
+                var cols = grid.columns;    
+                    for(;cols.length > 0;){
+                        console.log(cols[0].name);
+                        grid.removeColumn(cols[0].name);
+                    }
+                }
+                grid.items = [];
+                grid.addColumn({name: "<b>Something went wrong while fetching the data, Please try again or check you filter query again!</b>"});
+                alert('Something went wrong while fetching the data, Please try again or check you filter query again!');
             }
-          }
-          grid.items = [];
-          grid.addColumn({name: "<b>Something went wrong while fetching the data, Please try again or check you filter query again!</b>"});
-          alert('Something went wrong while fetching the data, Please try again or check you filter query again!');
-        }
+            return;
+          },
 
-        return;
-      },
+          WUResultResponse: function(request) {
 
-      WUResultResponse: function(request) {
-        if(this.$.ajaxwuResult.lastResponse.WUResultResponse.Name === "SUPERFILECONTENTS"){
-          var subfilename = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row[0].name;
-          this.$.ajaxdfuFileInfo.url=this.properties.eclIP+ "/WsDfu/DFUInfo.json";
-          this.$.ajaxdfuFileInfo.params = {Name:subfilename};
-          return this.$.ajaxdfuFileInfo.generateRequest();
-        }
+			if(this.$.ajaxwuResult.lastResponse.WUResultResponse.Name === "SUPERFILECONTENTS"){
+				var subfilename = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row[0].name;
+				this.$.ajaxdfuFileInfo.url=this.properties.eclIP+ "/WsDfu/DFUInfo.json";
+				this.$.ajaxdfuFileInfo.params = {Name:subfilename};
+				return this.$.ajaxdfuFileInfo.generateRequest();
+			}
 
-        var currentPage = document.querySelector("#pages").selectedItem;
-        var grid = currentPage.querySelector(".projectworksheet");
-        var cols = grid.columns;    
-        var colArray = [];
-        for(;cols.length > 0;){
-          grid.removeColumn(cols[0].name);
-        }
+			var currentPage = document.querySelector("#pages").selectedItem;
 
-        if(this.$.ajaxwuResult.lastResponse.WUResultResponse.Count === 0){
-          grid.items = [];
-          grid.addColumn({name: "<b>There are no records for your Filter Query</b>"});
+			var grid = currentPage.querySelector(".projectworksheet");
 
-          return;
-        }
-       
-        var obj = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row[0];
-        var cnt = 0;
+			var cols = grid.columns;    
+			var colArray = [];
+			for(;cols.length > 0;){
+				console.log(cols[0].name);
+				grid.removeColumn(cols[0].name);
+			}
 
-        var fieldnames = "";
-        Object.keys(obj).forEach(function(key) {
-          grid.addColumn({name: key, resizable:true});
-          if(fieldnames === "") {
-            fieldnames += key;
-          } else {
-            fieldnames += "," + key;
-          }
-          colArray[cnt] = key;
-          cnt++;
-        });
+			if(this.$.ajaxwuResult.lastResponse.WUResultResponse.Count === 0){
+				grid.items = [];
+				grid.addColumn({name: "<b>There are no records for your Filter Query</b>"});
+				return;
+			}
 
-        currentPage.properties.fields = fieldnames;
-        sessionStorage.setItem('gridColumns', colArray);
-        // Add some example data as an array.
-        grid.items = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row;
-        if(grid.items.length === 0){
-             grid.addColumn({name: "<b>There are no records for your Filter Query</b>"});
-        }
+			var obj = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row[0];
+			var cnt = 0;
 
-        return;// Polish.resovle();
-      },
-    
-      DFUFileResponse: function(request) {
-        var currentPage = document.querySelector("#pages").selectedItem;
-        currentPage.properties.outputdsname = 'inputds' + '_' +  Math.random().toString(36).substr(2, 4);
-                
-        if(request.detail.response.DFUInfoResponse.FileDetail.isSuperfile){
-          var QueryStr = "IMPORT STD;OUTPUT(STD.FILE.SUPERFILECONTENTS('~" + sessionStorage.getItem("selecteFile") + "', TRUE)[1], NAMED('SUPERFILECONTENTS'));"
-        }else {
-          var QueryStr1 = "#OPTION(\'OUTPUTLIMIT\',2000);\nrecLayout := " + request.detail.response.DFUInfoResponse.FileDetail.Ecl + "\n" + currentPage.properties.outputdsname  + " := DATASET(\'~" + sessionStorage.getItem("selecteFile") + "\'," +  "recLayout, THOR);\n";
-          var QueryStr = QueryStr1 + "Output(" + currentPage.properties.outputdsname  +  "(" + (sessionStorage.getItem('FilterCriteria') === null ? "" : sessionStorage.getItem('FilterCriteria'))+ ")"+ ");";
+			var fieldnames = "";
+			Object.keys(obj).forEach(function(key) {
+			grid.addColumn({name: key, resizable:true});
+			if(fieldnames === ""){
+				fieldnames += key;
+			}else{
+				fieldnames += "," + key;
+			}
+			colArray[cnt] = key;
+			cnt++;
+			});
 
-          currentPage.properties.eclcode = QueryStr1;
-        }
+			currentPage.editor.properties.displayFields = fieldnames;
 
-        this.$.ajaxwuWUCreateAndUpdate.url=this.properties.eclIP+ "/WsWorkunits/WUCreateAndUpdate.json";
-        this.$.ajaxwuWUCreateAndUpdate.params = {QueryText : QueryStr, ResultLimit : 10000, Jobname : "HPCCInfoRequest", Owner : sessionStorage.getItem("user")};
-        this.$.ajaxwuWUCreateAndUpdate.generateRequest();
+			sessionStorage.setItem('gridColumns', colArray);
+			// Add some example data as an array.
+			grid.items = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row;
+			if(grid.items.length === 0){
+				grid.addColumn({name: "<b>There are no records for your Filter Query</b>"});
+			}
+			return;// Polish.resovle();
+			// this.createGrid(this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row);
+		},
+		DFUFileResponse: function(request) {
+			console.log(request.detail.response.DFUInfoResponse);
 
-        return;
-      },
+			var currentPage = document.querySelector("#pages").selectedItem;
+			this.properties.outputdsname = 'inputds' + '_' +  Math.random().toString(36).substr(2, 4);
 
+			if(request.detail.response.DFUInfoResponse.FileDetail.isSuperfile){
+					var QueryStr = "IMPORT STD;OUTPUT(STD.FILE.SUPERFILECONTENTS('~" + this.properties.expression + "', TRUE)[1], NAMED('SUPERFILECONTENTS'));"
+			}else{
+					var QueryStr1 = "#OPTION(\'OUTPUTLIMIT\',2000);\nrecLayout := " + request.detail.response.DFUInfoResponse.FileDetail.Ecl + "\n" + 
+									this.properties.outputdsname  + " := DATASET(\'" + (this.properties.expression.startsWith('~') ? '' : '~')  + this.properties.expression + "\'," +  "recLayout, THOR);\n";
+					var QueryStr = QueryStr1 + "Output(" + this.properties.outputdsname  +  "(" + (sessionStorage.getItem('FilterCriteria') === null ? "" : 
+								   sessionStorage.getItem('FilterCriteria'))+ ")"+ ");";
+					this.properties.eclcode = QueryStr1;
+			}
+			console.log(QueryStr);
+			this.properties.eclcode = QueryStr1;
+			this.$.ajaxwuWUCreateAndUpdate.url=this.properties.eclIP+ "/WsWorkunits/WUCreateAndUpdate.json";
+			this.$.ajaxwuWUCreateAndUpdate.params = {QueryText : QueryStr, ResultLimit : 10000, Jobname : "HPCCInfoRequest", Owner : this.properties.hpccuser};
+			this.$.ajaxwuWUCreateAndUpdate.generateRequest();
+			console.log("Workunit is Executed");
+			return;
+		},	
+		_loadFilesOnScopeChange: function(event){
+			this.$.ajaxdfuFilesListInfo.url= this.properties.eclIP + "/WsDfu/DFUQuery.json";
+			this.$.ajaxdfuFilesListInfo.params = {LogicalName: event.currentTarget.value + '*', "Access-Control-Allow-Origin": this.properties.eclIP };
+			this.$.ajaxdfuFilesListInfo.headers = {user:username, pass:(password === null ? "" : password)};
+			this.$.ajaxdfuFilesListInfo.generateRequest();
+		},
+		selectfilename : function(event){
+			sessionStorage.setItem("selecteFile", subfilesgrid.value);
+			var filterText = document.querySelector('#filterformulas');
+			filterText.value = "";
+			sessionStorage.setItem("FilterCriteria", '');
+			sessionStorage.setItem('worksheetTitle', title.value);
+			var divtag = document.querySelector("#homepagediv");
+			divtag.innerText = title.value;
+			var grid = document.querySelector('#worksheet');
+			grid.fire('tap');
+
+
+		},
+		DFUFilesListResponse: function(request) {
+			console.log(request.detail.response.DFUQueryResponse.NumFiles);
+			var subfilesgrid = document.querySelector("#subfilesgrid");
+			if(request.detail.response.DFUQueryResponse.NumFiles === 0){
+				subfilesgrid.items = [];
+				subfilesgrid.selectedItem = null;
+				alert('The scope does not have any sub files in it! Please choose any!');
+				return;
+			}
+			var subfiles = request.detail.response.DFUQueryResponse.DFULogicalFiles.DFULogicalFile;
+			var subfilesstrnames = "";
+			var fileArray = [];
+			for(var cnt = 0; cnt < subfiles.length; cnt++){
+				subfilesstrnames = subfilesstrnames + "," +subfiles[cnt].Name;
+				fileArray[cnt] = subfiles[cnt].Name;
+			}
+
+			subfilesgrid.items = fileArray;// subfilesstrnames.split(",");
+			subfilesgrid.selectedItem = fileArray[0];
+		},
       _loadFilesOnScopeChange: function(event) {
         this.$.ajaxdfuFilesListInfo.url= this.properties.eclIP + "/WsDfu/DFUQuery.json";
         this.$.ajaxdfuFilesListInfo.params = {LogicalName: event.currentTarget.value + '*', "Access-Control-Allow-Origin": this.properties.eclIP };
@@ -306,7 +407,6 @@
         subfilesgrid.items = fileArray;// subfilesstrnames.split(",");
         subfilesgrid.selectedItem = fileArray[0];
       }
-
     });      
   </script>
 </dom-module>

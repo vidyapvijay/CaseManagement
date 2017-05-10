@@ -21,6 +21,7 @@
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html" />
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html" />
 <link rel="import" href="../../bower_components/iron-label/iron-label.html" />
+<link rel="import" href="../../../bower_components/iron-ajax/iron-ajax.html">
 
 <link rel="import" href="info-box.html">
 <!-- <link rel="import" href="info-plugin-dialog.html">
@@ -32,8 +33,16 @@
 <dom-module id="hpcc-info-app">
 
     <template>
-
-
+        <iron-ajax id="ajaxRetrieveAllProjects" method="GET" handle-as="json" on-response="ajaxRetrieveAllProjectsResponse">
+        </iron-ajax>
+        <iron-ajax id="ajaxRetrieveProjectByName" method="GET" handle-as="json" on-response="ajaxRetrieveProjectByNameResponse">
+        </iron-ajax>
+        <iron-ajax id="ajaxGetProjectByProjectID" method="GET" handle-as="json" on-response="ajaxGetProjectByProjectIDResponse">
+        </iron-ajax>
+        <iron-ajax id="ajaxAddProject" method="POST" handle-as="json" on-response="ajaxAddProjectResponse">
+        </iron-ajax>
+        <iron-ajax id="ajaxUpdateProject" method="PUT" handle-as="json" on-response="ajaxUpdateProjectResponse">
+        </iron-ajax>
         <style>
             
             app-toolbar {
@@ -165,8 +174,10 @@
                     <paper-toggle-button class="toggleBtn" id="httpSecured">
                         <iron-label class="headerLabels">HTTP Secured</iron-label>
                     </paper-toggle-button></br></br>
-                    <paper-button class="btnSaveClusterDetails" on-tap="addAllToSession">Save Cluster Details</paper-button>
-                    <paper-button raised class="green" onclick="drawer.toggle()">Cancel</paper-button>
+                    <!--<paper-button class="btnSaveClusterDetails" on-tap="addAllToSession">Save Cluster Details</paper-button>-->
+                    <paper-button style="background-color: #4caf50;;color: white;text-transform: none;"  on-tap="saveProjectDtls">Save</paper-button>
+
+                    <!--<paper-button raised class="green" onclick="drawer.toggle()">Cancel</paper-button>-->
                 </section>
             </div>
         </app-drawer>
@@ -206,6 +217,8 @@
                 infoBox.properties.httpSecured = false;
 
                 var pluginId = "common-input";
+                infoBox.properties.projectid = 'projectid' + '_' +  Math.random().toString(36).substr(2, 4); 
+                infoBox.properties.title = 'Welcome to HPCC Ino Application';
                 infobox.addTab(pluginId, "Input", pluginId);    
 
                 }catch(e2){
@@ -215,6 +228,118 @@
                 //Initialize projecttitle handler for inline editing of projecttitle
                 editProjectTitleHandler();
 
+            },
+            ajaxRetrieveProjectByNameResponse : function(eve){
+
+           		   console.log(this.$.ajaxRetrieveProjectByName.lastResponse[0].projectdata.replace(/\s*\n\s*/g,""));
+                    var infoBox = this.$$('#infobox');
+
+                    infoBox.properties.tabsdata = JSON.parse(this.$.ajaxRetrieveProjectByName.lastResponse[0].projectdata.replace("\n","").replace(/\s*\n\s*/g,""));
+
+                     var tabs = infoBox.properties.tabsdata.Tabs;
+
+                     var clusterDetails = infoBox.properties.tabsdata.cluster_details;
+
+                    infoBox.properties.cluster_name =  clusterDetails.name;
+                    infoBox.properties.cluster_address = clusterDetails.ip;
+                    infoBox.properties.port = clusterDetails.port;
+                    infoBox.properties.username = clusterDetails.username;
+                    infoBox.properties.password = clusterDetails.password;
+                    infoBox.properties.httpSecured = clusterDetails.httpsecured;                 
+
+                     for(var cnt =0; cnt < tabs.length; cnt++){
+                         var tab = tabs[cnt];
+                         
+                         console.log(tab.title);
+
+                         infobox.addTab(tab.pluginId,tab.title, tab.pluginId, true);    
+
+                     }
+                     infoBox.$.tabs.selected = 0;
+                     infoBox.$.pages.selected = 0;
+        		   return; 
+            },
+
+            saveProjectDtls : function(event){
+
+                var infoBox = this.$$('#infobox');
+                var projectid = infobox.properties.projectid;
+
+                 this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':3000/projectDetails/' + projectid;
+                 this.$.ajaxRetrieveProjectByName.generateRequest();
+
+            },
+
+            ajaxRetrieveProjectByNameResponse : function(eve){
+
+                var infoBox = this.$$('#infobox');
+
+                var insterOrUpdate = this.$.ajaxRetrieveProjectByName.lastResponse.length > 0 ? false : true;
+
+                infoBox.properties.cluster_name = this.$.cluster_name.value;
+                infoBox.properties.cluster_address = this.$.cluster_address.value;
+                infoBox.properties.port = this.$.port.value;
+                infoBox.properties.username = this.$.username.value;
+                infoBox.properties.password = this.$.password.value;
+                infoBox.properties.httpSecured = this.$.httpSecured.value;
+
+                var tabs = infobox.querySelector('#tabs');
+
+                var projectid = infobox.properties.projectid;
+
+                var title = infobox.properties.title;
+
+                var udpatedby = infobox.properties.updatedby;
+
+                var dateupdated = infobox.properties.dateupdated;
+
+                var file = infobox.properties.file;
+
+
+                var projectJsonStr = '{\"updatedby\": \"raja.sundarrajan@lexisnexis.com\", \"projectdata\" : \"{\\"cluster_details\\":{';
+
+                var projectJsonStr1 = '';
+
+                projectJsonStr1 += '\"ip\" : \"' + infoBox.properties.cluster_address + '\",';
+                projectJsonStr1 += '\"name\" :\"' + infoBox.properties.cluster_name + '\",';
+                projectJsonStr1 += '\"port\" :\"' + infoBox.properties.port + '\",';
+                projectJsonStr1 += '\"username\" :\"' + infoBox.properties.username + '\",';
+                projectJsonStr1 += '\"password\" :\"' + infoBox.properties.password + '\",';
+                projectJsonStr1 += '\"hpccsecured\" :\"' + infoBox.properties.httpSecured + '\"}, \"Tabs\":[';
+
+                for(var cnt = 0 ; cnt < infoBox.viewList.length; cnt++){
+                    projectJsonStr1 += infoBox.viewList[cnt].editor.serialize() + (cnt < infoBox.viewList.length -1 ? ',' : '');
+                }
+
+                projectJsonStr +=  projectJsonStr1.replace(/"/g, '\\"') + ' ]}\"' +  
+                                   ',\"projectid\" : \"' + projectid + 
+                                   '",\"udpatedby\" : \"' + 'raja.sundarrajan@lexisnexis.com' + 
+                                   '",\"dateupdated\" : \"' + new Date().toISOString().slice(0, 19).replace('T', ' ') + 
+                                   '",\"file\" : \"' + file + 
+                                    '",\"title\" : \"' + title + '\"}';
+
+                
+                console.log(projectJsonStr);
+
+                console.log(JSON.parse(projectJsonStr));
+
+                if(insterOrUpdate != true) {
+                    this.$.ajaxUpdateProject.url = 'http://' + window.location.hostname + ':3000/projectDetails/' + projectid;
+
+                    this.$.ajaxUpdateProject.body = JSON.stringify(JSON.parse(projectJsonStr));
+
+                    this.$.ajaxUpdateProject.contentType =  'application/json';
+
+                    this.$.ajaxUpdateProject.generateRequest();
+                }else{
+                    this.$.ajaxAddProject.url = 'http://' + window.location.hostname + ':3000/projectDetails';
+
+                    this.$.ajaxAddProject.body = JSON.stringify(JSON.parse(projectJsonStr));
+
+                    this.$.ajaxAddProject.contentType =  'application/json';
+
+                    this.$.ajaxAddProject.generateRequest();
+                }
             },
 
             addAllToSession  : function(event){

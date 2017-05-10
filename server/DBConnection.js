@@ -5,7 +5,7 @@ var pool = mysql.createPool({
 	connectionLimit : 100, //important
 	host:'localhost',
  	user:'root',
- 	password:'root',
+ 	password:'password',
  	database:'hpccinfo'
 });
 
