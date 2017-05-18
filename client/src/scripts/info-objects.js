@@ -3,7 +3,6 @@ function Plugin(id, label, category) {
     this.label = label;
     this.category = category;
 }
-
 /*
 	Function for inline editing of 'projecttitle' field.
 */
@@ -28,9 +27,11 @@ function editProjectTitleHandler() {
 	  
 	  	document.onclick = myClickHandler;
 		function myClickHandler() {
-		  	if(document.getElementById('thVal') !== null) {
-		  		var newEle = document.getElementById('thVal').value;
+		  	if(document.getElementById('thVal') != null) {
+                var newEle = document.getElementById('thVal').value;
 		  		currentElement.innerHTML = newEle;
+				var infoBox = document.querySelector('#infobox');
+		        infoBox.properties.title = newEle;
 		  	}
 		} 
 	}

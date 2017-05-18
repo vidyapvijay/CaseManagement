@@ -1,17 +1,29 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+
+<link rel="import" href="../../bower_components/iron-data-table/iron-data-table.html">
+
+<link rel="import" href="../../bower_components/iron-data-table/data-table-column.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html" />
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
 
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js" ></script>
+  <script src="https://apis.google.com/js/client:platform.js?onload=startApp"></script>
 
 <!--- ---------------------------------------------filter dialog------------------------------------------------>
 
 
 <dom-module id="open-worksheet-dialog">
 
-    <template>
+    <template is="dom-bind" id="app">
+        <iron-ajax id="ajaxRetrieveProjectByName" method="GET" handle-as="json" on-response="ajaxRetrieveProjectByNameResponse">
+          </iron-ajax>
+        <iron-ajax id="ajaxRetrieveAllProjects" method="GET" handle-as="json" on-response="ajaxRetrieveAllProjectsResponse">
+           </iron-ajax>
 
         <style>
             paper-button.green {
@@ -39,41 +51,138 @@
             }
         </style>
 
-        <paper-dialog id="dialog" modal style="width:700px;height:400px">
+        <paper-dialog id="dialog" modal style="width:1400px;height:500px">
+          <!--<iron-ajax url='http://' + window.location.hostname + ':3000/projectDetails' last-response="{{projects}}" auto></iron-ajax>-->
+          <div style="width:1350px;height:425px">
+          <iron-data-table  id="worksheetlist" items="[[projects.projectdata]]" selection-enabled multi-selection
+               on-selecting-item='handleSelect' on-deselecting-item='handleDeselect' on-selecting-all-items = 'handleselectall' 
+               on-deselecting-all-items = 'handledeselectall' >
 
-            <vaadin-grid  id="worksheet-list" style="height:80%">
-                <table>
-                    <col name="title">
-                    <col name="file">
-                    <col name="updatedby">
-                    <col name="dateupdated">
-
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>File</th>
-                            <th>Updated By</th>
-                            <th>Date Updated</th>
-                        </tr>
-                    </thead>
-
-                </table>
-            </vaadin-grid>
+                <data-table-column name="Project Title">
+                <template>[[item.title]]</template>
+                </data-table-column>
+                    <data-table-column name="Logical File">
+                <template>[[item.file]]</template>
+                </data-table-column>
+                <data-table-column name="Updated By">
+                <template>[[item.updatedby]]</template>
+                </data-table-column>
+                    <data-table-column name="Updated Date">
+                <template>[[item.dateupdated]]</template>
+                </data-table-column>
+                </iron-data-table>
+            </div>
 
             <div class="buttons">
-                <paper-button dialog-confirm raised class="indigo">Ok</paper-button>
-                <paper-button dialog-dismiss raised class="green">Cancel</paper-button>
+                <paper-button dialog-confirm raised class="indigo"  on-tap="_okHandler">Ok</paper-button>
+                <paper-button dialog-dismiss raised class="green" on-tap='_cancelHandler'>Cancel</paper-button>
             </div>
         </paper-dialog>
     </template>
     
-
     <script>
+
         Polymer({
         is: 'open-worksheet-dialog',
-            open: function () {
-                this.$.dialog.open();
-            }
+        properties : {
+                data : Array
+        },
+        
+ 
+        handleSelect : function(e){
+            var table = document.querySelector('#worksheetlist');
+            e.preventDefault(); // this will cancel the default selection behavior
+            table.clearSelection();
+            table.selectItem(e.detail.item);
+        },
+        handleselectall : function(e){
+            e.preventDefault();
+        },
+        handledeselectall : function(e){
+            e.preventDefault();
+        },
+        handleDeselect : function(e){
+
+            var table = document.querySelector('#worksheetlist');
+
+             if (table.selectedItems.length > 1 || table.selectedItems[0] !== e.detail.item) {
+                    e.preventDefault(); // this will cancel the default selection behavior
+                    table.clearSelection();
+                    table.selectItem(e.detail.item);
+              }
+        },
+        fireAjaxToFetchAllProjects : function(updatedby){
+             var infoBox = document.querySelector('#infobox');
+            this.$.ajaxRetrieveAllProjects.url = 'http://' + window.location.hostname + ':3000/projectDetails/' + updatedby;
+            this.$.ajaxRetrieveAllProjects.generateRequest();
+            console.log('check');
+            this.$.dialog.open();
+      },
+       open : function(e){
+            document.querySelector('#drawer').toggle();
+            // loginThenLoadAll : function({
+                var infoApp = document.querySelector('#hpcc-info-app');
+                var infoBox = document.querySelector('#infobox');
+          		var updatedby = infoBox.properties.updatedby;
+                var openworksheet = document.querySelector('#openwork');
+                if(updatedby === undefined || updatedby === null ||updatedby === ''){
+                    e.preventDefault();
+                    return;
+                }
+               openworksheet.fireAjaxToFetchAllProjects(updatedby);
+        },
+        ready : function(){
+        },
+        ajaxRetrieveAllProjectsResponse : function(){
+            var app = document.querySelector('#app');
+            this.$.worksheetlist.items = this.$.ajaxRetrieveAllProjects.lastResponse;
+        },
+
+        _okHandler: function (event) {
+            var infoBox = document.querySelector('#infobox');
+            infoBox.properties.projectid = this.$.worksheetlist.selectedItems[0].projectid;
+            infoBox.properties.title = this.$.worksheetlist.selectedItems[0].title;
+            var titleElement = document.querySelector('#projecttitle');
+            titleElement.textContent  = this.$.worksheetlist.selectedItems[0].title ;
+            infoBox.properties.file = this.$.worksheetlist.selectedItems[0].file;
+            this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':3000/projectDetails/' + this.$.worksheetlist.selectedItems[0].projectid;
+            this.$.ajaxRetrieveProjectByName.generateRequest();
+            // document.querySelector('#drawer').toggle(); //Toggle the app-drawer
+        },
+        _cancelHandler : function(event){
+            //  document.querySelector('#drawer').toggle();
+        },
+        ajaxRetrieveProjectByNameResponse : function(eve){
+
+            console.log(this.$.ajaxRetrieveProjectByName.lastResponse[0].projectdata.replace(/\s*\n\s*/g,""));
+            var infoBox = document.querySelector('#infobox');
+
+            infoBox.properties.tabsdata = JSON.parse(this.$.ajaxRetrieveProjectByName.lastResponse[0].projectdata.replace("\n","").replace(/\s*\n\s*/g,""));
+
+                var tabs = infoBox.properties.tabsdata.Tabs;
+
+                var clusterDetails = infoBox.properties.tabsdata.cluster_details;
+
+            infoBox.properties.cluster_name =  clusterDetails.name;
+            infoBox.properties.cluster_address = clusterDetails.ip;
+            infoBox.properties.port = clusterDetails.port;
+            infoBox.properties.username = clusterDetails.username;
+            infoBox.properties.password = clusterDetails.password;
+            infoBox.properties.httpSecured = clusterDetails.httpsecured;                 
+
+                for(var cnt =0; cnt < tabs.length; cnt++){
+                    var tab = tabs[cnt];
+                    
+                    console.log(tab.title);
+
+                    infobox.addTab(tab.pluginId,tab.title, tab.pluginId, true);    
+
+                }
+                infoBox.$.tabs.selected = 0;
+                infoBox.$.pages.selected = 0;
+            return; 
+    },
+
     });
     </script>
 

@@ -2,18 +2,15 @@ CREATE DATABASE  IF NOT EXISTS `hpccinfo`;
 USE `hpccinfo`;
 
 --
--- Table structure for table `clusterdetails`
+-- Table structure for table `ProjectDetails`
 --
 
-CREATE TABLE `clusterdetails` (
-  `clustername` varchar(50) NOT NULL,
-  `clusteraddress` varchar(50) NOT NULL,
-  `port` int(11) NOT NULL,
-  `clustertype` varchar(10) NOT NULL
+CREATE TABLE `projectdetails` (
+  `projectdata` TEXT NOT NULL,
+  `projectid` varchar(50) NOT NULL,
+  `title` varchar(50) NOT NULL,
+  `updatedby` varchar(50) NOT NULL,
+  `dateupdated` timestamp,
+  `file` varchar(100)
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `clusterdetails`
---
-
-INSERT INTO `clusterdetails` VALUES ('Four-Way','10.173.147.1',8010,'default');

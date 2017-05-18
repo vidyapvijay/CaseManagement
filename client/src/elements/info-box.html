@@ -82,6 +82,9 @@
     <script>
         Polymer({
             is: 'info-box',
+            listeners : {
+                'iron-select' : 'handleTabTap'
+            },
             properties: {
                 viewList: {
                     type: Array
@@ -99,6 +102,11 @@
                 httpSecured : Boolean,
                 username    : String,
                 password  : String,
+                projectid  : String,
+                title : String,
+                updatedby : String,
+                dateupdated : Date,
+                file : String
 
             },
 
@@ -106,9 +114,16 @@
                 this.addPlugin("common-filter", "Filter", "common");
                 this.addPlugin("common-aggregate", "Aggregate", "common");
                 this.addPlugin("common-sort", "Sort", "common");
-                this.addPlugin("common-sample", "Sample", "common");
+                this.addPlugin("common-sample", "Data Sampling", "common");
             },
-
+            handleTabTap : function(e){
+                console.log(e);
+                if(e.detail.item.editor != undefined){
+                    if(e.detail.item.querySelector('.projectworksheet').items.length === 0){
+                        e.detail.item.editor.loadgrid();
+                    }
+                }
+            },
             attached : function() {
                 this.listen(this.$.plugininfo, 'complete', '_pluginNewTabHandler');
             },
@@ -127,7 +142,7 @@
                 this.pluginList.push(plugin);
             },
 
-            addTab: function (id, label, pluginId) {
+            addTab: function (id, label, pluginId, reload = false) {
 
                if(pluginId === "common-input"){
                    var tabitems = Polymer.dom(this.$.tabs);
@@ -138,7 +153,12 @@
                     pageitems._clear(); 
                     if(this.viewList === undefined ||  this.viewList.length > 0){
 
-                        this.viewList = [];
+                        if(this.viewList != undefined ){
+                            var listsize = this.viewList.length;
+                            for(var cnt =0; cnt < listsize; cnt++){
+                                this.viewList.pop();
+                            }
+                        }
                     }
                }
                 var view = document.createElement(pluginId + "-view");
@@ -155,6 +175,8 @@
                 Polymer.dom(this.$.tabs).appendChild(tab);
                 Polymer.dom(this.$.pages).appendChild(view);
                 Polymer.dom(this.$.tabs).appendChild(editor);
+                document.querySelector('#pages').items.push(view);
+                document.querySelector('#tabs').items.push(editor);
 
                 this.listen(editor, 'complete', '_pluginEditCompleteHandler');
 
@@ -162,8 +184,14 @@
                     this.viewList = [];
                 };
                 this.viewList.push(view);
-                this.$.tabs.selectIndex(pluginId == "common-input" ? 0 : this.$.tabs.items.length);//Select the new tab
+                if(reload){
+                    editor.deSerialize(label);
+                }else{
+                    this.$.tabs.selectIndex(pluginId == "common-input" ? 0 : this.$.tabs.items.length -1);//Select the new tab
+                }
 
+                var pluginMenu = document.querySelector('#pluginMenu');
+                pluginMenu.disabled = false;
             },
 
 

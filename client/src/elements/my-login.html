@@ -1,0 +1,50 @@
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<dom-module id="my-login" >
+	<template>
+		<firebase-auth id="auth" 
+					   user="{{user}}" 
+					   provider="google" 
+					   on-error="handleError">
+		</firebase-auth>
+
+
+		<h4 style="background-color: #4caf50;;color: white;text-transform: none;float: right;">[[user.displayName]]</h4>
+
+		<paper-button raised on-tap="login" id="signinout" style="background-color: #4caf50;;color: white;text-transform: none;float: right;">Sign In</paper-button>
+	</template>
+	<script type="text/javascript">
+		Polymer({
+			is: "my-login",
+			properties: {
+				user: Object
+			},
+
+			login: function() {
+					if(this.$.auth.signedIn === true){
+						// var x = event.currentTarget;
+						this.$.auth.signOut().then( 
+							function() { document.querySelector('#hpcc-info-app').querySelector('#signinout').textContent = 'Sign-In';
+							}).then( function() {
+							});
+					
+					}else{
+							return this.$.auth.signInWithPopup()
+										.then(function(response) {
+											document.querySelector('#hpcc-info-app').querySelector('#signinout').textContent = 'Sign-Out';
+											var infoBox = document.querySelector('#infobox');
+          									infoBox.properties.updatedby = response.user.email;
+
+										})// optionally handle a successful login
+										.catch(function(error) {// unsuccessful authentication response here
+											console.log(error);
+										});
+					}
+				},
+			handleError: function(e) {
+				console.log(e);
+			}
+		});
+	</script>
+</dom-module>

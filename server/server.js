@@ -12,7 +12,12 @@ app.use(bodyParser.urlencoded({
 }));
 
 var clusterDetailsRouter = require('./routes/ClusterDetailsRouter');
+
+var projectDetailsRouter = require('./routes/ProjectDetailsRouter');
+
 app.use('/clusterDetails', clusterDetailsRouter);
+
+app.use('/projectDetails', projectDetailsRouter);
 
 
 // Set static path
