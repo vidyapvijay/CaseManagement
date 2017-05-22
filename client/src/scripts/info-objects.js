@@ -3,7 +3,6 @@ function Plugin(id, label, category) {
     this.label = label;
     this.category = category;
 }
-
 /*
 	Function for inline editing of 'projecttitle' field.
 */

@@ -46,7 +46,7 @@
                    required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
                    error-message="Title is Required"></paper-input>
             <paper-input id='sampleoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
-            <vaadin-combo-box id='sampleInputtab' required label="Input Dataset" items='[]'></vaadin-combo-box>
+            <vaadin-combo-box id='sampleInputtab' required label="Input Dataset" on-value-changed='changeSampleInput' items='[]'></vaadin-combo-box>
             <paper-input id='samplingInterval' allowed-pattern="[\d]" label="Sampling Interval"></paper-input>
             <paper-input id='ordinalNumber' allowed-pattern="[\d]" label="Ordinal Number For Sample"></paper-input>
             <div class="buttons">
@@ -118,7 +118,6 @@
 			tabnames += (tabnames === "" ? "" : ",") + document.getElementsByTagName("paper-tab")[cnt].textContent.trim();
 		}
 		sampleInputtab.items = tabnames.split(",");
-
 		this.$.dialog.open();
 	},
 
@@ -261,8 +260,6 @@
             var currentPage = document.querySelector("#pages").selectedItem;
 
             var grid = currentPage.querySelector(".projectworksheet");
-
-
 			if(grid !== null){
 			  var cols = grid.columns;    
 				for(;cols.length > 0;){

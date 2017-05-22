@@ -103,7 +103,7 @@
             jsonStr += '\"inputdsname\" :\" ' + this.properties.inputdsname + '\",';
             jsonStr += '\"outputdsname\" : \"' + this.properties.outputdsname + '\",';
             jsonStr += '\"expression\" : \"' + this.properties.expression + '\",';
-            jsonStr += '\"title\" : \"' + this.properties.title + '\",';
+            jsonStr += '\"title\" : \"' + this.properties.title.trim() + '\",';
             jsonStr += '\"pluginId\" : \"' + 'common-sort' + '\"}';
 
             return jsonStr;
@@ -210,11 +210,7 @@
 		},
 		changeSortInput: function(e){
 
-			// this.$.tabs.selectedItem.id
-
-			console.log(event.currentTarget.value);
-
-							var tabid = "";
+     		var tabid = "";
 
 			for(var cnt =0 ; cnt < document.getElementsByTagName("paper-tab").length; cnt++){
 				if(event.currentTarget.value === document.getElementsByTagName("paper-tab")[cnt].textContent.trim()){

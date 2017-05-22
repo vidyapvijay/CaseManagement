@@ -134,7 +134,7 @@ serialize : function(){
 	jsonStr += '\"inputdsname\" :\" ' + this.properties.inputdsname + '\",';
 	jsonStr += '\"outputdsname\" : \"' + this.properties.outputdsname + '\",';
 	jsonStr += '\"expression\" : \"' + this.properties.expression + '\",';
-	jsonStr += '\"title\" : \"' + this.properties.title + '\",';
+	jsonStr += '\"title\" : \"' + this.properties.title.trim() + '\",';
 	jsonStr += '\"pluginId\" : \"' + 'common-filter' + '\"}';
 
 	return jsonStr;

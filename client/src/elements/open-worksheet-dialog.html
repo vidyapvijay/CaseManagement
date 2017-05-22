@@ -8,8 +8,11 @@
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html" />
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-datatable/paper-datatable.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
 
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js" ></script>
+  <script src="https://apis.google.com/js/client:platform.js?onload=startApp"></script>
 
 <!--- ---------------------------------------------filter dialog------------------------------------------------>
 
@@ -69,6 +72,7 @@
                 </data-table-column>
     
             </iron-data-table>
+
             <div class="buttons">
                 <paper-button dialog-confirm raised class="indigo"  on-tap="_okHandler">Ok</paper-button>
                 <paper-button dialog-dismiss raised class="green" on-tap='_cancelHandler'>Cancel</paper-button>
@@ -77,9 +81,13 @@
     </template>
     
     <script>
+
         Polymer({
         is: 'open-worksheet-dialog',
- 
+        properties : {
+                data : Array
+        },
+
         handleSelect : function(e){
             var table = document.querySelector('#worksheetlist');
             e.preventDefault(); // this will cancel the default selection behavior
@@ -102,21 +110,33 @@
                     table.selectItem(e.detail.item);
               }
         },
-      open: function () {
-            this.$.ajaxRetrieveAllProjects.url = 'http://' + window.location.hostname + ':3000/projectDetails';
+        fireAjaxToFetchAllProjects : function(updatedby){
+             var infoBox = document.querySelector('#infobox');
+            this.$.ajaxRetrieveAllProjects.url = 'http://' + window.location.hostname + ':3000/projectDetails/' + updatedby;
             this.$.ajaxRetrieveAllProjects.generateRequest();
             console.log('check');
             this.$.dialog.open();
+      },
+       open : function(e){
+            document.querySelector('#drawer').toggle();
+            // loginThenLoadAll : function({
+                var infoApp = document.querySelector('#hpcc-info-app');
+                var infoBox = document.querySelector('#infobox');
+          		var updatedby = infoBox.properties.updatedby;
+                var openworksheet = document.querySelector('#openwork');
+                if(updatedby === undefined || updatedby === null ||updatedby === ''){
+                    e.preventDefault();
+                    return;
+                }
+               openworksheet.fireAjaxToFetchAllProjects(updatedby);
         },
         ready : function(){
-            this.$.ajaxRetrieveAllProjects.url = 'http://' + window.location.hostname + ':3000/projectDetails';
-            this.$.ajaxRetrieveAllProjects.generateRequest();
-            console.log('check');
         },
         ajaxRetrieveAllProjectsResponse : function(){
-            // JSON.parse(this.$.ajaxRetrieveAllProjects.lastResponse);
+            var app = document.querySelector('#app');
             this.$.worksheetlist.items = this.$.ajaxRetrieveAllProjects.lastResponse;
         },
+
         _okHandler: function (event) {
             var infoBox = document.querySelector('#infobox');
             infoBox.properties.projectid = this.$.worksheetlist.selectedItems[0].projectid;

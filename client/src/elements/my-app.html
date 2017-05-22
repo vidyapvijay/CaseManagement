@@ -1,0 +1,27 @@
+<link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="my-login.html">
+
+<dom-module id="my-app">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <firebase-app auth-domain="hpcc-info.firebaseapp.com"
+                  database-url="https://hpcc-info.firebaseio.com/"
+                  api-key="AIzaSyAPHqup8Zco3-TA1W43kOun6bIR_mdpabk">
+    </firebase-app>
+    <my-login></my-login>
+    
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-app'
+    });
+  </script>
+  
+
+</dom-module>

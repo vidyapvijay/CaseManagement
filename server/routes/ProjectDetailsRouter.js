@@ -4,7 +4,7 @@ var router = express.Router();
 var ProjectDetails = require('../models/ProjectDetails');
 
 router.get('/:name?',function(req, res, next) {
-	if(req.params.name){
+	if(!req.params.name.includes('.')){
 	    ProjectDetails.getProjectByid(req.params.name, function(err, rows) {
 	        if(err) {
 	        	res.json(err);
@@ -14,7 +14,7 @@ router.get('/:name?',function(req, res, next) {
 	        }
 	    });
 	} else {
-		ProjectDetails.getAll(function(err, rows) {
+		ProjectDetails.getProjectByemail(req.params.name, function(err, rows) {
 		    if(err) {
 		    	res.json(err);
 		    } else {
