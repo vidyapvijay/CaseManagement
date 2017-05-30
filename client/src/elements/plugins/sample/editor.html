@@ -61,6 +61,7 @@
 
 	properties: {
 		eclcode : String,
+		inputeclcode : String,
 		outputdsname : String,
 		inputdsname : String,
 		eclIP : String,
@@ -89,6 +90,7 @@
 
 			this.properties.displayFields = '';
 			this.properties.eclcode = '';
+			this.properties.inputeclcode = '';
 			this.properties.editortitle = '';
 			this.$.TabTitle.value = '';
 			this.properties.inputdsname = '';
@@ -115,6 +117,8 @@
 
 			this.properties.eclcode = selpage.editor.properties.eclcode;
 
+			this.properties.inputeclcode = selpage.editor.properties.eclcode;
+
 			this.properties.inputdsname = selpage.editor.properties.outputdsname;
 
 			this.$.sortfield.items = selpage.editor.properties.displayFields.split(",");
@@ -139,13 +143,12 @@
 			tabnames += (tabnames === "" ? "" : ",") + document.getElementsByTagName("paper-tab")[cnt].textContent.trim();
 		}
 		sampleInputtab.items = tabnames.split(",");
-
 		this.$.dialog.open();
 	},
 
        serialize : function(){
             var jsonStr = '{';
-				jsonStr += '\"displayFields\" : \"' + this.properties.displayFields + '\",';
+			jsonStr += '\"displayFields\" : \"' + this.properties.displayFields + '\",';
             jsonStr += '\"editortitle\" : \"' + this.properties.editortitle + '\",';
             jsonStr += '\"eclcode\" : \"' + this.properties.eclcode.replace(/[\r\n]/g, '') + '\",';
             jsonStr += '\"inputdsname\" :\" ' + this.properties.inputdsname + '\",';
@@ -171,6 +174,7 @@
                           jsonTabContent = tabs[cnt];
                           this.properties.displayFields = jsonTabContent.displayFields;
                           this.properties.eclcode = jsonTabContent.eclcode;
+						  this.properties.inputeclcode = jsonTabContent.eclcode;
                           this.properties.editortitle = jsonTabContent.title;
                           this.$.TabTitle.value = jsonTabContent.title;
                           this.properties.inputdsname = jsonTabContent.inputdsname;
@@ -209,7 +213,7 @@
 
 		this.properties.outputdsname = currentPage.properties.outputdsname;
 
-	   var QueryStr1 =  this.properties.eclcode + "\n" +  currentPage.properties.outputdsname + " := " + " SAMPLE(" +
+	   var QueryStr1 =  this.properties.inputeclcode + "\n" +  currentPage.properties.outputdsname + " := " + " SAMPLE(" +
 						this.properties.inputdsname + ", " + 
 						this.$.samplingInterval.value + ", " + 
 						this.$.ordinalNumber.value +                                 
@@ -278,8 +282,6 @@
             var currentPage = document.querySelector("#pages").selectedItem;
 
             var grid = currentPage.querySelector(".projectworksheet");
-
-
 			if(grid !== null){
 			  var cols = grid.columns;    
 				for(;cols.length > 0;){

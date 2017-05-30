@@ -72,7 +72,6 @@
                 </data-table-column>
                 </iron-data-table>
             </div>
-
             <div class="buttons">
                 <paper-button dialog-confirm raised class="indigo"  on-tap="_okHandler">Ok</paper-button>
                 <paper-button dialog-dismiss raised class="green" on-tap='_cancelHandler'>Cancel</paper-button>
@@ -87,8 +86,6 @@
         properties : {
                 data : Array
         },
-        
- 
         handleSelect : function(e){
             var table = document.querySelector('#worksheetlist');
             e.preventDefault(); // this will cancel the default selection behavior
