@@ -13,4 +13,3 @@ CREATE TABLE `projectdetails` (
   `dateupdated` timestamp,
   `file` varchar(100)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-

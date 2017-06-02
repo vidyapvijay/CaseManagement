@@ -1,40 +1,39 @@
-<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+
 <link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
 <link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
-<link rel="import" href="../../bower_components/app-layout/demo/sample-content.html">
-<link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="../../bower_components/app-route/app-location.html">
+
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
-<link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
-<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower_components/iron-label/iron-label.html">
-<link rel="import" href="../../bower_components/paper-styles/color.html">
-<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html" />
-<link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html" />
-<link rel="import" href="../../bower_components/iron-label/iron-label.html" />
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
-<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-label/iron-label.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+
+<link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid.html">
+
 
 <link rel="import" href="info-box.html">
-<!-- <link rel="import" href="info-plugin-dialog.html">
-<link rel="import" href="filter-dialog.html"> -->
 <link rel="import" href="new-worksheet-dialog.html">
 <link rel="import" href="open-worksheet-dialog.html">
-<link rel="import" href="my-app.html">
 <link rel="import" href="dialog-button.html">
-
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js" ></script>
-  <script src="https://apis.google.com/js/client:platform.js?onload=startApp"></script>
+<link rel="import" href="my-login.html">
+<link rel="import" href="na-behavior.html">
 
 <dom-module id="hpcc-info-app">
 
@@ -146,22 +145,25 @@
                 ;
             }
 
-
         </style>
+
+        <app-location route="{{route}}"></app-location>
 
         <!-- ----------------------- App Drawer Left Position ---------------------------->
         <app-toolbar>
             <paper-icon-button icon="menu" onclick="drawer.toggle()" ></paper-icon-button>
-            <div class="main-title" id="projecttitle"  >Welcome to HPCCInfo Application</div>
-            <!--<div style="position: absolute;right: 0;font-size: small;font-weight: bold;!important">
-                 <paper-button id="signinout" style="background-color: #4caf50;;color: white;text-transform: none;float: right;"  onclick="handleSignInClick()" >Sign-In</paper-button> 
-            </div>-->
-           <my-app id="myhpccinfosignin"></my-app>
+            <div class="main-title" id="projecttitle">Welcome to HPCCInfo Application</div>
+            <span style="flex: 1;"></span>
+            <my-login signed-in="{{signedIn}}" user={{user}}></my-login>
+
         </app-toolbar> 
         <new-worksheet-dialog id="newwork"></new-worksheet-dialog>
         <open-worksheet-dialog id="openwork"></open-worksheet-dialog>
         
-        <info-box id="infobox" ></info-box>
+         <template is="dom-if" if="[[user]]">
+             <info-box id="infobox"></info-box>
+        </template>
+       
         <app-drawer id="drawer" >
             <div class="listbx_div" role="listbox">
                 <section class="main">
@@ -217,9 +219,16 @@
                 hideAppForSignin : {
                     type : Boolean,
                     value : true
-                }
-
-            },
+                }, 
+                 exportTo : {
+                    type : String,
+                    value : ''
+                },
+                user: {
+                    type: Object,
+                    notify: true,
+                    observer: '_userChanged',
+                },
 
             ready : function(){
                 var infoBox = this.$$('#infobox');
@@ -239,66 +248,70 @@
                 }catch(e2){
                     console.log("Error occurred");
                 }
+            },
 
-                //Initialize projecttitle handler for inline editing of projecttitle
-                editProjectTitleHandler();
+            // This function is called evertime the user state changes (login/logout)
+            _userChanged: function() {
+                this.async(function() {                   
+                    if(this.user !== null && this.user !== undefined) {
+                        var infoBox = this.$$('#infobox');
+                        try{
+                            infoBox.properties.cluster_name =  "4-way";
+                            infoBox.properties.cluster_address = "10.173.147.1";
+                            infoBox.properties.port = "8010";
+                            infoBox.properties.username = "";
+                            infoBox.properties.password = "";
+                            infoBox.properties.httpSecured = false;
+                            infoBox.properties.updatedby = this.user.email;
+
+                            var pluginId = "common-input";
+                            infoBox.properties.projectid = 'projectid' + '_' +  Math.random().toString(36).substr(2, 4); 
+                            infoBox.properties.title = 'Welcome to HPCCInfo Application';
+                            infobox.addTab(pluginId, "Input", pluginId);
+
+                            //Initialize projecttitle handler for inline editing of projecttitle
+                            editProjectTitleHandler();  
+
+                        }catch(e2){
+                            console.log("Error occurred");
+                        }
+                    }
+                                      
+                }.bind(this), 50);
 
             },
-            ajaxRetrieveProjectByNameResponse : function(eve){
 
-           		   console.log(this.$.ajaxRetrieveProjectByName.lastResponse[0].projectdata.replace(/\s*\n\s*/g,""));
-                    var infoBox = this.$$('#infobox');
-
-                    infoBox.properties.tabsdata = JSON.parse(this.$.ajaxRetrieveProjectByName.lastResponse[0].projectdata.replace("\n","").replace(/\s*\n\s*/g,""));
-
-                     var tabs = infoBox.properties.tabsdata.Tabs;
-
-                     var clusterDetails = infoBox.properties.tabsdata.cluster_details;
-
-                    infoBox.properties.cluster_name =  clusterDetails.name;
-                    infoBox.properties.cluster_address = clusterDetails.ip;
-                    infoBox.properties.port = clusterDetails.port;
-                    infoBox.properties.username = clusterDetails.username;
-                    infoBox.properties.password = clusterDetails.password;
-                    infoBox.properties.httpSecured = clusterDetails.httpsecured;                 
-
-                     for(var cnt =0; cnt < tabs.length; cnt++){
-                         var tab = tabs[cnt];
-                         
-                         console.log(tab.title);
-
-                         infobox.addTab(tab.pluginId,tab.title, tab.pluginId, true);    
-
-                     }
-                     infoBox.$.tabs.selected = 0;
-                     infoBox.$.pages.selected = 0;
-        		   return; 
+            ready : function() {
+                // If the user is not authenticated, this will redirect him to Home page.
+                // This will take care if the user types in the protected page url in the browser and if the user refreshes the page
+                if(this.user === null || this.user === undefined) {
+                    this.set('route.path', '/');
+                }
             },
 
             saveProjectDtls : function(event){
-<<<<<<< HEAD
-
-=======
-                document.querySelector('#drawer').toggle();
->>>>>>> 703ecae9d87f79aa7b1e5979722e9cfbbc91aef2
                 var infoBox = this.$$('#infobox');
                 var projectid = infobox.properties.projectid;
-
-                 this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':3000/projectDetails/' + projectid;
-                 this.$.ajaxRetrieveProjectByName.generateRequest();
+                this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':3000/projectDetails/' + projectid;
+                this.$.ajaxRetrieveProjectByName.generateRequest();
 
             },
 
-<<<<<<< HEAD
-            ajaxRetrieveProjectByNameResponse : function(eve){
+            exportProjectDtls : function(exportTo){
+                document.querySelector('#drawer').toggle();
+                this.$.exportTo =  exportTo;
+                var infoBox = this.$$('#infobox');
+                var projectid = infobox.properties.projectid;
+                this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':3000/projectDetails/' + projectid;
+                this.$.ajaxRetrieveProjectByName.generateRequest();
 
-=======
+            },
 
             ajaxRetrieveProjectByNameResponse : function(eve){
->>>>>>> 703ecae9d87f79aa7b1e5979722e9cfbbc91aef2
                 var infoBox = this.$$('#infobox');
 
-                var insterOrUpdate = this.$.ajaxRetrieveProjectByName.lastResponse.length > 0 ? false : true;
+                var insterOrUpdate = (this.$.ajaxRetrieveProjectByName.lastResponse.length > 0 ? 
+                                      (( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? false : true) : true);
 
                 infoBox.properties.cluster_name = this.$.cluster_name.value;
                 infoBox.properties.cluster_address = this.$.cluster_address.value;
@@ -309,32 +322,25 @@
 
                 var tabs = infobox.querySelector('#tabs');
 
-                var projectid = infobox.properties.projectid;
+                var projectid = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? infobox.properties.projectid : 'projectid' + '_' +  Math.random().toString(36).substr(2, 4);
+                //  infobox.properties.projectid;
 
                 var title = infobox.properties.title;
 
-<<<<<<< HEAD
-                var udpatedby = infobox.properties.updatedby;
-=======
-                var updatedby = infobox.properties.updatedby;
+                var updatedby = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? infobox.properties.updatedby :  this.$.exportTo;
 
                 if(updatedby === undefined || updatedby === null ||updatedby === ''){
                     return;
                 }
                 
                 infobox.properties.updatedby = updatedby;
->>>>>>> 703ecae9d87f79aa7b1e5979722e9cfbbc91aef2
 
                 var dateupdated = infobox.properties.dateupdated;
 
                 var file = infobox.properties.file;
 
 
-<<<<<<< HEAD
-                var projectJsonStr = '{\"updatedby\": \"raja.sundarrajan@lexisnexis.com\", \"projectdata\" : \"{\\"cluster_details\\":{';
-=======
                 var projectJsonStr = '{\"updatedby\": \"' + updatedby + '\", \"projectdata\" : \"{\\"cluster_details\\":{';
->>>>>>> 703ecae9d87f79aa7b1e5979722e9cfbbc91aef2
 
                 var projectJsonStr1 = '';
 
@@ -344,8 +350,6 @@
                 projectJsonStr1 += '\"username\" :\"' + infoBox.properties.username + '\",';
                 projectJsonStr1 += '\"password\" :\"' + infoBox.properties.password + '\",';
                 projectJsonStr1 += '\"hpccsecured\" :\"' + infoBox.properties.httpSecured + '\"}, \"Tabs\":[';
-<<<<<<< HEAD
-
                 for(var cnt = 0 ; cnt < infoBox.viewList.length; cnt++){
                     projectJsonStr1 += infoBox.viewList[cnt].editor.serialize() + (cnt < infoBox.viewList.length -1 ? ',' : '');
                 }
@@ -380,43 +384,7 @@
                     this.$.ajaxAddProject.generateRequest();
                 }
             },
-=======
->>>>>>> 703ecae9d87f79aa7b1e5979722e9cfbbc91aef2
 
-                for(var cnt = 0 ; cnt < infoBox.viewList.length; cnt++){
-                    projectJsonStr1 += infoBox.viewList[cnt].editor.serialize() + (cnt < infoBox.viewList.length -1 ? ',' : '');
-                }
-
-                projectJsonStr +=  projectJsonStr1.replace(/"/g, '\\"') + ' ]}\"' +  
-                                   ',\"projectid\" : \"' + projectid + 
-                                   '",\"udpatedby\" : \"' +  'xxx.gmail.com'  + 
-                                   '",\"dateupdated\" : \"' + new Date().toISOString().slice(0, 19).replace('T', ' ') + 
-                                   '",\"file\" : \"' + file + 
-                                    '",\"title\" : \"' + title + '\"}';
-
-                
-                console.log(projectJsonStr);
-
-                console.log(JSON.parse(projectJsonStr));
-
-                if(insterOrUpdate != true) {
-                    this.$.ajaxUpdateProject.url = 'http://' + window.location.hostname + ':3000/projectDetails/' + updatedby;
-
-                    this.$.ajaxUpdateProject.body = JSON.stringify(JSON.parse(projectJsonStr));
-
-                    this.$.ajaxUpdateProject.contentType =  'application/json';
-
-                    this.$.ajaxUpdateProject.generateRequest();
-                }else{
-                    this.$.ajaxAddProject.url = 'http://' + window.location.hostname + ':3000/projectDetails';
-
-                    this.$.ajaxAddProject.body = JSON.stringify(JSON.parse(projectJsonStr));
-
-                    this.$.ajaxAddProject.contentType =  'application/json';
-
-                    this.$.ajaxAddProject.generateRequest();
-                }
-            },
             addAllToSession  : function(event){
 
                  var infoBox = this.$$('#infobox');

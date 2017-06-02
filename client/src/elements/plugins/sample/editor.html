@@ -61,6 +61,7 @@
 
 	properties: {
 		eclcode : String,
+		inputeclcode : String,
 		outputdsname : String,
 		inputdsname : String,
 		eclIP : String,
@@ -149,6 +150,7 @@
                           jsonTabContent = tabs[cnt];
                           this.properties.displayFields = jsonTabContent.displayFields;
                           this.properties.eclcode = jsonTabContent.eclcode;
+						  this.properties.inputeclcode = jsonTabContent.eclcode;
                           this.properties.editortitle = jsonTabContent.title;
                           this.$.TabTitle.value = jsonTabContent.title;
                           this.properties.inputdsname = jsonTabContent.inputdsname;
@@ -191,7 +193,7 @@
 
 		this.properties.outputdsname = currentPage.properties.outputdsname;
 
-	   var QueryStr1 =  this.properties.eclcode + "\n" +  currentPage.properties.outputdsname + " := " + " SAMPLE(" +
+	   var QueryStr1 =  this.properties.inputeclcode + "\n" +  currentPage.properties.outputdsname + " := " + " SAMPLE(" +
 						this.properties.inputdsname + ", " + 
 						this.$.samplingInterval.value + ", " + 
 						this.$.ordinalNumber.value +                                 

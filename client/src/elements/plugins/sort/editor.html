@@ -60,6 +60,7 @@
 
 		properties: {
 			eclcode : String,
+			inputeclcode : String,
 			outputdsname : String,
 			inputdsname : String,
 			eclIP : String,
@@ -88,6 +89,7 @@
 
 			this.properties.displayFields = '';
 			this.properties.eclcode = '';
+			this.properties.inputeclcode = '';
 			this.properties.editortitle = '';
 			this.$.TabTitle.value = '';
 			this.properties.inputdsname = '';
@@ -126,6 +128,7 @@
 						this.$.TabTitle.value = jsonTabContent.title;
 						this.properties.editortitle = jsonTabContent.title;
 						this.properties.eclcode = jsonTabContent.eclcode;
+						this.properties.inputeclcode = jsonTabContent.eclcode;
 						this.properties.inputdsname = jsonTabContent.inputdsname;
 						this.properties.outputdsname = jsonTabContent.outputdsname;
 						this.properties.pluginId = jsonTabContent.pluginId;
@@ -181,7 +184,7 @@
 
 			this.properties.outputdsname = currentPage.properties.outputdsname;
 
-		   var QueryStr1 =  this.properties.eclcode + "\n" +  currentPage.properties.outputdsname + " := " + " SORT(" +
+		   var QueryStr1 =  this.properties.inputeclcode + "\n" +  currentPage.properties.outputdsname + " := " + " SORT(" +
 							this.properties.inputdsname + "," + 
 
 							this.$.sortformulas.value +
@@ -195,7 +198,7 @@
 
 
 
-		currentPage.properties.eclcode = QueryStr1;
+		    currentPage.properties.eclcode = QueryStr1;
 
 			this.properties.eclcode = QueryStr1;
 			console.log(QueryStr);
@@ -226,6 +229,8 @@
 			var selpage = document.querySelector("#pages").querySelector("#" + tabid);
 
 			this.properties.eclcode = selpage.editor.properties.eclcode;
+
+			this.properties.inputeclcode = selpage.editor.properties.eclcode;
 
 			this.properties.inputdsname = selpage.editor.properties.outputdsname;
 

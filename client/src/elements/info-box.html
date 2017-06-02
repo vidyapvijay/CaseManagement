@@ -9,6 +9,7 @@
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../../bower_components/iron-icons/social-icons.html">
 
 <link rel="import" href="info-plugin-dialog.html">
 
@@ -23,6 +24,7 @@
 <link rel="import" href="plugins/aggregate/view.html">
 <link rel="import" href="plugins/sample/editor.html">
 <link rel="import" href="plugins/sample/view.html">
+<link rel="import" href="export-project-dialog.html">
 
 <dom-module id="info-box">
     <template>
@@ -63,10 +65,16 @@
                 }
             }
     </style>
+    <export-project-dialog id="exportproject"></export-project-dialog>
         <app-toolbar>
             <paper-tabs id="tabs" selected="{{selected}}"></paper-tabs>
-            <paper-icon-button id="btnEditPlugin" icon="create" on-tap="_pluginEditOpenHandler"></paper-icon-button>
+
+            <!--<paper-icon-button id="btnExportProject" icon="export" on-tap="_projectExportOpenHandler"></paper-icon-button>-->
+            <p><dialog-button id="export-project-dialog" icon="social:share"></dialog-button></p>
+
             <paper-tooltip for="btnEditPlugin" offset="0">Edit Plugin</paper-tooltip>
+            <paper-tooltip for="export-project-dialog" offset="0">Share Project</paper-tooltip>
+            <paper-icon-button id="btnEditPlugin" icon="create" on-tap="_pluginEditOpenHandler"></paper-icon-button>
             <paper-menu-button horizontal-align="right" disabled id="pluginMenu">
                 <paper-icon-button id="btnAddPlugin" icon="add" class="dropdown-trigger"></paper-icon-button>
                 <paper-menu id="pluginmenu" class="dropdown-content"> </paper-menu>
@@ -76,9 +84,6 @@
         <iron-pages id="pages" selected="{{selected}}"></iron-pages>
         <info-plugin-dialog id="plugininfo"></info-plugin-dialog>
     </template>
-    
-
-
     <script>
         Polymer({
             is: 'info-box',
