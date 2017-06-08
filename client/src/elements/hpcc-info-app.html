@@ -182,7 +182,7 @@
                     <paper-input class="paperInputs" id='cluster_address' label="Cluster Address" value="[[clusteraddress]]"></paper-input>
                     <paper-input class="paperInputs" id='port' label="Port" value="[[port]]"></paper-input>
                     <paper-input class="paperInputs" id='username' label="Username" value="[[username]]"></paper-input>
-                    <paper-input class="paperInputs" id='password' label="Password" value="[[password]]"></paper-input>
+                    <paper-input class="paperInputs" id='password' label="Password" type="password" value="[[password]]"></paper-input>
                     </br>
                     <paper-toggle-button class="toggleBtn" id="httpSecured">
                         <iron-label class="headerLabels">HTTP Secured</iron-label>
@@ -203,7 +203,7 @@
             properties: {
                 clusteraddress : {
                     type : String,
-                    value : "10.173.147.1"
+                    value : "10.241.41.11"
                 },
                 clustername : {
                     type : String,
@@ -214,8 +214,14 @@
                     value : "8010"
                 },
                 httpSecured : Boolean,
-                username    : String,
-                password  : String,
+                username    : {
+                    type : String,
+                    value : 'rsundarrajan'
+                },
+                password  : {
+                    type : String,
+                    value : 'April2017'
+                },
                 hideAppForSignin : {
                     type : Boolean,
                     value : true
@@ -228,8 +234,8 @@
                     type: Object,
                     notify: true,
                     observer: '_userChanged',
-                },
-
+                }
+            },
             ready : function(){
                 var infoBox = this.$$('#infobox');
                 try{
@@ -396,38 +402,8 @@
                 infoBox.properties.password = this.$.password.value;
                 infoBox.properties.httpSecured = this.$.httpSecured.value;
                 
-            },
-
-
-             addMeToSession : function(event){
-
-                 var infoBox = this.$$('#infobox');
-                switch(event.currentTarget.id){
-                    case 'cluster_name' : 
-                        infoBox.properties.cluster_name = event.currentTarget.value;
-                        break;
-                    case 'cluster_address' : 
-                        infoBox.properties.cluster_address = event.currentTarget.value;
-                        break;
-                    case 'port':
-                        infoBox.properties.port = event.currentTarget.value;
-                        break;
-                    case 'username':
-                        infoBox.properties.username = event.currentTarget.value;
-                        break;
-                    case 'password':
-                        infoBox.properties.password = event.currentTarget.value;
-                        break;
-                    case 'httpSecured':
-                        infoBox.properties.httpSecured = event.currentTarget.value;
-                        break;
-                    default:
-                        break;
-                }
-                console.log(event);
-             }     
-
+            }
         });
     </script>
 
-</dom-module>
+</dom-module>   
