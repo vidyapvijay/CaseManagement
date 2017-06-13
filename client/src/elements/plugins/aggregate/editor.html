@@ -8,14 +8,6 @@
 
 <dom-module id="common-aggregate-editor">
     <template>
-        <iron-ajax id="ajaxwuWUCreateAndUpdate" method="POST" handle-as="json" on-response="WUCreateAndUpdateResponse">
-        </iron-ajax>
-        <iron-ajax id="ajaxwuSubmit" method="POST" handle-as="json" on-response="WUSubmitResponse">
-        </iron-ajax>
-        <iron-ajax id="ajaxwuStatus" method="POST" handle-as="json" on-response="WUInfoResponse">
-        </iron-ajax>
-        <iron-ajax id="ajaxwuResult" method="POST" handle-as="json" on-response="WUResultResponse">
-        </iron-ajax>
         <style>
         paper-button.green {
             background-color: var(--paper-green-500);
@@ -190,10 +182,8 @@
 			}
 			var QueryStr1 =  this.properties.eclcode;
 			var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.properties.outputdsname + ");";
-			this.$.ajaxwuWUCreateAndUpdate.url = this.properties.eclIP+ "/WsWorkunits/WUCreateAndUpdate.json";
-			this.$.ajaxwuWUCreateAndUpdate.params = {QueryText : QueryStr, ResultLimit : 10000, Jobname : "HPCCInfoRequest", Owner : this.properties.hpccuser};
-			this.$.ajaxwuWUCreateAndUpdate.generateRequest();
-			return;
+
+			return loadGridwithEcl(QueryStr);
 	   },
 		open: function () {
 
@@ -220,6 +210,8 @@
 		
 			document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
 			var currentPage = document.querySelector("#pages").selectedItem;
+			var infoBox = document.querySelector('#infobox');
+		
 			this.properties.title  = this.$.TabTitle.value;
 			currentPage.properties.outputdsname = 'aggregatedsName'  + '_' +  Math.random().toString(36).substr(2, 4);
 
@@ -257,15 +249,11 @@
 
 			console.log(QueryStr);  
 
-			this.$.ajaxwuWUCreateAndUpdate.url=this.properties.eclIP+ "/WsWorkunits/WUCreateAndUpdate.json";
+			
+			return loadGridwithEcl(QueryStr);
 
-		    this.$.ajaxwuWUCreateAndUpdate.params = {QueryText : QueryStr, ResultLimit : 10000, Jobname : "HPCCInfoRequest", Owner : this.properties.hpccuser};
-		    this.$.ajaxwuWUCreateAndUpdate.generateRequest();
-			console.log("Workunit is Executed");
-			this.fire('complete');
-			return;
+	},
 
-		},
 		changeAggregateInput: function(e){
 
 			console.log(event.currentTarget.value);
@@ -312,95 +300,7 @@
 
         getViewProperties: function() {
 
-		},
-		WUCreateAndUpdateResponse: function(request) {
-		   console.log(this.$.ajaxwuWUCreateAndUpdate.lastResponse.WUUpdateResponse.Workunit.Wuid + 'CreateAndUpdate');
-		   console.log(request.detail.response);
-					this.$.ajaxwuSubmit.url=this.properties.eclIP+ "/WsWorkunits/WUSubmit.json";
-		   this.$.ajaxwuSubmit.params = {Wuid:this.$.ajaxwuWUCreateAndUpdate.lastResponse.WUUpdateResponse.Workunit.Wuid, Cluster : "thor"};
-		   this.$.ajaxwuStatus.params = {Wuid:request.detail.response.WUUpdateResponse.Workunit.Wuid, Cluster : "thor"};
-		   this.$.ajaxwuSubmit.generateRequest();
-		   return; 
-       },
-       WUSubmitResponse: function(request) {
-		   console.log(this.$.ajaxwuSubmit.lastResponse);
-					this.$.ajaxwuStatus.url=this.properties.eclIP+ "/WsWorkunits/WUInfo.json";
-		   this.$.ajaxwuStatus.generateRequest();
-					return;
-		},
-		WUInfoResponse : function(request){
-     
-			var wuState = request.detail.response.WUInfoResponse.Workunit.State;
-
-			if(wuState === "submitted" || wuState === 'compiling'|| wuState === 'running' || wuState === 'compiled' || wuState === 'blocked'){
-				this.$.ajaxwuStatus.generateRequest();
-			}else if(wuState === 'completed'){
-				this.$.ajaxwuResult.url=this.properties.eclIP+ "/WsWorkunits/WUResult.json";
-				this.$.ajaxwuResult.params = {Wuid:request.detail.response.WUInfoResponse.Workunit.Wuid,"BypassCachedResult":1, "Count":this.$.aggregateoutputlimit.value};
-				this.$.ajaxwuResult.generateRequest();
-			}else{
-	            var grid =  document.querySelector("#worksheet");
-
-                var currentPage = document.querySelector("#pages").selectedItem;
-
-                var grid = currentPage.querySelector(".projectworksheet");
-
-
-				if(grid !== null){
-				  var cols = grid.columns;    
-					for(;cols.length > 0;){
-						console.log(cols[0].name);
-						grid.removeColumn(cols[0].name);
-					}
-				}
-				grid.items = [];
-				grid.addColumn({name: "<b>Something went wrong while fetching the data, Please try again or check you filter query again!</b>"});
-				alert('Something went wrong while fetching the data, Please try again or check you filter query again!');
-			  }
-			  return;
-		},
-     WUResultResponse: function(request) {
-
-		var currentPage = document.querySelector("#pages").selectedItem;
-
-		var grid = currentPage.querySelector(".projectworksheet");
-
-		var cols = grid.columns;    
-		var colArray = [];
-		for(;cols.length > 0;){
-			console.log(cols[0].name);
-			grid.removeColumn(cols[0].name);
 		}
-		if(this.$.ajaxwuResult.lastResponse.WUResultResponse.Count === 0){
-			grid.items = [];
-			 grid.addColumn({name: "<b>There are no records for your Filter Query</b>"});
-			 return;
-		}
-		var obj = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row[0];
-		var cnt = 0;
-
-		var fieldnames = "";
-		Object.keys(obj).forEach(function(key) {
-		grid.addColumn({name: key, resizable:true});
-		 if(fieldnames === ""){
-			 fieldnames += key;
-		 }else{
-			 fieldnames += "," + key;
-		 }
-		 colArray[cnt] = key;
-		 cnt++;
-		});
-
-		currentPage.editor.properties.displayFields = fieldnames;
-
-		 sessionStorage.setItem('gridColumns', colArray);
-		// Add some example data as an array.
-		grid.items = this.$.ajaxwuResult.lastResponse.WUResultResponse.Result.Row;
-
-
-		return;
-	}
-
  });
     </script>
 </dom-module>
