@@ -1,2 +1,2 @@
 # HPCCInfo
-An Info Worksheet (like a spreadsheet) to view HPCC data files and apply simple data manipulation
+A Workbook (like an Excel workbook) to view HPCC data files and apply simple data manipulation
