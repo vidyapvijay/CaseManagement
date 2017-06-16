@@ -299,8 +299,9 @@
                 var infoBox = this.$$('#infobox');
                 var projectid = infobox.properties.projectid;
                 this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':3000/projectDetails/' + projectid;
+                document.querySelector('#infobox').parentNode.querySelector('#drawer').toggle();
                 this.$.ajaxRetrieveProjectByName.generateRequest();
-
+                
             },
 
             exportProjectDtls : function(exportTo){
@@ -389,6 +390,8 @@
 
                     this.$.ajaxAddProject.generateRequest();
                 }
+
+                alert('WorkSheet Details are saved successfully!!!')
             },
 
             addAllToSession  : function(event){

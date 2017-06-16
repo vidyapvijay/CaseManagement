@@ -119,7 +119,11 @@
                           this.properties.outputdsname = jsonTabContent.outputdsname;
                           this.properties.expression = jsonTabContent.expression;
                           this.$.subfilesgrid.selectedItem = jsonTabContent.expression;
-                          callForFileDetails(jsonTabContent.expression);
+                          var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
+                                    // (this.properties.hpccuser != '' ? this.properties.hpccuser + ':' + this.properties.password + '@' : '')  +
+                                     infoBox.properties.cluster_address +
+                                     ":" + infoBox.properties.port;
+                          callForFileDetails(eclIP, jsonTabContent.expression,  infoBox.properties.username, infoBox.properties.password);
                           break;
                       }
               }
@@ -134,7 +138,7 @@
               var infoBox = document.querySelector('#infobox');
 
               var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
-                                    (this.properties.hpccuser != '' ? this.properties.hpccuser + ':' + this.properties.password + '@' : '')  +
+                                    // (this.properties.hpccuser != '' ? this.properties.hpccuser + ':' + this.properties.password + '@' : '')  +
                                      infoBox.properties.cluster_address +
                                      ":" + infoBox.properties.port;
 			      var currentPage = document.querySelector("#pages").selectedItem;
@@ -284,12 +288,18 @@
 
               var infoBox = document.querySelector('#infobox');
               var eclIP =               infoBox.properties.eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
-                                    (infoBox.properties.hpccuser != '' ? infoBox.properties.hpccuser + ':' + infoBox.properties.password + '@' : '')  +
+                                    // (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '')  +
                                      infoBox.properties.cluster_address +
                                      ":" + infoBox.properties.port;
     
-              getFileListForSearch(eclIP, event.currentTarget.value, infoBox.properties.hpccuser, infoBox.properties.password).then(function(data) {
+              getFileListForSearch(eclIP, event.currentTarget.value, infoBox.properties.username, infoBox.properties.password).then(function(data) {
               console.log(data);
+
+              if(data.DFUQueryResponse.NumFiles === 0){
+                alert('No logical files matched for the given filescope, please try with different value!');
+                return;
+              }
+
               var subfiles =  data.DFUQueryResponse.DFULogicalFiles.DFULogicalFile;
               var subfilesstrnames = "";
               var fileArray = [];
