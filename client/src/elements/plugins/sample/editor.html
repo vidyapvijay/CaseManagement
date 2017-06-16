@@ -216,7 +216,7 @@ changeSampleInput: function(e){
 		this.properties.expression = this.$.samplingInterval.value + '#' + this.$.ordinalNumber.value;
 
 		var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
-					(this.properties.hpccuser != '' ? this.properties.hpccuser + ':' + this.properties.password + '@' : '')  +
+					// (this.properties.hpccuser != '' ? this.properties.hpccuser + ':' + this.properties.password + '@' : '')  +
 						infoBox.properties.cluster_address +
 						":" + infoBox.properties.port;
 

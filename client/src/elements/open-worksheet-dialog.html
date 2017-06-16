@@ -50,13 +50,11 @@
             }
         </style>
 
-        <paper-dialog id="dialog" modal style="width:1400px;height:400px">
+        <paper-dialog id="dialog" modal style="width:1400px">
           <!--<iron-ajax url='http://' + window.location.hostname + ':3000/projectDetails' last-response="{{projects}}" auto></iron-ajax>-->
           <iron-data-table  id="worksheetlist" items="[[projects.projectdata]]" selection-enabled multi-selection
                on-selecting-item='handleSelect' on-deselecting-item='handleDeselect' on-selecting-all-items = 'handleselectall' on-deselecting-all-items = 'handledeselectall'>
-                <data-table-column name="Project Name">
-                <template>[[item.projectid]]</template>
-                </data-table-column>
+
                 <data-table-column name="title">
                 <template>[[item.title]]</template>
                 </data-table-column>
@@ -144,10 +142,10 @@
             infoBox.properties.file = this.$.worksheetlist.selectedItems[0].file;
             this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':3000/projectDetails/' + this.$.worksheetlist.selectedItems[0].projectid;
             this.$.ajaxRetrieveProjectByName.generateRequest();
-            document.querySelector('#drawer').toggle(); //Toggle the app-drawer
+            // document.querySelector('#drawer').toggle(); //Toggle the app-drawer
         },
         _cancelHandler : function(event){
-             document.querySelector('#drawer').toggle();
+            //  document.querySelector('#drawer').toggle();
         },
         ajaxRetrieveProjectByNameResponse : function(eve){
 
