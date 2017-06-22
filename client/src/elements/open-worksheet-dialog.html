@@ -108,7 +108,7 @@
         },
         fireAjaxToFetchAllProjects : function(updatedby){
              var infoBox = document.querySelector('#infobox');
-            this.$.ajaxRetrieveAllProjects.url = 'http://' + window.location.hostname + ':3000/projectDetails/' + updatedby;
+            this.$.ajaxRetrieveAllProjects.url = 'http://' + window.location.hostname + ':' + window.location.port + '/projectDetails/' + updatedby;
             this.$.ajaxRetrieveAllProjects.generateRequest();
             console.log('check');
             this.$.dialog.open();
@@ -140,7 +140,7 @@
             var titleElement = document.querySelector('#projecttitle');
             titleElement.textContent  = this.$.worksheetlist.selectedItems[0].title ;
             infoBox.properties.file = this.$.worksheetlist.selectedItems[0].file;
-            this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':3000/projectDetails/' + this.$.worksheetlist.selectedItems[0].projectid;
+            this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':' + window.location.port + '/projectDetails/' + this.$.worksheetlist.selectedItems[0].projectid;
             this.$.ajaxRetrieveProjectByName.generateRequest();
             // document.querySelector('#drawer').toggle(); //Toggle the app-drawer
         },

@@ -21,7 +21,7 @@
       }
     </style>
     <template>
-        <paper-icon-button id=[[id]] icon="[[icon]]" title=[[title]] on-tap="clickHandler"></paper-icon-button>
+        <paper-icon-button id=[[id]] icon="[[icon]]" title=[[title]] disabled=[[disabled]] on-tap="clickHandler"></paper-icon-button>
     </template>
     <script>
         Polymer({
@@ -30,6 +30,10 @@
 
                 dialogId: {
                     type: String
+                },
+                disabled : {
+                    type : Boolean,
+                    value : false
                 },
                   /* Button ID */
                id: String,

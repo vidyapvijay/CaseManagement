@@ -77,28 +77,28 @@
 			);
 			var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") +  infoBox.properties.cluster_address +
 				":" + infoBox.properties.port;
-			this.properties.eclIP = eclIP;
-			this.properties.hpccuser = username;
+			this.eclIP = eclIP;
+			this.hpccuser = username;
 
-			this.properties.displayFields = '';
-			this.properties.eclcode = '';
-			this.properties.inputeclcode = '';
-			this.properties.editortitle = '';
+			this.displayFields = '';
+			this.eclcode = '';
+			this.inputeclcode = '';
+			this.editortitle = '';
 			this.$.TabTitle.value = '';
-			this.properties.inputdsname = '';
-			this.properties.outputdsname = '';
-			this.properties.expression = '';
+			this.inputdsname = '';
+			this.outputdsname = '';
+			this.expression = '';
 
         },
         serialize : function(){
             var jsonStr = '{';
-            jsonStr += '\"displayFields\" : \"' + this.properties.displayFields + '\",';
-            jsonStr += '\"editortitle\" : \"' + this.properties.editortitle + '\",';
-            jsonStr += '\"eclcode\" : \"' + this.properties.eclcode.replace(/[\r\n]/g, '') + '\",';
-            jsonStr += '\"inputdsname\" :\" ' + this.properties.inputdsname + '\",';
-            jsonStr += '\"outputdsname\" : \"' + this.properties.outputdsname + '\",';
-            jsonStr += '\"expression\" : \"' + this.properties.expression + '\",';
-            jsonStr += '\"title\" : \"' + this.properties.title.trim() + '\",';
+            jsonStr += '\"displayFields\" : \"' + this.displayFields + '\",';
+            jsonStr += '\"editortitle\" : \"' + this.editortitle + '\",';
+            jsonStr += '\"eclcode\" : \"' + this.eclcode.replace(/[\r\n]/g, '') + '\",';
+            jsonStr += '\"inputdsname\" :\" ' + this.inputdsname + '\",';
+            jsonStr += '\"outputdsname\" : \"' + this.outputdsname + '\",';
+            jsonStr += '\"expression\" : \"' + this.expression + '\",';
+            jsonStr += '\"title\" : \"' + this.title.trim() + '\",';
             jsonStr += '\"pluginId\" : \"' + 'common-sort' + '\"}';
 
             return jsonStr;
@@ -116,17 +116,17 @@
 			for(var cnt = 0; cnt < tabs.length; cnt++){
 					if( tabTtitle === tabs[cnt].title){
 						jsonTabContent = tabs[cnt];
-						this.properties.displayFields = jsonTabContent.displayFields;
-						this.$.sortfield.items = this.properties.displayFields.split(',');
+						this.displayFields = jsonTabContent.displayFields;
+						this.$.sortfield.items = this.displayFields.split(',');
 						this.$.TabTitle.value = jsonTabContent.title;
-						this.properties.editortitle = jsonTabContent.title;
-						this.properties.eclcode = jsonTabContent.eclcode;
-						this.properties.inputeclcode = jsonTabContent.eclcode;
-						this.properties.inputdsname = jsonTabContent.inputdsname;
-						this.properties.outputdsname = jsonTabContent.outputdsname;
-						this.properties.pluginId = jsonTabContent.pluginId;
-						this.properties.title = jsonTabContent.title;                            
-						this.properties.expression = jsonTabContent.expression;
+						this.editortitle = jsonTabContent.title;
+						this.eclcode = jsonTabContent.eclcode;
+						this.inputeclcode = jsonTabContent.eclcode;
+						this.inputdsname = jsonTabContent.inputdsname;
+						this.outputdsname = jsonTabContent.outputdsname;
+						this.pluginId = jsonTabContent.pluginId;
+						this.title = jsonTabContent.title;                            
+						this.expression = jsonTabContent.expression;
 						this.$.sortformulas.value = jsonTabContent.expression;
 						this.$.sortInputtab.value = jsonTabContent.inputdsname;
 						break;
@@ -135,12 +135,12 @@
 		},
 
 	   loadgrid : function(tabTtitle){
-			var QueryStr1 =  this.properties.eclcode;
+			var QueryStr1 =  this.eclcode;
 			if(QueryStr1.trim() === ''){
 				return;
 			}               
-			var QueryStr1 =  this.properties.eclcode;
-			var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.properties.outputdsname + ");";
+			var QueryStr1 =  this.eclcode;
+			var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.outputdsname + ");";
 			return loadGridwithEcl(QueryStr);
 		},
 
@@ -170,16 +170,16 @@
 
 			document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
 			var currentPage = document.querySelector("#pages").selectedItem;
-			this.properties.title  = this.$.TabTitle.value;
+			this.title  = this.$.TabTitle.value;
 
 			currentPage.properties.outputdsname = 'sortdsName'  + '_' +  Math.random().toString(36).substr(2, 4);
 
 	     	var infoBox = document.querySelector('#infobox');
 		
-		  this.properties.outputdsname = currentPage.properties.outputdsname;
+		  this.outputdsname = currentPage.properties.outputdsname;
 
-		   var QueryStr1 =  this.properties.inputeclcode + "\n" +  currentPage.properties.outputdsname + " := " + " SORT(" +
-							this.properties.inputdsname + "," + 
+		   var QueryStr1 =  this.inputeclcode + "\n" +  currentPage.properties.outputdsname + " := " + " SORT(" +
+							this.inputdsname + "," + 
 
 							this.$.sortformulas.value +
 
@@ -187,10 +187,10 @@
 
 			 var QueryStr =    QueryStr1 +  "\n OUTPUT(" + currentPage.properties.outputdsname  + ");";
 
-        this.properties.expression = this.$.sortformulas.value;
+        this.expression = this.$.sortformulas.value;
 
 		currentPage.properties.eclcode = QueryStr1;
-		this.properties.eclcode = QueryStr1;
+		this.eclcode = QueryStr1;
 
 		return loadGridwithEcl(QueryStr);
 		},
@@ -211,13 +211,13 @@
 
 			var selpage = document.querySelector("#pages").querySelector("#" + tabid);
 
-			this.properties.eclcode = selpage.editor.properties.eclcode;
+			this.eclcode = selpage.editor.eclcode;
 
-			this.properties.inputeclcode = selpage.editor.properties.eclcode;
+			this.inputeclcode = selpage.editor.eclcode;
 
-			this.properties.inputdsname = selpage.editor.properties.outputdsname;
+			this.inputdsname = selpage.editor.outputdsname;
 
-			this.$.sortfield.items = selpage.editor.properties.displayFields.split(",");
+			this.$.sortfield.items = selpage.editor.displayFields.split(",");
 
 			return;
        },

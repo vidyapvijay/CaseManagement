@@ -60,10 +60,14 @@
     </style>
         <app-toolbar>
             <paper-tabs id="tabs" selected="{{selected}}"></paper-tabs>
-            <paper-icon-button id="btnEditPlugin" icon="create" on-tap="_pluginEditOpenHandler"></paper-icon-button>
+
+            <!--<paper-icon-button id="btnExportProject" icon="export" on-tap="_projectExportOpenHandler"></paper-icon-button>-->
+            <p><paper-icon-button id="export-project-dialog" disabled="true" icon="social:share"></paper-icon-button></p>
+
             <paper-tooltip for="btnEditPlugin" offset="0">Edit Plugin</paper-tooltip>
-                
-            <paper-menu-button horizontal-align="right" disabled id="pluginMenu">
+            <paper-tooltip for="export-project-dialog"  offset="0">Share Project</paper-tooltip>
+            <paper-icon-button id="btnEditPlugin" disabled="true" icon="create" on-tap="_pluginEditOpenHandler"></paper-icon-button>
+            <paper-menu-button horizontal-align="right" disabled="true" id="pluginMenu">
                 <paper-icon-button id="btnAddPlugin" icon="add" class="dropdown-trigger"></paper-icon-button>
                 <paper-menu id="pluginmenu" class="dropdown-content"> </paper-menu>
             </paper-menu-button>
@@ -96,20 +100,50 @@
                     type: Number,
                     value: 0
                 },
-                cluster_address : String,
-                cluster_name : String,
-                port : String,
-                httpSecured : Boolean,
-                username    : String,
-                password  : String,
-                projectid  : String,
-                title : String,
-                updatedby : String,
-                dateupdated : Date,
-
+                cluster_address : {
+                    type : String,
+                    value : ''
+                },
+                cluster_name : {
+                    type : String,
+                    value : ''
+                },
+                port : {
+                    type : String,
+                    value : ''
+                },
+                httpSecured : {
+                    type : Boolean,
+                    value : false
+                },
+                username : {
+                    type :  String,
+                    value : ''
+                
+                },
+                password  : {
+                    type : String,
+                    value : ''
+                },
+                projectid  : {
+                    type : String,
+                    value : ''
+                },
+                title : {
+                    type : String,
+                    value : ''
+                },
+                updatedby : {
+                    type : String,
+                    value : ''
+                },
+                dateupdated : {
+                    type : Date,
+                    value : null
+                }, 
                 file : {
                     type : String,
-                    value : ""
+                    value : ''
                 } 
 
             },
@@ -149,6 +183,11 @@
             addTab: function (id, label, pluginId, reload = false) {
 
                if(pluginId === "common-input"){
+
+                   document.querySelector('#export-project-dialog').disabled = true;
+
+
+                   
                    var tabitems = Polymer.dom(this.$.tabs);
                    var pageitems = Polymer.dom(this.$.pages);
                    var cnt = 0;
@@ -163,7 +202,17 @@
                                 this.viewList.pop();
                             }
                         }
+
+                        if(this.$.tabs != undefined ){
+                            var listsize = this.$.tabs.length;
+                            for(var cnt =0; cnt < listsize; cnt++){
+                                this.$.tabs.pop();
+                            }
+                        }
                     }
+
+                var pluginMenu = document.querySelector('#pluginMenu');
+                pluginMenu.disabled = true;
                }
                 var view = document.createElement(pluginId + "-view");
                 var editor = document.createElement(pluginId + "-editor");
@@ -172,6 +221,7 @@
                 tab.textContent = label;
                 
                 view.id = id;
+                editor.id = id + '_editor_' + Math.random().toString(36).substr(2, 9);
                 view.pluginId = pluginId;
                 view.label = label;
                 view.tab = tab; 
@@ -194,8 +244,7 @@
                     this.$.tabs.selectIndex(pluginId == "common-input" ? 0 : this.$.tabs.items.length -1);//Select the new tab
                 }
 
-                var pluginMenu = document.querySelector('#pluginMenu');
-                pluginMenu.disabled = false;
+
             },
 
 

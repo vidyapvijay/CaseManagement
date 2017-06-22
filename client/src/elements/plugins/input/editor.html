@@ -152,9 +152,9 @@
             });
             getFileData.then(function(ajaxResp) {
 
-              infoBox.getActiveView().editor.properties.eclcode = ajaxResp.querystr;
+              infoBox.getActiveView().editor.eclcode = ajaxResp.querystr;
 
-              infoBox.getActiveView().editor.properties.outputdsname = ajaxResp.outputdsname;
+              infoBox.getActiveView().editor.outputdsname = ajaxResp.outputdsname;
 
               var obj = ajaxResp.Result.Row[0];
               var cnt = 0;
@@ -178,7 +178,10 @@
               cnt++;
               });
 
-              currentPage.editor.properties.displayFields = fieldnames;
+              document.querySelector('#pluginMenu').disabled = false;
+              document.querySelector('#export-project-dialog').disabled = false;
+
+              currentPage.editor.displayFields = fieldnames;
 
               sessionStorage.setItem('gridColumns', colArray);
               // Add some example data as an array.
@@ -188,7 +191,7 @@
               }
           }
         );
-            },
+      },
 
 
 
@@ -211,7 +214,7 @@
               var infoBox = document.querySelector('#infobox');
 
               var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
-                                    (this.properties.hpccuser != '' ? this.properties.hpccuser + ':' + this.properties.password + '@' : '')  +
+                                    // (this.properties.hpccuser != '' ? this.properties.hpccuser + ':' + this.properties.password + '@' : '')  +
                                      infoBox.properties.cluster_address +
                                      ":" + infoBox.properties.port;
 			      var currentPage = document.querySelector("#pages").selectedItem;
@@ -225,9 +228,9 @@
             });
             getFileData.then(function(ajaxResp) {
 
-              infoBox.getActiveView().editor.properties.eclcode = ajaxResp.querystr;
+              infoBox.getActiveView().editor.eclcode = ajaxResp.querystr;
 
-              infoBox.getActiveView().editor.properties.outputdsname = ajaxResp.outputdsname;
+              infoBox.getActiveView().editor.outputdsname = ajaxResp.outputdsname;
 
               var obj = ajaxResp.Result.Row[0];
               var cnt = 0;
@@ -251,9 +254,12 @@
               cnt++;
               });
 
-              currentPage.editor.properties.displayFields = fieldnames;
+              currentPage.editor.displayFields = fieldnames;
 
               sessionStorage.setItem('gridColumns', colArray);
+
+              document.querySelector('#pluginMenu').disabled = false;
+
               // Add some example data as an array.
               grid.items = ajaxResp.Result.Row;
               if(grid.items.length === 0){
@@ -282,12 +288,12 @@
               var infoBox = document.querySelector('#infobox');
 
               this.properties.eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
-                                    (this.properties.hpccuser != '' ? this.properties.hpccuser + ':' + this.properties.password + '@' : '')  +
+                                    // (this.properties.hpccuser != '' ? this.properties.hpccuser + ':' + this.properties.password + '@' : '')  +
                                      infoBox.properties.cluster_address +
                                      ":" + infoBox.properties.port;
 
               var infoBox = document.querySelector('#infobox');
-              var eclIP =               infoBox.properties.eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
+              var eclIP =     (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
                                     // (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '')  +
                                      infoBox.properties.cluster_address +
                                      ":" + infoBox.properties.port;

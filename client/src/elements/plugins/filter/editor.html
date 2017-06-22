@@ -57,40 +57,76 @@
 
 
 	properties: {
-		eclcode : String,
-		inputeclcode : String,
-		outputdsname : String,
-		inputdsname : String,
-		eclIP : String,
-		hpccuser : String,
-		editortitle : String,
-		displayFields : String,
-		expression : String,
-		title : String
+
+
+		inputeclcode : {
+                    type: Object,
+                     value: function() { return {}; } 
+                },
+
+		outputdsname : {
+                    type: Object,
+                     value: function() { return {}; } 
+                },
+
+		inputdsname : {
+                    type: Object,
+                     value: function() { return {}; } 
+                },
+
+
+		hpccuser : {
+                    type: Object,
+                     value: function() { return {}; } 
+                },
+
+
+		editortitle : {
+                    type: Object,
+                     value: function() { return {}; } 
+                },
+
+		displayFields : {
+                    type: Object,
+                     value: function() { return {}; } 
+                },
+
+		expression : {
+                    type: Object,
+                     value: function() { return {}; } 
+                },
+		title: {
+			type: Object,
+			value: function() { return []; }
+		},
+	eclcode: {
+				type: Object,
+				value: function() { return {}; }
+			}
 	},
 
 	ready : function(){
 		var selpage = document.querySelector("#pages").querySelector("#common-input");
 		var infoBox = document.querySelector('#infobox');
-		var username = infoBox.properties.username;
-		var password = infoBox.properties.password;
+		var username = infoBox.username;
+		var password = infoBox.password;
 		var credentials = username === null || username === "" ? "" : (
 		password === null || password === "" ?  (username + '@') :
 		(username + ':' + password + '@')               
 		);
-		var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") +  infoBox.properties.cluster_address +
-		":" + infoBox.properties.port;
-		this.properties.eclIP = eclIP;
-		this.properties.hpccuser = username;
+		var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") +  infoBox.cluster_address +
+		":" + infoBox.port;
+		this.eclIP = eclIP;
+		this.hpccuser = username;
 
-		this.properties.displayFields = '';
-		this.properties.eclcode = '';
-		this.properties.inputeclcode = '';
-		this.properties.editortitle = '';
+		this.displayFields = '';
+		this.eclcode = '';
+		this.inputeclcode = '';
+		this.editortitle = '';
 		this.$.TabTitle.value = '';
-		this.properties.inputdsname = '';
-		this.properties.outputdsname = '';
-		this.properties.expression = '';
+		this.inputdsname = '';
+		this.outputdsname = '';
+		this.expression = '';
 	},
 
 deSerialize : function(tabTtitle){
@@ -99,22 +135,22 @@ deSerialize : function(tabTtitle){
 
   var infoBox = document.querySelector('#infobox');
 
-   var tabs = infoBox.properties.tabsdata.Tabs;
+  var tabs = infoBox.properties.tabsdata.Tabs;
 
    for(var cnt = 0; cnt < tabs.length; cnt++){
 		if( tabTtitle === tabs[cnt].title){
 			jsonTabContent = tabs[cnt];
-			this.properties.displayFields = jsonTabContent.displayFields;
-			this.$.field.items = this.properties.displayFields.split(",");
+			this.displayFields = jsonTabContent.displayFields;
+			this.$.field.items = this.displayFields.split(",");
 			this.$.TabTitle.value = jsonTabContent.title;
-			this.properties.editortitle = jsonTabContent.title;
-			this.properties.eclcode = jsonTabContent.eclcode;
-			this.properties.inputeclcode = jsonTabContent.eclcode;
-			this.properties.inputdsname = jsonTabContent.inputdsname;
-			this.properties.outputdsname = jsonTabContent.outputdsname;
-			this.properties.pluginId = jsonTabContent.pluginId;
-			this.properties.title = jsonTabContent.title;
-			this.properties.expression = jsonTabContent.expression;
+			this.editortitle = jsonTabContent.title;
+			this.eclcode = jsonTabContent.eclcode;
+			this.inputeclcode = jsonTabContent.eclcode;
+			this.inputdsname = jsonTabContent.inputdsname;
+			this.outputdsname = jsonTabContent.outputdsname;
+			this.pluginId = jsonTabContent.pluginId;
+			this.title = jsonTabContent.title;
+			this.expression = jsonTabContent.expression;
 			this.$.filterformulas.value = jsonTabContent.expression; 
 			this.$.filterInputTab.value = jsonTabContent.inputdsname;
 			
@@ -125,23 +161,23 @@ deSerialize : function(tabTtitle){
 
 serialize : function(){
 	var jsonStr = '{';
-	jsonStr += '\"displayFields\" : \"' + this.properties.displayFields + '\",';
-	jsonStr += '\"editortitle\" : \"' + this.properties.editortitle + '\",';
-	jsonStr += '\"eclcode\" : \"' + this.properties.eclcode.replace(/[\r\n]/g, '') + '\",';
-	jsonStr += '\"inputdsname\" :\" ' + this.properties.inputdsname + '\",';
-	jsonStr += '\"outputdsname\" : \"' + this.properties.outputdsname + '\",';
-	jsonStr += '\"expression\" : \"' + this.properties.expression + '\",';
-	jsonStr += '\"title\" : \"' + this.properties.title.trim() + '\",';
+	jsonStr += '\"displayFields\" : \"' + this.displayFields + '\",';
+	jsonStr += '\"editortitle\" : \"' + this.editortitle + '\",';
+	jsonStr += '\"eclcode\" : \"' + this.eclcode.replace(/[\r\n]/g, '') + '\",';
+	jsonStr += '\"inputdsname\" :\" ' + this.inputdsname + '\",';
+	jsonStr += '\"outputdsname\" : \"' + this.outputdsname + '\",';
+	jsonStr += '\"expression\" : \"' + this.expression + '\",';
+	jsonStr += '\"title\" : \"' + this.title.trim() + '\",';
 	jsonStr += '\"pluginId\" : \"' + 'common-filter' + '\"}';
 
 	return jsonStr;
 },
 loadgrid : function(tabTtitle){
-	var QueryStr1 =  this.properties.eclcode;
+	var QueryStr1 =  this.eclcode;
 	if(QueryStr1.trim() === ''){
 		return;
 	}
-	var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.properties.outputdsname + ");";
+	var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.outputdsname + ");";
 	return loadGridwithEcl(QueryStr);
 },
 
@@ -171,30 +207,30 @@ open: function () {
 
 _okHandler: function (e) {
 	document.querySelector("#tabs").selectedItem.textContent = this.$.TabTitle.value;
-	this.properties.title  = this.$.TabTitle.value;
+	this.title  = this.$.TabTitle.value;
 	var currentPage = document.querySelector("#pages").selectedItem;
 
-	currentPage.properties.outputdsname = 'filterdsName'  + '_' +  Math.random().toString(36).substr(2, 4);
+	currentPage.outputdsname = 'filterdsName'  + '_' +  Math.random().toString(36).substr(2, 4);
 
 	var infoBox = document.querySelector('#infobox');
 
-	this.properties.outputdsname = currentPage.properties.outputdsname;
+	this.outputdsname = currentPage.outputdsname;
 
-	var QueryStr1 =  this.properties.inputeclcode + "\n" + currentPage.properties.outputdsname + " := " + 
-					 this.properties.inputdsname + "(" +                                
+	var QueryStr1 =  this.inputeclcode + "\n" + currentPage.outputdsname + " := " + 
+					 this.inputdsname + "(" +                                
 					 this.$.filterformulas.value + ");";
 
-    this.properties.expression = this.$.filterformulas.value;
+    this.expression = this.$.filterformulas.value;
 
-	var QueryStr =  QueryStr1 +  "\n OUTPUT(" + currentPage.properties.outputdsname + ");";
+	var QueryStr =  QueryStr1 +  "\n OUTPUT(" + currentPage.outputdsname + ");";
 
-	var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
-				// (this.properties.hpccuser != '' ? this.properties.hpccuser + ':' + this.properties.password + '@' : '')  +
-					infoBox.properties.cluster_address +
-					":" + infoBox.properties.port;
+	var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + 
+				// (this.hpccuser != '' ? this.hpccuser + ':' + this.password + '@' : '')  +
+					infoBox.cluster_address +
+					":" + infoBox.port;
 
-	currentPage.properties.eclcode = QueryStr1;
-	this.properties.eclcode = QueryStr1;
+	currentPage.eclcode = QueryStr1;
+	this.eclcode = QueryStr1;
 
 	return loadGridwithEcl(QueryStr);
 },
@@ -215,15 +251,15 @@ changeInput: function(e){
 
 	var selpage = document.querySelector("#pages").querySelector("#" + tabid);
 
-	this.properties.eclcode = selpage.editor.properties.eclcode;
+	this.eclcode = selpage.editor.eclcode;
 
-	this.properties.inputeclcode = selpage.editor.properties.eclcode;
+	this.inputeclcode = selpage.editor.eclcode;
 
-	this.properties.inputdsname = selpage.editor.properties.outputdsname;
+	this.inputdsname = selpage.editor.outputdsname;
 
-	this.properties.displayFields = selpage.editor.properties.displayFields;
+	this.displayFields = selpage.editor.displayFields;
 
-	this.$.field.items = selpage.editor.properties.displayFields.split(",");
+	this.$.field.items = selpage.editor.displayFields.split(",");
 
 	return;
 

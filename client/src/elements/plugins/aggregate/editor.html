@@ -120,26 +120,26 @@
 
 			var eclIP = (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") +  infoBox.properties.cluster_address +
 				":" + infoBox.properties.port;
-			this.properties.eclIP = eclIP;
-			this.properties.hpccuser = username;
+			this.eclIP = eclIP;
+			this.hpccuser = username;
 
-			this.properties.displayFields = '';
-			this.properties.eclcode = '';
-			this.properties.editortitle = '';
+			this.displayFields = '';
+			this.eclcode = '';
+			this.editortitle = '';
 			this.$.TabTitle.value = '';
-			this.properties.inputdsname = '';
-			this.properties.outputdsname = '';
-			this.properties.expression = '';
+			this.inputdsname = '';
+			this.outputdsname = '';
+			this.expression = '';
 		},
         serialize : function(){
             var jsonStr = '{';
-            jsonStr += '\"displayFields\" : \"' + this.properties.displayFields + '\",';
-            jsonStr += '\"editortitle\" : \"' + this.properties.editortitle + '\",';
-            jsonStr += '\"eclcode\" : \"' + this.properties.eclcode.replace(/[\r\n]/g, '') + '\",';
-            jsonStr += '\"inputdsname\" :\" ' + this.properties.inputdsname + '\",';
-            jsonStr += '\"outputdsname\" : \"' + this.properties.outputdsname + '\",';
-            jsonStr += '\"expression\" : \"' + this.properties.expression + '\",';
-            jsonStr += '\"title\" : \"' + this.properties.title.trim() + '\",';
+            jsonStr += '\"displayFields\" : \"' + this.displayFields + '\",';
+            jsonStr += '\"editortitle\" : \"' + this.editortitle + '\",';
+            jsonStr += '\"eclcode\" : \"' + this.eclcode.replace(/[\r\n]/g, '') + '\",';
+            jsonStr += '\"inputdsname\" :\" ' + this.inputdsname + '\",';
+            jsonStr += '\"outputdsname\" : \"' + this.outputdsname + '\",';
+            jsonStr += '\"expression\" : \"' + this.expression + '\",';
+            jsonStr += '\"title\" : \"' + this.title.trim() + '\",';
             jsonStr += '\"pluginId\" : \"' + 'common-aggregate' + '\"}';
 
             return jsonStr;
@@ -156,18 +156,18 @@
 			for(var cnt = 0; cnt < tabs.length; cnt++){
 				if( tabTtitle === tabs[cnt].title){
 					jsonTabContent = tabs[cnt];
-					this.properties.displayFields = jsonTabContent.displayFields;
-					this.$.crosstabfield.items = this.properties.displayFields.split(",");
-					this.$.aggregatefield.items = this.properties.displayFields.split(",");
+					this.displayFields = jsonTabContent.displayFields;
+					this.$.crosstabfield.items = this.displayFields.split(",");
+					this.$.aggregatefield.items = this.displayFields.split(",");
 					this.$.TabTitle.value = jsonTabContent.title;
-					this.properties.editortitle = jsonTabContent.title;
-					this.properties.eclcode = jsonTabContent.eclcode;
-					this.properties.pluginId = jsonTabContent.pluginId;
-					this.properties.title = jsonTabContent.title;                        
-					this.properties.inputdsname = jsonTabContent.inputdsname;
-					this.properties.outputdsname = jsonTabContent.outputdsname;
-					this.properties.expression = jsonTabContent.expression;
-					var formulas = this.properties.expression.split('#');
+					this.editortitle = jsonTabContent.title;
+					this.eclcode = jsonTabContent.eclcode;
+					this.pluginId = jsonTabContent.pluginId;
+					this.title = jsonTabContent.title;                        
+					this.inputdsname = jsonTabContent.inputdsname;
+					this.outputdsname = jsonTabContent.outputdsname;
+					this.expression = jsonTabContent.expression;
+					var formulas = this.expression.split('#');
 					this.$.aggregateformulas.value = formulas[1];
 					this.$.aggregategroupformulas.value = formulas[0];
 					break;
@@ -176,12 +176,12 @@
 		},
 
 	   loadgrid : function(tabTtitle){
-			var QueryStr1 =  this.properties.eclcode;
+			var QueryStr1 =  this.eclcode;
 			if(QueryStr1.trim() === ''){
 				return;
 			}
-			var QueryStr1 =  this.properties.eclcode;
-			var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.properties.outputdsname + ");";
+			var QueryStr1 =  this.eclcode;
+			var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.outputdsname + ");";
 
 			return loadGridwithEcl(QueryStr);
 	   },
@@ -212,14 +212,14 @@
 			var currentPage = document.querySelector("#pages").selectedItem;
 			var infoBox = document.querySelector('#infobox');
 		
-			this.properties.title  = this.$.TabTitle.value;
+			this.title  = this.$.TabTitle.value;
 			currentPage.properties.outputdsname = 'aggregatedsName'  + '_' +  Math.random().toString(36).substr(2, 4);
 
-			this.properties.outputdsname = currentPage.properties.outputdsname;
+			this.outputdsname = currentPage.properties.outputdsname;
 
-            var ipDs = this.properties.inputdsname;
+            var ipDs = this.inputdsname;
 
-            var QueryStr1 = this.properties.eclcode + "\n" + currentPage.properties.outputdsname + " := " +
+            var QueryStr1 = this.eclcode + "\n" + currentPage.properties.outputdsname + " := " +
 
                 (this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? "" : "SORT(") + "TABLE(" + ipDs + ", {";
 
@@ -243,9 +243,9 @@
 
 			currentPage.properties.eclcode = QueryStr1;
 
-			this.properties.eclcode = QueryStr1;
+			this.eclcode = QueryStr1;
 
-            this.properties.expression =  this.$.aggregategroupformulas.value.trim() + '#' + this.$.aggregateformulas.value.trim();
+            this.expression =  this.$.aggregategroupformulas.value.trim() + '#' + this.$.aggregateformulas.value.trim();
 
 			console.log(QueryStr);  
 
@@ -273,13 +273,14 @@
 
 			var selpage = document.querySelector("#pages").querySelector("#" + tabid);
 
-			this.properties.eclcode = selpage.editor.properties.eclcode;
+			this.eclcode = selpage.editor.eclcode;
 
-			this.properties.inputdsname = selpage.editor.properties.outputdsname;
+			this.inputdsname = selpage.editor.outputdsname;
 
-			this.$.aggregatefield.items = selpage.editor.properties.displayFields.split(",");
+			this.$.aggregatefield.items = selpage.editor.displayFields.split(",");
 
-			this.$.crosstabfield.items = selpage.editor.properties.displayFields.split(",");
+			this.$.crosstabfield.items = selpage.editor.displayFields.split(",");
+
 
 
             return;

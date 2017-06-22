@@ -37,6 +37,40 @@ function editProjectTitleHandler() {
 	}
 }
 
+function hostReachable(url, hpccuser, password) {
+
+  // Handle IE and more capable browsers
+  var xhr = new ( window.ActiveXObject || XMLHttpRequest )( "Microsoft.XMLHTTP" );
+  var status;
+
+  // Open new request as a HEAD to the root hostname with a random param to bust the cache
+  xhr.open( "GET", url);
+
+	xhr = $.ajax({
+		//url : "http://10.240.33.54:8010/WsDfu/DFUQuery.json", 
+		url: url ,
+		headers: { 'Access-Control-Allow-Origin': '*' },
+		dataType: "JSONP",
+		jsonp: 'jsonp',
+		type: 'GET',
+		async: 'false',
+		headers: {
+			"Authorization": "Basic " + btoa(hpccuser + ":" + password)
+		}
+	});
+
+
+  // Issue request and handle response
+//   try {
+//     xhr.send();
+//     return ( xhr.status >= 200 && (xhr.status < 300 || xhr.status === 304) );
+//   } catch (error) {
+//     return false;
+//   }
+
+return true;
+}
+
 function workunitStatus(url, queryparam, hpccuser, password) {
 	var promise = new Promise(function (resolve, reject) {
 		$.ajax({
@@ -92,6 +126,8 @@ function getFileListForSearch(url, pattern, hpccuser, password) {
 			"Authorization": "Basic " + btoa(hpccuser + ":" + password)
 		}
 	});
+
+
 }
 
 function loadGridwithEcl(QueryStr) {
@@ -150,7 +186,7 @@ function loadGridwithEcl(QueryStr) {
 			cnt++;
 		});
 
-		currentPage.editor.properties.displayFields = fieldnames;
+		currentPage.editor.displayFields = fieldnames;
 
 		sessionStorage.setItem('gridColumns', colArray);
 		// Add some example data as an array.
