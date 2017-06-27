@@ -122,6 +122,7 @@ function getFileListForSearch(url, pattern, hpccuser, password) {
 		jsonp: 'jsonp',
 		type: 'GET',
 		async: 'false',
+		error : function(data) {alert('Input Cluster details are not valid');},
 		headers: {
 			"Authorization": "Basic " + btoa(hpccuser + ":" + password)
 		}

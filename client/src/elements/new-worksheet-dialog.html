@@ -100,13 +100,18 @@
 
                  var projecttitlediv = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#projecttitle');
 
-                 projecttitlediv.textContent = "HPCCInfo-" + this.$.worksheettitle.value;
-
-
                  var eclIP =     (infoBox.properties.isHpccSecured === "true" ? "https://" : "http://") + 
                                     // (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '')  +
                                      infoBox.properties.cluster_address +
                                      ":" + infoBox.properties.port;
+
+                var titleval = this.$.worksheettitle.value;
+
+                getFileListForSearch(eclIP, '', infoBox.properties.username, infoBox.properties.password).then(function(data){
+                
+ 
+                projecttitlediv.textContent = "HPCCInfo-" + titleval ;
+
 
                 var isValid = hostReachable(eclIP, infoBox.properties.username, infoBox.properties.password);
 
@@ -114,12 +119,15 @@
                         alert("The Cluster details provided are invalid! Please check");
                         return;
                     }      
-  
+                
+                infoBox.properties.title = titleval;
+
                 infoBox.addTab('common-input', "Input", 'common-input');  
 
                 document.querySelector('#btnEditPlugin').disabled = false; 
 
-                document.querySelector('#edit-worksheet-dialog').disabled = false;                                           
+                document.querySelector('#edit-worksheet-dialog').disabled = false;        
+                });
             },
  
 
