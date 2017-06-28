@@ -178,6 +178,45 @@
                 this.pluginList.push(plugin);
             },
 
+            clearWorkBook(){
+
+                document.querySelector('#btnExportProject').disabled = true;
+                document.querySelector('#export-project-dialog').disabled = true;
+
+                this.properties.cluster_name = '';
+                this.properties.cluster_address = '';
+                this.properties.port = '';
+                this.properties.username = '';
+                this.properties.password = '';
+                this.properties.httpSecured = '';
+                this.properties.file = '';
+                this.pluginList = [];
+                this.properties.pluginList = [];
+                this.properties.httpSecured = '';
+
+                var tabitems = Polymer.dom(this.$.tabs);
+                var pageitems = Polymer.dom(this.$.pages);
+                var cnt = 0;
+                tabitems._clear();
+                this.$.tabs.items = [];
+                pageitems._clear(); 
+                if(this.viewList === undefined ||  this.viewList.length > 0){
+
+                    if(this.viewList != undefined ){
+                        var listsize = this.viewList.length;
+                        for(var cnt =0; cnt < listsize; cnt++){
+                            this.viewList.pop();
+                        }
+                    }
+
+                    if(this.$.tabs != undefined ){
+                        var listsize = this.$.tabs.length;
+                        for(var cnt =0; cnt < listsize; cnt++){
+                            this.$.tabs.pop();
+                        }
+                    }
+                }
+            },
             addTab: function (id, label, pluginId, reload = false) {
 
                if(pluginId === "common-input"){

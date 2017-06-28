@@ -60,6 +60,10 @@
 				if(e.target.innerText === 'Sign-Out') {
 					this.fire('sign-out');
 				}
+
+								
+				var infoBox = document.querySelector('#infobox');
+				infoBox.clearWorkBook();
 				
                 this.set('route.path', '/');
             }
