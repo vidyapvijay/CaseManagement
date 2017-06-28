@@ -132,6 +132,10 @@
                 // console.log(' On Tap event of Tab : ' + tabTtitle);
               var infoBox = document.querySelector('#infobox');
 
+              if( infoBox.properties.file === ''){
+                return;
+              }
+
               if(infoBox.properties.file.value === ""){
                 return;
               }

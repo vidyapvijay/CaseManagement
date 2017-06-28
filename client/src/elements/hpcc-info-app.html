@@ -306,6 +306,7 @@
                 var projectid = infobox.properties.projectid;
                 this.$.ajaxRetrieveProjectByName.url = 'http://' + window.location.hostname + ':' + window.location.port + '/projectDetails/' + projectid;
                 document.querySelector('#infobox').parentNode.querySelector('#drawer').toggle();
+                document.querySelector('#btnExportProject').disabled = false;
                 this.$.ajaxRetrieveProjectByName.generateRequest();
                 
             },

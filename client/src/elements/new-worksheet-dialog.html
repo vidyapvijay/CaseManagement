@@ -100,6 +100,7 @@
                 infoBox.properties.username = this.$.username.value;
                 infoBox.properties.password = this.$.password.value;
                 infoBox.properties.httpSecured = this.$.httpSecured.value;
+                infoBox.properties.file = '';
 
                 var projecttitlediv = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#projecttitle');
 
@@ -110,6 +111,8 @@
 
                 var titleval = this.$.worksheettitle.value;
                 projecttitlediv.textContent = "HPCCInfo-" + titleval ;
+
+                document.querySelector('#btnExportProject').disabled = true;
 
                 hostReachable(eclIP, infoBox.properties.username, infoBox.properties.password).then(function(response) {
                     alert("The Cluster details provided are valid");

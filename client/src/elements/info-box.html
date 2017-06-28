@@ -70,11 +70,11 @@
             </paper-menu-button>
             <paper-tooltip for="btnAddPlugin" offset="0">Plugin List</paper-tooltip>   
 
-            <paper-icon-button id="btnExportProject"
+            <paper-icon-button id="btnExportProject" disabled="true"
                                    icon="social:share" 
                                    on-tap="_projectExportOpenHandler">                       
             </paper-icon-button>
-            <paper-tooltip for="btnExportProject" offset="0">Share Project</paper-tooltip>
+            <paper-tooltip for="btnExportProject" disabled="true" offset="0">Share Project</paper-tooltip>
 
         </app-toolbar>
         <export-project-dialog id="export-project-dialog"></export-project-dialog>
