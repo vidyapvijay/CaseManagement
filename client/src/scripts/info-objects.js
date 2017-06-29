@@ -227,7 +227,7 @@ function callAjaxForECL(url, eclCode, hpccuser, password) {
 									success: function (data) {
 
 										if (data.WUResultResponse.Name === "SUPERFILECONTENTS") {
-											var newData = callForFileDetails(url, data.WUResultResponse.Result.Row[0].name, hpccuser, password);
+											var newData = callForFileDetails(url, data.WUResultResponse.Result.Row[0].super, data.WUResultResponse.Result.Row[0].name, hpccuser, password);
 											newData.then(
 												function (val) {
 													resolve(val);
@@ -249,11 +249,11 @@ function callAjaxForECL(url, eclCode, hpccuser, password) {
 
 	return promise;
 }
-function callForFileDetails(url, filename, hpccuser, password) {
+function callForFileDetails(url, filename, subfilename, hpccuser, password) {
 	var promise = new Promise(function (resolve, reject) {
 		var wuid = '';
 		$.ajax({
-			url: url + "/WsDfu/DFUInfo.json?Name=" + '~' + filename,
+			url: url + "/WsDfu/DFUInfo.json?Name=" + '~' + subfilename,
 			headers: { 'Access-Control-Allow-Origin': '*' },
 			dataType: "JSONP",
 			jsonp: 'jsonp',
@@ -268,7 +268,9 @@ function callForFileDetails(url, filename, hpccuser, password) {
 				outputdsname = 'inputds' + '_' + Math.random().toString(36).substr(2, 4);
 
 				if (data.DFUInfoResponse.FileDetail.isSuperfile) {
-					var QueryStr = "IMPORT STD;OUTPUT(STD.FILE.SUPERFILECONTENTS('~" + filename + "', TRUE)[1], NAMED('SUPERFILECONTENTS'));"
+					var QueryStr = "IMPORT STD;NOTHOR(OUTPUT(DATASET([{NOTHOR(std.file.SUPERFILECONTENTS('~" + filename + "', TRUE)[1].NAME), '~" + filename + "'}], {STRING NAME, STRING SUPER}), NAMED('SUPERFILECONTENTS')));";
+					
+					// OUTPUT(STD.FILE.SUPERFILECONTENTS('~" + filename + "', TRUE)[1], NAMED('SUPERFILECONTENTS'));"
 				} else {
 					var QueryStr1 = "#OPTION(\'OUTPUTLIMIT\',2000);\nrecLayout := " + data.DFUInfoResponse.FileDetail.Ecl + "\n" +
 						outputdsname + " := DATASET(\'" + (filename.startsWith('~') ? '' : '~') + filename + "\'," + "recLayout, THOR);\n";
