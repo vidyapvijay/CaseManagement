@@ -25,6 +25,10 @@
 	            <vaadin-combo-box id='sampleInputtab' required label="Input Dataset" on-value-changed='changeSampleInput' items='[]'></vaadin-combo-box>
 	            <paper-input id='samplingInterval' allowed-pattern="[\d]" label="Sampling Interval"></paper-input>
 	            <paper-input id='ordinalNumber' allowed-pattern="[\d]" label="Ordinal Number For Sample"></paper-input>
+				<vaadin-combo-box id='sortfields' required label="Sort By"></vaadin-combo-box>
+                <paper-button on-tap="addSortFunction" class="addBtn">ADD</paper-button>
+                <paper-input id='sortbyfieldsvalue' label="Sort Order"></paper-input>
+
 	            <br><br><br>
 	            <div class="buttons">
 	                <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
@@ -57,9 +61,9 @@
 
     var selpage = document.querySelector("#pages").querySelector("#common-input");
 
-	this.eclcode = selpage.editor.eclcode;
+	this.eclcode = '';
 
-	this.inputdsname = selpage.editor.outputdsname;
+	this.inputdsname ='';
 
 	var infoBox = document.querySelector('#infobox');
 
@@ -110,6 +114,15 @@ changeSampleInput: function(e){
 	this.inputdsname = selpage.editor.outputdsname;
 
 	this.displayFields = selpage.editor.displayFields;
+	this.$.sortfields.items = [];
+	var fieldList = [];
+	var splitstrs =  selpage.editor.displayFields.split(',');
+	for(var cnt = 0; cnt < splitstrs.length; cnt++ ){
+		fieldList.push('+' + splitstrs[cnt]);
+		fieldList.push('-' + splitstrs[cnt]);
+	}
+
+    this.$.sortfields.items = fieldList;
 
 	return;
 
@@ -188,7 +201,7 @@ changeSampleInput: function(e){
 		
 		var QueryStr1 =  this.eclcode;
 		var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.outputdsname + ");";
-		return loadGridwithEcl(QueryStr);
+		return loadGridwithEcl(QueryStr, 1000);
    },
 
 	_okHandler: function (e) {
@@ -221,13 +234,28 @@ changeSampleInput: function(e){
 						this.$.ordinalNumber.value +                                 
 						  ");";
 
-		 var QueryStr =    QueryStr1 +  "\n OUTPUT(" + currentPage.properties.outputdsname  + ");";
+		//  var QueryStr =    QueryStr1 +  "\n OUTPUT(" + currentPage.properties.outputdsname  + ");";
+
+		
+	     var QueryStr =  QueryStr1 +  "\n OUTPUT(" + ( this.$.sortbyfieldsvalue.value.length > 0 ? ( 'SORT(' + currentPage.properties.outputdsname + ',' + this.$.sortbyfieldsvalue.value +')' ) : currentPage.outputdsname) + ");";
+
 
  		 currentPage.properties.eclcode = QueryStr1;
          this.eclcode = QueryStr1;
 
-        return loadGridwithEcl(QueryStr);
+        return loadGridwithEcl(QueryStr, this.$.sampleoutputlimit.value);
 	},
+
+	 addSortFunction: function (e) {
+		var splitstrs = this.$.sortbyfieldsvalue.value.split(',');
+		for(var cnt = 0; cnt < splitstrs.length; cnt++ ){
+			if(splitstrs[cnt].trim().substring(1) === this.$.sortfields.value.substring(1) ){
+				return;
+			}
+		}
+
+        this.$.sortbyfieldsvalue.value = this.$.sortbyfieldsvalue.value + (this.$.sortbyfieldsvalue.value.length > 0 ? " ," : "") + this.$.sortfields.value  ;            
+    },
 
    _cancelHandler: function (e) {
 		this.fire('cancel');

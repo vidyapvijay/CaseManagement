@@ -29,6 +29,9 @@
 	            <paper-button on-tap="andFunction" class="addBtn">AND</paper-button>
 	            <paper-button on-tap="orFunction" class="addBtn">OR</paper-button>
 	            <paper-input id='filterformulas' label="Value"></paper-input>
+				<vaadin-combo-box id='sortfields' required label="Sort By"></vaadin-combo-box>
+                <paper-button on-tap="addSortFunction" class="addBtn">ADD</paper-button>
+                <paper-input id='sortbyfieldsvalue' label="Sort Order"></paper-input>
 	            <br><br><br>
 	            <div class="buttons">
 	                <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
@@ -164,7 +167,7 @@ loadgrid : function(tabTtitle){
 		return;
 	}
 	var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.outputdsname + ");";
-	return loadGridwithEcl(QueryStr);
+	return loadGridwithEcl(QueryStr, 1000);
 },
 
 
@@ -208,7 +211,7 @@ _okHandler: function (e) {
 
     this.expression = this.$.filterformulas.value;
 
-	var QueryStr =  QueryStr1 +  "\n OUTPUT(" + currentPage.outputdsname + ");";
+	var QueryStr =  QueryStr1 +  "\n OUTPUT(" + ( this.$.sortbyfieldsvalue.value.length > 0 ? ( 'SORT(' + currentPage.outputdsname + ',' + this.$.sortbyfieldsvalue.value +')' ) : currentPage.outputdsname) + ");";
 
 	var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + 
 				// (this.hpccuser != '' ? this.hpccuser + ':' + this.password + '@' : '')  +
@@ -218,7 +221,7 @@ _okHandler: function (e) {
 	currentPage.eclcode = QueryStr1;
 	this.eclcode = QueryStr1;
 
-	return loadGridwithEcl(QueryStr);
+	return loadGridwithEcl(QueryStr, this.$.filteroutputlimit.value);
 },
 changeInput: function(e){
 
@@ -247,12 +250,38 @@ changeInput: function(e){
 
 	this.$.field.items = selpage.editor.displayFields.split(",");
 
+    this.$.sortfields.items = [];
+
+	var fieldList = [];
+
+	var splitstrs =  selpage.editor.displayFields.split(',');
+	for(var cnt = 0; cnt < splitstrs.length; cnt++ ){
+		fieldList.push('+' + splitstrs[cnt]);
+		fieldList.push('-' + splitstrs[cnt]);
+	}
+
+    this.$.sortfields.items = fieldList;
+
 	return;
 
     },
     andFunction: function (e) {
         this.$.filterformulas.value = this.$.filterformulas.value + (this.$.filterformulas.value.length > 0 ? " AND " : "") + this.$.field.value + ' ' + this.$.operation.value + ' ' + this.$.formulavalue.value ;            
     },
+
+	addSortFunction: function (e) {
+		var splitstrs = this.$.sortbyfieldsvalue.value.split(',');
+		for(var cnt = 0; cnt < splitstrs.length; cnt++ ){
+			if(splitstrs[cnt].trim().substring(1) === this.$.sortfields.value.substring(1) ){
+				return;
+			}
+		}
+
+        this.$.sortbyfieldsvalue.value = this.$.sortbyfieldsvalue.value + (this.$.sortbyfieldsvalue.value.length > 0 ? " ," : "") + this.$.sortfields.value  ;            
+    },
+
+		
+        
     orFunction: function (e) {
         this.$.filterformulas.value = this.$.filterformulas.value + (this.$.filterformulas.value.length > 0 ? " OR " : "") + this.$.field.value + ' ' + this.$.operation.value + ' ' +this.$.formulavalue.value ;
     },

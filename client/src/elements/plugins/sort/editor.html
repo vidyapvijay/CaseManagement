@@ -131,7 +131,7 @@
 			}               
 			var QueryStr1 =  this.eclcode;
 			var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.outputdsname + ");";
-			return loadGridwithEcl(QueryStr);
+			return loadGridwithEcl(QueryStr, 1000);
 		},
 
 
@@ -182,7 +182,7 @@
 		currentPage.properties.eclcode = QueryStr1;
 		this.eclcode = QueryStr1;
 
-		return loadGridwithEcl(QueryStr);
+		return loadGridwithEcl(QueryStr, this.$.sortoutputlimit.value);
 		},
 		changeSortInput: function(e){
 

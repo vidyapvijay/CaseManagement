@@ -25,6 +25,7 @@
                        error-message="Title is Required"></paper-input>
           <paper-input id='scope' label="File Scope" ></paper-input>
           <vaadin-combo-box id='subfilesgrid' class='subfilesgrid' required label="File" items='[]'></vaadin-combo-box>
+          <paper-input id='filteroutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
           <br><br><br>
           <div class="buttons">
             <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
@@ -119,7 +120,7 @@
                                     // (this.properties.hpccuser != '' ? this.properties.hpccuser + ':' + this.properties.password + '@' : '')  +
                                      infoBox.properties.cluster_address +
                                      ":" + infoBox.properties.port;
-                          callForFileDetails(eclIP, jsonTabContent.expression, jsonTabContent.expression,  infoBox.properties.username, infoBox.properties.password);
+                          callForFileDetails(eclIP, jsonTabContent.expression, jsonTabContent.expression,  infoBox.properties.username, infoBox.properties.password, 1000);
                           break;
                       }
               }
@@ -146,7 +147,7 @@
 			      var grid = currentPage.querySelector(".projectworksheet");
 
             var getFileData = new Promise(function(resolve, reject) {
-                callForFileDetails(eclIP,  infoBox.properties.file, infoBox.properties.file,  infoBox.properties.username, infoBox.properties.password).then(function(resData){
+                callForFileDetails(eclIP,  infoBox.properties.file, infoBox.properties.file,  infoBox.properties.username, infoBox.properties.password, 1000).then(function(resData){
                 resolve(resData);
                 });
             });
@@ -221,8 +222,10 @@
 
 			      var grid = currentPage.querySelector(".projectworksheet");
 
+            var recLimit =  this.$.filteroutputlimit.value;
+            
             var getFileData = new Promise(function(resolve, reject) {
-                callForFileDetails(eclIP, selectedFile, selectedFile, infoBox.properties.username, infoBox.properties.password).then(function(resData){
+                callForFileDetails(eclIP, selectedFile, selectedFile, infoBox.properties.username, infoBox.properties.password, recLimit).then(function(resData){
                 resolve(resData);
                 });
             });

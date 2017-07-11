@@ -82,7 +82,7 @@ function getFileListForSearch(url, pattern, hpccuser, password) {
 
 }
 
-function loadGridwithEcl(QueryStr) {
+function loadGridwithEcl(QueryStr, recLimit) {
 
 	var infoBox = document.querySelector('#infobox');
 
@@ -92,7 +92,7 @@ function loadGridwithEcl(QueryStr) {
 		":" + infoBox.properties.port;
 
 	var getFileData = new Promise(function (resolve, reject) {
-		callAjaxForECL(eclIP, QueryStr, infoBox.properties.username, infoBox.properties.password).then(function (resData) {
+		callAjaxForECL(eclIP, QueryStr, infoBox.properties.username, infoBox.properties.password, recLimit).then(function (resData) {
 			resolve(resData);
 		});
 	});
@@ -147,14 +147,14 @@ function loadGridwithEcl(QueryStr) {
 	return;
 }
 
-function callAjaxForECL(url, eclCode, hpccuser, password) {
+function callAjaxForECL(url, eclCode, hpccuser, password, recLimit) {
 	var wuid = '';
 	var promise = new Promise(
 		function (resolve, reject) {
 
 			$.ajax({
 				url: url + "/WsWorkunits/WUCreateAndUpdate.json",
-				data: { "QueryText": eclCode.replace(/\n/g, ''), "ResultLimit": 10000, "Jobname": "HPCCInfoRequest" },
+				data: { "QueryText": eclCode.replace(/\n/g, ''), "ResultLimit": recLimit, "Jobname": "HPCCInfoRequest" },
 				headers: { 'Access-Control-Allow-Origin': '*' },
 				dataType: "JSONP",
 				jsonp: 'jsonp',
@@ -216,7 +216,7 @@ function callAjaxForECL(url, eclCode, hpccuser, password) {
 
 	return promise;
 }
-function callForFileDetails(url, filename, subfilename, hpccuser, password) {
+function callForFileDetails(url, filename, subfilename, hpccuser, password, recLimit) {
 	var promise = new Promise(function (resolve, reject) {
 		var wuid = '';
 		$.ajax({
@@ -245,7 +245,7 @@ function callForFileDetails(url, filename, subfilename, hpccuser, password) {
 				}
 				console.log(QueryStr);
 				var callAjaxPromise = new Promise(function (rs, rj) {
-					callAjaxForECL(url, QueryStr, hpccuser, password).then(function (data) {
+					callAjaxForECL(url, QueryStr, hpccuser, password, recLimit).then(function (data) {
 						rs(data);
 					})
 				});

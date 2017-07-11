@@ -45,6 +45,10 @@
 	            <vaadin-combo-box id='aggregatefield' required label="Aggregate Field"></vaadin-combo-box>
 	            <paper-button id='addGroupFuncKey' on-tap="tableKeyAddGrpFunction" class="addBtn">ADD</paper-button>
 	            <paper-input id='aggregategroupformulas' required label="Fields for Group Functions " label="Value"></paper-input>
+				<vaadin-combo-box id='sortfields' required label="Sort By"></vaadin-combo-box>
+                <paper-button on-tap="addSortFunction" class="addBtn">ADD</paper-button>
+                <paper-input id='sortbyfieldsvalue' label="Sort Order"></paper-input>
+
 	            <br><br><br>
 	            <div class="buttons">
 	                <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
@@ -93,6 +97,16 @@
 			} else{
 				this.$.aggregateformulas.value += (currentformula === "" ? "" : ",") + key_value;
 			}
+			this.$.sortfields.items = [];
+			var fieldList = [];
+			var splitstrs =  this.$.aggregateformulas.value.split(',');
+			for(var cnt = 0; cnt < splitstrs.length; cnt++ ){
+				fieldList.push('+' + splitstrs[cnt]);
+				fieldList.push('-' + splitstrs[cnt]);
+			}
+
+			this.$.sortfields.items = fieldList;
+
 
         },
 
@@ -186,7 +200,7 @@
 			var QueryStr1 =  this.eclcode;
 			var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.outputdsname + ");";
 
-			return loadGridwithEcl(QueryStr);
+			return loadGridwithEcl(QueryStr, 1000);
 	   },
 		open: function () {
 
@@ -241,8 +255,9 @@
 
                 (this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? ";" : ", -CNT);");
 
-            var QueryStr = QueryStr1 + "\n OUTPUT(" + currentPage.properties.outputdsname + ");";
-
+            // var QueryStr = QueryStr1 + "\n OUTPUT(" + currentPage.properties.outputdsname + ");";
+		
+            var QueryStr =  QueryStr1 +  "\n OUTPUT(" + ( this.$.sortbyfieldsvalue.value.length > 0 ? ( 'SORT(' + currentPage.properties.outputdsname + ',' + this.$.sortbyfieldsvalue.value +')' ) : currentPage.outputdsname) + ");";
 
 			currentPage.properties.eclcode = QueryStr1;
 
@@ -253,9 +268,20 @@
 			console.log(QueryStr);  
 
 			
-			return loadGridwithEcl(QueryStr);
+			return loadGridwithEcl(QueryStr, this.$.aggregateoutputlimit.value);
 
 	},
+
+	addSortFunction: function (e) {
+		var splitstrs = this.$.sortbyfieldsvalue.value.split(',');
+		for(var cnt = 0; cnt < splitstrs.length; cnt++ ){
+			if(splitstrs[cnt].trim().substring(1) === this.$.sortfields.value.substring(1) ){
+				return;
+			}
+		}
+
+        this.$.sortbyfieldsvalue.value = this.$.sortbyfieldsvalue.value + (this.$.sortbyfieldsvalue.value.length > 0 ? " ," : "") + this.$.sortfields.value  ;            
+    },
 
 		changeAggregateInput: function(e){
 
@@ -283,8 +309,6 @@
 			this.$.aggregatefield.items = selpage.editor.displayFields.split(",");
 
 			this.$.crosstabfield.items = selpage.editor.displayFields.split(",");
-
-
 
             return;
 
