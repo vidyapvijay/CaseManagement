@@ -166,7 +166,7 @@ function callAjaxForECL(url, eclCode, hpccuser, password, recLimit) {
 				success: function (data) {
 					wuid = data.WUUpdateResponse.Workunit.Wuid;
 					$.ajax({
-						url: url + "/WsWorkunits/WUSubmit.json?Wuid=" + data.WUUpdateResponse.Workunit.Wuid + '&Cluster=hthor',
+						url: url + "/WsWorkunits/WUSubmit.json?Wuid=" + data.WUUpdateResponse.Workunit.Wuid + '&Cluster=hthor' ,
 						headers: { 'Access-Control-Allow-Origin': '*' },
 						dataType: "JSONP",
 						jsonp: 'jsonp',
@@ -183,7 +183,7 @@ function callAjaxForECL(url, eclCode, hpccuser, password, recLimit) {
 
 							wustatus.then(function (result) {
 								$.ajax({
-									url: url + "/WsWorkunits/WUResult.json?Wuid=" + result + '&Cluster=hthor',
+									url: url + "/WsWorkunits/WUResult.json?Wuid=" + result + '&Cluster=hthor' + '&Count=' + recLimit,
 									headers: { 'Access-Control-Allow-Origin': '*' },
 									dataType: "JSONP",
 									jsonp: 'jsonp',
