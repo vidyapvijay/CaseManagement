@@ -44,7 +44,8 @@
                              required auto-validate error-message="Please enter username"></paper-input>
                 <paper-input id='password' label="Password"  on-value-changed = "disableClusternames"  type="password" value="[[password]]" 
                              required auto-validate error-message="Please enter password"></paper-input>
-                <vaadin-combo-box id='clusternames' on-selected-item-changed="addSelCluster" class='clusternames' disabled required label="Choose Cluster" items='[]'></vaadin-combo-box>
+                <vaadin-combo-box id='clusternames' on-selected-item-changed="addSelCluster" class='clusternames' disabled
+                             required label="Choose Cluster" items='[]'></vaadin-combo-box>
                 <br>
                 <paper-toggle-button class="toggleBtn" id="httpSecured">
                     <iron-label class="headerLabels">HTTP Secured</iron-label>
@@ -76,12 +77,14 @@
                 }
              },
              disableClusternames : function(e) {
-                this.$.clusternames.disabled = false;
+                this.$.clusternames.disabled = true;
                 this.$.clusternames.items = [];
              },
              addSelCluster : function(e){
                 var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
-
+                if(this.$.clusternames.items.length === 0){
+                    return;
+                }
                 infoBox.properties.clusterid =  this.$.clusternames.selectedItem.toString();
              },
             open: function (e) {
@@ -98,6 +101,7 @@
                 this.$.username.value = infoBox.properties.username;
                 this.$.password.value = infoBox.properties.password;
                 this.$.httpSecured.value = infoBox.properties.httpSecured;
+                this.$.clusternames.selectedItem = infoBox.properties.clusterid;
 
                 var projecttitlediv = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#projecttitle');
 
@@ -116,7 +120,7 @@
                 if(!this.validate()) {
                     return;
                 }
-                if(this.$.clusternames.disabled === true) {
+                if(this.$.clusternames.disabled === false) {
 
                     setTimeout(function () {
                         that.$.dialog.close();
@@ -135,7 +139,7 @@
 
                 var projecttitlediv = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#projecttitle');
 
-                var titleval = this.$.worksheettitle.value;;
+                var titleval = this.$.worksheettitle.value;
 
                 /*if(this.$.worksheettitle.value.startsWith('HPCCInfo-')) {
                    titleval = this.$.worksheettitle.value;
@@ -155,9 +159,9 @@
                     infoBox.properties.title = titleval;
                     document.querySelector('#btnEditPlugin').disabled = false;
 
-                    this.$.clusternames.disabled = false;
+                    that.$.clusternames.disabled = false;
                     that.loading = false;
-                    this.$.clusternames.items = [];
+                    that.$.clusternames.items = [];
                     that.$.toast.text = "Cluster details entered validated successfully";
                     that.$.toast.open();
                     getThorList(eclIP, infoBox.properties.username, infoBox.properties.password).then(function(data) {
@@ -166,8 +170,14 @@
                         for(var cnt = 0 ; cnt < data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType.length; cnt++){
                            vallist.push(data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType[cnt].Name);
                         }
-                        this.$.clusternames.items = vallist;
+                        that.$.clusternames.items = vallist;
                         
+                        setTimeout(function () {
+                            that.$.toast.close();
+                            that.$.toast.text = "Please choose the clustername ";
+                            that.$.toast.open();
+                        }, 3000);
+
                         return;
                     });
                 }, function(error) {
@@ -193,9 +203,10 @@
                 const isValidPort = this.$.port.validate();
                 const isValidUsername = this.$.username.validate();
                 const isValidPassword = this.$.password.validate();
+                const isValidclusterid = this.$.clusternames.validate() || this.$.clusternames.disabled === true;
 
                 if(isValidWorksheettitle && isValidClusterName && isValidClusterAddress 
-                    && isValidPort && isValidUsername && isValidPassword) {
+                    && isValidPort && isValidUsername && isValidPassword && isValidclusterid) {
                     console.log('returning true');
                     return true;
                 } else {
@@ -212,6 +223,7 @@
                 this.$.username.invalid = false;
                 this.$.password.invalid = false;
                 this.$.httpSecured.invalid = false;
+                this.$.clusternames.invalid = false;
             }
  
         });
