@@ -147,6 +147,9 @@
 			this.inputdsname = '';
 			this.outputdsname = '';
 			this.expression = '';
+			setTimeout(function () {
+				document.querySelector('#btnEditPlugin').fire('click');
+			}, 2000);
 		},
         serialize : function(){
             var jsonStr = '{';

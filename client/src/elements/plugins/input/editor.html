@@ -301,17 +301,22 @@
                                      infoBox.properties.cluster_address +
                                      ":" + infoBox.properties.port;
               var that = this;
-              getFileListForSearch(eclIP, event.currentTarget.value, infoBox.properties.username, infoBox.properties.password).then(function(data) {
-              console.log(data);
 
-              if(data.DFUQueryResponse.NumFiles === 0) {
-                that.$.toast.text = "No logical files matched for the given filescope, please try with different value";
-                that.$.toast.open();
-                return;
+              subfilesgrid.items = [];
+              subfilesgrid.selectedItem = '';
+              
+              getFileListForSearch(eclIP, event.currentTarget.value, infoBox.properties.username, infoBox.properties.password, infoBox.properties.clusterid, 'FLAT').then(function(data) {
+
+              if((data.DFUQueryResponse.NumFiles + subfilesgrid.items.length) === 0) {
+                  that.$.toast.text = "No logical files matched for the given filescope, please try with different value";
+                  that.$.toast.open();
+                    return;
               }
 
               var subfiles =  data.DFUQueryResponse.DFULogicalFiles.DFULogicalFile;
               var subfilesstrnames = "";
+
+
               var fileArray = [];
               for(var cnt = 0; cnt < subfiles.length; cnt++){
               subfilesstrnames = subfilesstrnames + "," +subfiles[cnt].Name;
@@ -320,8 +325,28 @@
 
               subfilesgrid.items = fileArray;
               subfilesgrid.selectedItem = fileArray[0];
+
+
            
         });
+
+        getFileListForSearch(eclIP, event.currentTarget.value, infoBox.properties.username, infoBox.properties.password, infoBox.properties.clusterid, 'THOR').then(function(data) {
+              console.log(data);
+
+              var subfiles =  data.DFUQueryResponse.DFULogicalFiles.DFULogicalFile;
+              var subfilesstrnames = "";
+              var fileArray = subfilesgrid.items;
+              for(var cnt = 0; cnt < subfiles.length; cnt++){
+              subfilesstrnames = subfilesstrnames + "," +subfiles[cnt].Name;
+              fileArray.push(subfiles[cnt].Name);
+              }
+
+              subfilesgrid.items = fileArray;
+              subfilesgrid.selectedItem = fileArray[0];
+           
+        });
+ 
+
       },
             
       selectfilename : function(event) {

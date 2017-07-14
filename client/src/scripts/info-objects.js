@@ -64,22 +64,37 @@ function workunitStatus(url, queryparam, hpccuser, password) {
 	return promise;
 }
 
-function getFileListForSearch(url, pattern, hpccuser, password) {
+function getFileListForSearch(url, pattern, hpccuser, password, nodegroup, contentType) {
 	return $.ajax({
 		//url : "http://10.240.33.54:8010/WsDfu/DFUQuery.json", 
-		url: url + "/WsDfu/DFUQuery.json?LogicalName=" + pattern + '*',
+		url: url + "/WsDfu/DFUQuery.json?LogicalName=" + pattern + '&ContentType=' + contentType,
 		headers: { 'Access-Control-Allow-Origin': '*' },
 		dataType: "JSONP",
 		jsonp: 'jsonp',
 		type: 'GET',
 		async: 'false',
-		error : function(data) {alert('Input Cluster details are not valid');},
+		error : function(data) {alert('');},
 		headers: {
 			"Authorization": "Basic " + btoa(hpccuser + ":" + password)
 		}
 	});
 
 
+}
+
+function getThorList(url, hpccuser, password) {
+	return $.ajax({
+		//url : "http://10.240.33.54:8010/WsDfu/DFUQuery.json", 
+		url: url + "/WsTopology/TpListTargetClusters.json",
+		headers: { 'Access-Control-Allow-Origin': '*' },
+		dataType: "JSONP",
+		jsonp: 'jsonp',
+		type: 'GET',
+		async: 'false',
+		headers: {
+			"Authorization": "Basic " + btoa(hpccuser + ":" + password)
+		}
+	});
 }
 
 function loadGridwithEcl(QueryStr, recLimit) {
@@ -149,6 +164,8 @@ function loadGridwithEcl(QueryStr, recLimit) {
 
 function callAjaxForECL(url, eclCode, hpccuser, password, recLimit) {
 	var wuid = '';
+	var infoBox = document.querySelector('#infobox')
+	var clusterid = infoBox.properties.clusterid;
 	var promise = new Promise(
 		function (resolve, reject) {
 
@@ -166,7 +183,7 @@ function callAjaxForECL(url, eclCode, hpccuser, password, recLimit) {
 				success: function (data) {
 					wuid = data.WUUpdateResponse.Workunit.Wuid;
 					$.ajax({
-						url: url + "/WsWorkunits/WUSubmit.json?Wuid=" + data.WUUpdateResponse.Workunit.Wuid + '&Cluster=hthor' ,
+						url: url + "/WsWorkunits/WUSubmit.json?Wuid=" + data.WUUpdateResponse.Workunit.Wuid + '&Cluster=' + clusterid ,
 						headers: { 'Access-Control-Allow-Origin': '*' },
 						dataType: "JSONP",
 						jsonp: 'jsonp',
@@ -176,14 +193,14 @@ function callAjaxForECL(url, eclCode, hpccuser, password, recLimit) {
 						},
 						success: function (data) {
 							var wustatus = new Promise(function (res, rej) {
-								workunitStatus(url, "Wuid=" + wuid + "&Cluster=hthor", hpccuser, password).then(function (data) {
+								workunitStatus(url, "Wuid=" + wuid + "&Cluster=" + clusterid, hpccuser, password).then(function (data) {
 									res(data);
 								})
 							});
 
 							wustatus.then(function (result) {
 								$.ajax({
-									url: url + "/WsWorkunits/WUResult.json?Wuid=" + result + '&Cluster=hthor' + '&Count=' + recLimit,
+									url: url + "/WsWorkunits/WUResult.json?Wuid=" + result + '&Cluster=' + clusterid + '&Count=' + recLimit,
 									headers: { 'Access-Control-Allow-Origin': '*' },
 									dataType: "JSONP",
 									jsonp: 'jsonp',

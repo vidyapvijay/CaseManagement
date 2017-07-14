@@ -390,6 +390,7 @@
                 projectJsonStr1 += '\"port\" :\"' + infoBox.properties.port + '\",';
                 projectJsonStr1 += '\"username\" :\"' + infoBox.properties.username + '\",';
                 projectJsonStr1 += '\"password\" :\"' + infoBox.properties.password + '\",';
+                projectJsonStr1 += '\"clusterid\" :\"' + infoBox.properties.clusterid + '\",';
                 projectJsonStr1 += '\"hpccsecured\" :\"' + infoBox.properties.httpSecured + '\"}, \"Tabs\":[';
                 for(var cnt = 0 ; cnt < infoBox.viewList.length; cnt++){
                     projectJsonStr1 += infoBox.viewList[cnt].editor.serialize() + (cnt < infoBox.viewList.length -1 ? ',' : '');
