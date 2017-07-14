@@ -101,7 +101,9 @@
              },
              addSelCluster : function(e){
                 var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
-
+                if(this.$.clusternames.items.length === 0){
+                    return;
+                }
                 infoBox.properties.clusterid =  this.$.clusternames.selectedItem.toString();
              },
             _addNewTab : function(act) {
@@ -165,6 +167,11 @@
                         }
                         that.$.clusternames.items = vallist;
                         that.$.dialog.open();
+                        setTimeout(function () {
+                            that.$.toast.close();
+                            that.$.toast.text = "Please choose the clustername ";
+                            that.$.toast.open();
+                        }, 1500);
                         return;
                     });
 
@@ -191,9 +198,10 @@
                 const isValidPort = this.$.port.validate();
                 const isValidUsername = this.$.username.validate();
                 const isValidPassword = this.$.password.validate();
+                const isValidclusterid = this.$.clusternames.validate() || this.$.clusternames.disabled === true;
 
                 if(isValidWorksheettitle && isValidClusterName && isValidClusterAddress 
-                    && isValidPort && isValidUsername && isValidPassword) {
+                    && isValidPort && isValidUsername && isValidPassword && isValidclusterid) {
                     console.log('returning true');
                     return true;
                 } else {
@@ -210,6 +218,7 @@
                 this.$.username.value = '';
                 this.$.password.value = '';
                 this.$.httpSecured.value = false;
+                this.$.clusternames.selectedItem = '';
             },
 
             invalidateFormFields: function() {
@@ -220,6 +229,7 @@
                 this.$.username.invalid = false;
                 this.$.password.invalid = false;
                 this.$.httpSecured.invalid = false;
+                this.$.clusternames.invalid = false;
             }
  
         });
