@@ -67,7 +67,7 @@ function workunitStatus(url, queryparam, hpccuser, password) {
 function getFileListForSearch(url, pattern, hpccuser, password, nodegroup, contentType) {
 	return $.ajax({
 		//url : "http://10.240.33.54:8010/WsDfu/DFUQuery.json", 
-		url: url + "/WsDfu/DFUQuery.json?LogicalName=" + pattern + '&ContentType=' + contentType,
+		url: url + "/WsDfu/DFUQuery.json?LogicalName=" + pattern + '*' + '&ContentType=' + contentType,
 		headers: { 'Access-Control-Allow-Origin': '*' },
 		dataType: "JSONP",
 		jsonp: 'jsonp',
@@ -165,7 +165,7 @@ function loadGridwithEcl(QueryStr, recLimit) {
 function callAjaxForECL(url, eclCode, hpccuser, password, recLimit) {
 	var wuid = '';
 	var infoBox = document.querySelector('#infobox')
-	var clusterid = infoBox.properties.clusterid;
+	var clusterid = infoBox.properties.clusterid === '' ? 'hthor' : infoBox.properties.clusterid;
 	var promise = new Promise(
 		function (resolve, reject) {
 

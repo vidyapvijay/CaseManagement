@@ -96,12 +96,35 @@
             },
 
              disableClusternames : function(e) {
-                this.$.clusternames.disabled = true;
-                this.$.clusternames.items = [];
+               if(this.$.cluster_name.value != '' && this.$.cluster_address.value != '' && this.$.port.value != '' && this.$.username.value != '' && this.$.password.value != ''){
+                var eclIP = (this.$.httpSecured.value === "true" ? "https://" : "http://") + 
+                                    // (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '')  +
+                                     this.$.cluster_address.value +
+                                     ":" + this.$.port.value;
+
+                var username =  this.$.username.value;
+                var password = this.$.password.value;
+                var that = this;
+                getThorList(eclIP, username, password).then(function(data) {
+                        console.log(data);
+                        var vallist = [];
+                        for(var cnt = 0 ; cnt < data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType.length; cnt++){
+                           vallist.push(data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType[cnt].Name);
+                        }
+                        that.$.clusternames.items = vallist;
+                        that.$.clusternames.selectedItem = vallist[1];
+                        that.$.clusternames.disabled = false;
+                        that.$.dialog.open();
+                        setTimeout(function () {
+                            that.$.dialog.open();
+                        }, 1500);
+                        return;
+                    });
+                }
              },
              addSelCluster : function(e){
                 var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
-                if(this.$.clusternames.items.length === 0){
+                if(this.$.clusternames.items  === undefined || this.$.clusternames.items.length === 0){
                     return;
                 }
                 infoBox.properties.clusterid =  this.$.clusternames.selectedItem.toString();
@@ -112,12 +135,6 @@
                     return;
                 }
 
-                if(this.$.clusternames.disabled === false) {
-
-                    setTimeout(function () {
-                        that.$.dialog.close();
-                      }, 3000);
-                }
                 this.loading = true;
 
                 var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
@@ -153,28 +170,12 @@
                     infoBox.addTab('common-input', "Input", 'common-input');
                     document.querySelector('#btnEditPlugin').disabled = false; 
                     document.querySelector('#edit-worksheet-dialog').disabled = false;
-
-                    that.$.clusternames.disabled = false;
                     that.loading = false;
                     that.$.clusternames.items = [];
                     that.$.toast.text = "Cluster details entered validated successfully";
                     that.$.toast.open();
-                    getThorList(eclIP, infoBox.properties.username, infoBox.properties.password).then(function(data) {
-                        console.log(data);
-                        var vallist = [];
-                        for(var cnt = 0 ; cnt < data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType.length; cnt++){
-                           vallist.push(data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType[cnt].Name);
-                        }
-                        that.$.clusternames.items = vallist;
-                        that.$.dialog.open();
-                        setTimeout(function () {
-                            that.$.toast.close();
-                            that.$.toast.text = "Please choose the clustername ";
-                            that.$.toast.open();
-                        }, 1500);
-                        return;
-                    });
-
+                    that.$.dialog.close();
+                    return;
                 }, function(error) {
                     that.loading = false;
                     that.$.toast.text = "Cluster details provided are invalid! Please check";

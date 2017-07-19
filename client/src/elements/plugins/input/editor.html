@@ -1,5 +1,8 @@
 <link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../../../bower_components/paper-toast/paper-toast.html">
+
+
+
 <link rel="import" href="../../shared-styles.html">
 
 <dom-module id="common-input-editor">
@@ -26,6 +29,7 @@
           <paper-input id='scope' label="File Scope" ></paper-input>
           <vaadin-combo-box id='subfilesgrid' class='subfilesgrid' required label="File" items='[]'></vaadin-combo-box>
           <paper-input id='filteroutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
+
           <br><br><br>
           <div class="buttons">
             <paper-button dialog-confirm raised class="indigo" on-tap="_okHandler">Ok</paper-button>
@@ -33,9 +37,11 @@
           </div>
         </div>
 
-        <paper-toast id="toast" class="fit-bottom" style="text-transform: none"></paper-toast>
-    </paper-dialog>
+         <paper-toast id="toast" class="fit-bottom" style="text-transform: none"></paper-toast>
+
+     </paper-dialog>
     </template>
+
 
   <script>
     Polymer({
@@ -363,7 +369,7 @@
   
     });      
   </script>
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"
                 integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
                 crossorigin="anonymous"></script>
 </dom-module>
