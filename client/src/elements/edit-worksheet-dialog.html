@@ -36,15 +36,15 @@
                 <h2><iron-label>Cluster Details</iron-label></h2>
                 <paper-input id='cluster_name' label="Cluster Name" value="[[clustername]]" 
                          required auto-validate error-message="Please enter cluster name"></paper-input>
-                <paper-input id='cluster_address' on-value-changed = "disableClusternames" label="Cluster Address" value="[[clusteraddress]]" 
+                <paper-input id='cluster_address' on-change = "disableClusternames" label="Cluster Address" value="[[clusteraddress]]" 
                              required auto-validate error-message="Please enter cluster address"></paper-input>
-                <paper-input id='port' label="Port" value="[[port]]"  on-value-changed = "disableClusternames"  allowed-pattern="[0-9]" 
+                <paper-input id='port' label="Port" value="[[port]]"  on-change = "disableClusternames"  allowed-pattern="[0-9]" 
                              required auto-validate error-message="Please enter a valid port number"></paper-input>
-                <paper-input id='username' label="Username"  on-value-changed = "disableClusternames"  value="[[username]]" 
+                <paper-input id='username' label="Username"  on-change = "disableClusternames"  value="[[username]]" 
                              required auto-validate error-message="Please enter username"></paper-input>
-                <paper-input id='password' label="Password"  on-value-changed = "disableClusternames"  type="password" value="[[password]]" 
+                <paper-input id='password' label="Password"  on-change = "disableClusternames"  type="password" value="[[password]]" 
                              required auto-validate error-message="Please enter password"></paper-input>
-                <vaadin-combo-box id='clusternames' on-selected-item-changed="addSelCluster" class='clusternames' disabled
+                <vaadin-combo-box id='clusternames' on-selected-item-changed="addSelCluster" class='clusternames' 
                              required label="Choose Cluster" items='[]'></vaadin-combo-box>
                 <br>
                 <paper-toggle-button class="toggleBtn" id="httpSecured">
@@ -93,7 +93,7 @@
                            vallist.push(data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType[cnt].Name);
                         }
                         that.$.clusternames.items = vallist;
-                        that.$.clusternames.selectedItem = vallist[1];
+                        that.$.clusternames.selectedItem = vallist[0];
                         that.$.clusternames.disabled = false;
                         that.$.dialog.open();
                         setTimeout(function () {
@@ -105,7 +105,7 @@
              },
              addSelCluster : function(e){
                 var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
-                if(this.$.clusternames.items.length === 0){
+                if(this.$.clusternames === undefined || this.$.clusternames.items.length === 0){
                     return;
                 }
                 infoBox.properties.clusterid =  this.$.clusternames.selectedItem.toString();
@@ -185,7 +185,7 @@
                     getThorList(eclIP, infoBox.properties.username, infoBox.properties.password).then(function(data) {
                         console.log(data);
                         var vallist = [];
-                        for(var cnt = 0 ; cnt < data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType.length; cnt++){
+                        for(var cnt =0 ; cnt < data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType.length; cnt++){
                            vallist.push(data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType[cnt].Name);
                         }
                         that.$.clusternames.items = vallist;
