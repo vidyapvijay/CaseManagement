@@ -78,9 +78,9 @@
 			this.inputdsname = '';
 			this.outputdsname = '';
 			this.expression = '';
-			setTimeout(function () {
-				document.querySelector('#btnEditPlugin').fire('click');
-			}, 2000);
+			// setTimeout(function () {
+			// 	document.querySelector('#btnEditPlugin').fire('click');
+			// }, 2000);
 
         },
         serialize : function(){
@@ -134,6 +134,9 @@
 			}               
 			var QueryStr1 =  this.eclcode;
 			var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.outputdsname + ");";
+
+			this.$.dialog.close();
+
 			return loadGridwithEcl(QueryStr, 1000);
 		},
 

@@ -284,6 +284,10 @@
                     editor.deSerialize(label);
                 }else{
                     this.$.tabs.selectIndex(pluginId == "common-input" ? 0 : this.$.tabs.items.length -1);//Select the new tab
+                    
+                	setTimeout(function () {
+				            document.querySelector('#btnEditPlugin').fire('click');
+			        }, 2000);
                 }
 
 

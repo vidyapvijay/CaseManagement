@@ -86,9 +86,9 @@
 
 	this.hpccuser = username;
 
-		setTimeout(function () {
-        	document.querySelector('#btnEditPlugin').fire('click');
-        }, 2000);
+		// setTimeout(function () {
+        // 	document.querySelector('#btnEditPlugin').fire('click');
+        // }, 2000);
 
 	},
 
@@ -205,6 +205,8 @@ changeSampleInput: function(e){
 		
 		var QueryStr1 =  this.eclcode;
 		var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.outputdsname + ");";
+
+		this.$.dialog.close();
 		return loadGridwithEcl(QueryStr, 1000);
    },
 

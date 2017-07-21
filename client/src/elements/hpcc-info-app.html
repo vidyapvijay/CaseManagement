@@ -334,7 +334,6 @@
             },
 
             exportProjectDtls : function(exportTo){
-                document.querySelector('#drawer').toggle();
                 this.$.exportTo =  exportTo;
                 var infoBox = this.$$('#infobox');
                 var projectid = infobox.properties.projectid;
@@ -369,7 +368,13 @@
                     title = this.$.projecttitle.textContent;
                 } */  
 
-                var updatedby = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? infobox.properties.updatedby :  this.$.exportTo;
+                var exportAction = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? true : false;
+
+                var updatedby = exportAction ? infobox.properties.updatedby :  this.$.exportTo;
+
+                var responseMsg = exportAction ? 
+                                    "Workbook Details are saved successfully!!!" :  
+                                        "Workbook is exported to " + this.$.exportTo + " successfully";
 
                 var responseMsg = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? 
                                     "Workbook Details are saved successfully!!!" :  
@@ -379,7 +384,7 @@
                     return;
                 }
                 
-                infobox.properties.updatedby = updatedby;
+                // infobox.properties.updatedby = updatedby;
 
                 var dateupdated = infobox.properties.dateupdated;
 
