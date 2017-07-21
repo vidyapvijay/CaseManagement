@@ -116,9 +116,9 @@
 		this.inputdsname = '';
 		this.outputdsname = '';
 		this.expression = '';
-		setTimeout(function () {
-        	document.querySelector('#btnEditPlugin').fire('click');
-        }, 2000);
+		// setTimeout(function () {
+        // 	document.querySelector('#btnEditPlugin').fire('click');
+        // }, 2000);
 	},
 
 deSerialize : function(tabTtitle){
@@ -170,6 +170,7 @@ loadgrid : function(tabTtitle){
 		return;
 	}
 	var QueryStr =  QueryStr1 +  "\n OUTPUT(" + this.outputdsname + ");";
+	
 	return loadGridwithEcl(QueryStr, 1000);
 },
 
