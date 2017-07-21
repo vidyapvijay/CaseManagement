@@ -176,7 +176,7 @@
 
 							this.$.sortformulas.value +
 
-							  ");";
+							  ")" + " : PERSIST(\'" + currentPage.properties.outputdsname + "_persist\', EXPIRE(1));";
 
 			 var QueryStr =    QueryStr1 +  "\n OUTPUT(" + currentPage.properties.outputdsname  + ");";
 

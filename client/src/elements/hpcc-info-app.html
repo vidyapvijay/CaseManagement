@@ -27,6 +27,7 @@
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 
 <link rel="import" href="../../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
 
 
 <link rel="import" href="info-box.html">
@@ -370,6 +371,10 @@
 
                 var updatedby = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? infobox.properties.updatedby :  this.$.exportTo;
 
+                var responseMsg = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? 
+                                    "Workbook Details are saved successfully!!!" :  
+                                        "Workbook is exported to " + this.$.exportTo + " successfully";
+
                 if(updatedby === undefined || updatedby === null ||updatedby === ''){
                     return;
                 }
@@ -426,7 +431,7 @@
                     this.$.ajaxAddProject.generateRequest();
                 }
 
-                this.$.toast.text = "Workbook Details are saved successfully!!!";
+                this.$.toast.text = responseMsg;
                 this.$.toast.open();
             },
 

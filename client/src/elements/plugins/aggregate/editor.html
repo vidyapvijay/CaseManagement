@@ -256,11 +256,11 @@
 
             QueryStr1 += "," + (this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? this.$.aggregategroupformulas.value : "CNT := COUNT(GROUP)") + "}, " + this.$.aggregateformulas.value + " , few)" +
 
-                (this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? ";" : ", -CNT);");
+                (this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? ";" : ", -CNT)") + " : PERSIST(\'" + currentPage.properties.outputdsname + "_persist\', EXPIRE(1));";
 
             // var QueryStr = QueryStr1 + "\n OUTPUT(" + currentPage.properties.outputdsname + ");";
 		
-            var QueryStr =  QueryStr1 +  "\n OUTPUT(" + ( this.$.sortbyfieldsvalue.value.length > 0 ? ( 'SORT(' + currentPage.properties.outputdsname + ',' + this.$.sortbyfieldsvalue.value +')' ) : currentPage.outputdsname) + ");";
+            var QueryStr =  QueryStr1 +  "\n OUTPUT(" + ( this.$.sortbyfieldsvalue.value.length > 0 ? ( 'SORT(' + currentPage.properties.outputdsname + ',' + this.$.sortbyfieldsvalue.value +')' ) : currentPage.properties.outputdsname) + ");";
 
 			currentPage.properties.eclcode = QueryStr1;
 
