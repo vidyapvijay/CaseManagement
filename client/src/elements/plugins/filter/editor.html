@@ -210,7 +210,7 @@ _okHandler: function (e) {
 
 	var QueryStr1 =  this.inputeclcode + "\n" + currentPage.outputdsname + " := " + 
 					 this.inputdsname + "(" +                                
-					 this.$.filterformulas.value + ");";
+					 this.$.filterformulas.value + ")" + " : PERSIST(\'" + currentPage.outputdsname + "_persist\', EXPIRE(1));";
 
     this.expression = this.$.filterformulas.value;
 
