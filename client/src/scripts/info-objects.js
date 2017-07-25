@@ -165,7 +165,7 @@ function loadGridwithEcl(QueryStr, recLimit) {
 function callAjaxForECL(url, eclCode, hpccuser, password, recLimit) {
 	var wuid = '';
 	var infoBox = document.querySelector('#infobox')
-	var clusterid = infoBox.properties.clusterid === '' || infoBox.properties.clusterid === undefined ? 'hthor' : infoBox.properties.clusterid;
+	var clusterid = infoBox.properties.clusterid === '' || infoBox.properties.clusterid === undefined || infoBox.properties.clusterid === 'undefined' ? 'hthor' : infoBox.properties.clusterid;
 	var promise = new Promise(
 		function (resolve, reject) {
 

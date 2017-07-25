@@ -96,10 +96,6 @@
                         that.$.clusternames.items = vallist;
                         that.$.clusternames.selectedItem = vallist[0];
                         that.$.clusternames.disabled = false;
-                        that.$.dialog.open();
-                        setTimeout(function () {
-                            that.$.dialog.open();
-                        }, 1500);
                         return;
                     });
                 }
@@ -127,7 +123,28 @@
                 this.$.username.value = infoBox.properties.username;
                 this.$.password.value = infoBox.properties.password;
                 this.$.httpSecured.value = infoBox.properties.httpSecured;
-                this.$.clusternames.selectedItem = infoBox.properties.clusterid;
+                var chosenclusterid = infoBox.properties.clusterid;
+
+                var eclIP = (this.$.httpSecured.value === "true" ? "https://" : "http://") + 
+                                    // (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '')  +
+                                     this.$.cluster_address.value +
+                                     ":" + this.$.port.value;
+                var that = this;
+                getThorList(eclIP, this.$.username.value , this.$.password.value).then(function(data) {
+                        console.log(data);
+                        var vallist = [];
+                        var clusterIdx = 0;
+                        for(var cnt = 0 ; cnt < data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType.length; cnt++){
+                           vallist.push(data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType[cnt].Name);
+                           if(data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType[cnt].Name === chosenclusterid){
+                                 clusterIdx = cnt;
+                           }
+                        }
+                        that.$.clusternames.items = vallist;
+                        that.$.clusternames.selectedItem = vallist[clusterIdx];
+                        that.$.clusternames.disabled = false;
+                        return;
+                    });
 
                 var projecttitlediv = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#projecttitle');
 
@@ -185,16 +202,11 @@
                     that.$.clusternames.items = [];
                     that.$.toast.text = "Cluster details entered validated successfully";
                     that.$.toast.open();
-                    getThorList(eclIP, infoBox.properties.username, infoBox.properties.password).then(function(data) {
-                        console.log(data);
-                        var vallist = [];
-                        for(var cnt =0 ; cnt < data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType.length; cnt++){
-                           vallist.push(data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType[cnt].Name);
-                        }
-                        that.$.clusternames.items = vallist;
+                    setTimeout(function () {
                         that.$.dialog.close();
-                        return;
-                    });
+                    }, 1500);
+                    return;
+
                 }, function(error) {
                     that.loading = false;
                     that.$.toast.text = "Cluster details provided are invalid! Please check";

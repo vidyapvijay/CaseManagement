@@ -1,5 +1,4 @@
 <link rel="import" href="../../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
-<link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../../../bower_components/vaadin-grid/vaadin-grid.html">
 <link rel="import" href="../../shared-styles.html">
@@ -10,47 +9,7 @@
     <div>
       <vaadin-grid class="projectworksheet" name="worksheet" page-size="10"></vaadin-grid>
     </div>
-    <iron-ajax
-        id="ajaxwuWUCreateAndUpdate"
-        method = "POST"
-        handle-as="json" 
-        on-response="WUCreateAndUpdateResponse">
-    </iron-ajax> 
-  
-    <iron-ajax
-        id="ajaxwuSubmit"
-        method = "POST"
-        handle-as="json" 
-        on-response="WUSubmitResponse">
-    </iron-ajax>
 
-    <iron-ajax
-        id="ajaxwuStatus"
-        method = "POST"
-        handle-as="json" 
-        on-response="WUInfoResponse">
-    </iron-ajax>
-     
-    <iron-ajax
-        id="ajaxwuResult"
-        method = "POST"
-        handle-as="json"
-        on-response="WUResultResponse">
-    </iron-ajax>
-     
-    <iron-ajax
-        id="ajaxdfuFileInfo"
-        method = "POST"
-        handle-as="json" 
-        on-response="DFUFileResponse">
-    </iron-ajax>
-
-    <iron-ajax
-        id="ajaxdfuFilesListInfo"
-        method = "POST"
-        handle-as="json" 
-        on-response="DFUFilesListResponse">
-    </iron-ajax>
   </template>
 
   <script>

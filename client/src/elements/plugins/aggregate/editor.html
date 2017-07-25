@@ -257,7 +257,7 @@
 
             QueryStr1 += "," + (this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? this.$.aggregategroupformulas.value : "CNT := COUNT(GROUP)") + "}, " + this.$.aggregateformulas.value + " , few)" +
 
-                (this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? ";" : ", -CNT)") + " : PERSIST(\'" + currentPage.properties.outputdsname + "_persist\', EXPIRE(1));";
+                (this.$.forFreqTable.getAttribute("aria-pressed") === "false" ? "" : ", -CNT)") + " : PERSIST(\'" + currentPage.properties.outputdsname + "_persist\', EXPIRE(1));";
 
             // var QueryStr = QueryStr1 + "\n OUTPUT(" + currentPage.properties.outputdsname + ");";
 		

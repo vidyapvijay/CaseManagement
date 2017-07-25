@@ -338,7 +338,7 @@
             },
 
             exportProjectDtls : function(exportTo){
-                document.querySelector('#drawer').toggle();
+                // document.querySelector('#drawer').toggle();
                 this.$.exportTo =  exportTo;
                 var infoBox = this.$$('#infobox');
                 var projectid = infobox.properties.projectid;
@@ -375,11 +375,24 @@
 
                 var updatedby = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') ? infobox.properties.updatedby :  this.$.exportTo;
 
+                var forExportAction = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') === false;
+
                 if(updatedby === undefined || updatedby === null ||updatedby === ''){
                     return;
                 }
-                
-                infobox.properties.updatedby = updatedby;
+                var forExportAction = ( this.$.exportTo === undefined ||  this.$.exportTo === null || this.$.exportTo === '') === false;
+
+                var responseMsg = "";
+
+                if(forExportAction === false){
+                  
+                  infobox.properties.updatedby = updatedby;
+                  
+                  responseMsg = "Workbook Details are saved successfully!!!";
+                  
+                }else{
+                    responseMsg = "Workbook Details are exported to " + this.$.exportTo + " successfully!!!";
+                }
 
                 var dateupdated = infobox.properties.dateupdated;
 

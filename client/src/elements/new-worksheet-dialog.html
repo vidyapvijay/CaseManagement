@@ -115,10 +115,6 @@
                         that.$.clusternames.items = vallist;
                         that.$.clusternames.selectedItem = vallist[0];
                         that.$.clusternames.disabled = false;
-                        that.$.dialog.open();
-                        setTimeout(function () {
-                            that.$.dialog.open();
-                        }, 1500);
                         return;
                     });
                 }
@@ -175,7 +171,9 @@
                     that.$.clusternames.items = [];
                     that.$.toast.text = "Cluster details entered validated successfully";
                     that.$.toast.open();
-                    that.$.dialog.close();
+                    setTimeout(function () {
+                        that.$.dialog.close();
+                    }, 1500);
                     return;
                 }, function(error) {
                     that.loading = false;
