@@ -19,7 +19,7 @@
 		        </iron-label>
 		        <paper-dialog-scrollable>
 		            <!-- User cannot enter title value beginning with a number -->
-		            <paper-input id='TabTitle' label="[[editortitle]]" 
+		            <paper-input id='TabTitle' label="Title" 
 		                   required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
 		                   error-message="Title is Required"></paper-input>
 		            <paper-input id='sampleoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
@@ -51,7 +51,6 @@
 		eclIP : String,
 		hpccuser : String,
 		displayFields : String,
-		editortitle : String,
 		expression : String,
 		title : String,
 		sortfields : String,
@@ -139,8 +138,6 @@ changeSampleInput: function(e){
 
 	open: function () {
 
-		 Polymer.dom(this.$.dialog).querySelector("#TabTitle").label = document.querySelector("#tabs").selectedItem.textContent;
-
          this.$.TabTitle.value = document.querySelector("#tabs").selectedItem.textContent;
 
 		 var pages = document.querySelector("#tabs");
@@ -170,7 +167,6 @@ changeSampleInput: function(e){
        serialize : function(){
             var jsonStr = '{';
             jsonStr += '\"displayFields\" : \"' + this.displayFields + '\",';
-            jsonStr += '\"editortitle\" : \"' + this.editortitle + '\",';
             jsonStr += '\"eclcode\" : \"' + this.eclcode.replace(/[\r\n]/g, '') + '\",';
             jsonStr += '\"inputdsname\" :\" ' + this.inputdsname + '\",';
             jsonStr += '\"outputdsname\" : \"' + this.outputdsname.trim() + '\",';
@@ -198,7 +194,6 @@ changeSampleInput: function(e){
                           this.displayFields = jsonTabContent.displayFields;
                           this.eclcode = jsonTabContent.eclcode;
 						  this.inputeclcode = jsonTabContent.eclcode;
-                          this.editortitle = jsonTabContent.title;
                           this.$.TabTitle.value = jsonTabContent.title;
                           this.inputdsname = jsonTabContent.inputdsname;
                           this.pluginId = jsonTabContent.pluginId;

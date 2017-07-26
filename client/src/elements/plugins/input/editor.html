@@ -22,7 +22,7 @@
           </iron-label>
           <paper-dialog-scrollable>
               <!-- User cannot enter title value beginning with a number -->
-              <paper-input id='TabTitle' label="[[editortitle]]" 
+              <paper-input id='TabTitle' label="Title" 
                            required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
                            error-message="Title is Required"></paper-input>
               <paper-input id='scope' label="File Scope" ></paper-input>
@@ -53,7 +53,6 @@
                 inputdsname : String,
                 eclIP : String,
                 hpccuser : String,
-                editortitle : String,
                 displayFields : String,
                 expression : String,
                 title : String
@@ -74,7 +73,6 @@
 
           this.properties.displayFields = '';
           this.properties.eclcode = '';
-          this.properties.editortitle = '';
           this.$.TabTitle.value = '';
           this.properties.inputdsname = '';
           this.properties.outputdsname = '';
@@ -85,7 +83,6 @@
         serialize : function(){
             var jsonStr = '{';
             jsonStr += '\"displayFields\" : \"' + this.properties.displayFields + '\",';
-            jsonStr += '\"editortitle\" : \"' + this.properties.editortitle + '\",';
             jsonStr += '\"eclcode\" : \"' + this.properties.eclcode.replace(/[\r\n]/g, '') + '\",';
             jsonStr += '\"inputdsname\" :\" ' + this.properties.inputdsname + '\",';
             jsonStr += '\"outputdsname\" : \"' + this.properties.outputdsname + '\",';
@@ -110,7 +107,6 @@
                           jsonTabContent = tabs[cnt];
                           this.properties.displayFields = jsonTabContent.displayFields;
                           this.properties.eclcode = jsonTabContent.eclcode;
-                          this.properties.editortitle = jsonTabContent.title;
                           this.$.TabTitle.value = jsonTabContent.title;
                           this.properties.inputdsname = jsonTabContent.inputdsname;
                           this.properties.pluginId = jsonTabContent.pluginId;
@@ -205,7 +201,6 @@
 
         open: function () {
             this.$.TabTitle.value = document.querySelector("#tabs").selectedItem.textContent;
-            Polymer.dom(this.$.dialog).querySelector("#TabTitle").label = document.querySelector("#tabs").selectedItem.textContent;
             this.$.dialog.open();
         },
 

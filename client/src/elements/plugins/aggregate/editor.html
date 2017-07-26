@@ -35,7 +35,7 @@
 		        </div>
 		    </iron-label>
 		    <paper-dialog-scrollable>
-	            <paper-input id='TabTitle' label="[[editortitle]]" required auto-validate error-message="Title is Required"></paper-input>
+	            <paper-input id='TabTitle' label="Title" required auto-validate error-message="Title is Required"></paper-input>
 	            <paper-input id='aggregateoutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
 	            <vaadin-combo-box id='aggregateInputtab' on-value-changed='changeAggregateInput' required label="Input Dataset"></vaadin-combo-box>
 	            <paper-toggle-button id="forFreqTable" on-change="changeLayoutforFrequency">Frequency Table</paper-toggle-button>
@@ -68,7 +68,6 @@
 			inputdsname : String,
 			eclIP : String,
 			hpccuser : String,
-			editortitle : String,
 			displayFields : String,
 			expression : String,
 			title : String,
@@ -145,7 +144,6 @@
 
 			this.displayFields = '';
 			this.eclcode = '';
-			this.editortitle = '';
 			this.$.TabTitle.value = '';
 			this.inputdsname = '';
 			this.outputdsname = '';
@@ -159,7 +157,6 @@
         serialize : function(){
             var jsonStr = '{';
             jsonStr += '\"displayFields\" : \"' + this.displayFields + '\",';
-            jsonStr += '\"editortitle\" : \"' + this.editortitle + '\",';
             jsonStr += '\"eclcode\" : \"' + this.eclcode.replace(/[\r\n]/g, '') + '\",';
             jsonStr += '\"inputdsname\" :\" ' + this.inputdsname + '\",';
             jsonStr += '\"outputdsname\" : \"' + this.outputdsname + '\",';
@@ -187,7 +184,6 @@
 					this.$.crosstabfield.items = this.displayFields.split(",");
 					this.$.aggregatefield.items = this.displayFields.split(",");
 					this.$.TabTitle.value = jsonTabContent.title;
-					this.editortitle = jsonTabContent.title;
 					this.eclcode = jsonTabContent.eclcode;
 					this.pluginId = jsonTabContent.pluginId;
 					this.title = jsonTabContent.title;                        
@@ -220,8 +216,6 @@
 			return loadGridwithEcl(QueryStr, 1000);
 	   },
 		open: function () {
-
-			 Polymer.dom(this.$.dialog).querySelector("#TabTitle").label = document.querySelector("#tabs").selectedItem.textContent;
 
              this.$.TabTitle.value = document.querySelector("#tabs").selectedItem.textContent;			 
 

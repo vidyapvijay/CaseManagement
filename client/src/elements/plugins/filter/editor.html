@@ -19,7 +19,7 @@
 		        </iron-label>
 		        <paper-dialog-scrollable>
 		            <!-- User cannot enter title value beginning with a number -->
-		            <paper-input id='TabTitle' label="[[editortitle]]" 
+		            <paper-input id='TabTitle' label="Title" 
 		                         required auto-validate allowed-pattern="^[a-zA-Z](.*[a-zA-Z0-9 ])?$" 
 		                         error-message="Title is Required"></paper-input>
 		            <paper-input id='filteroutputlimit' allowed-pattern="[\d]" label="Output Limit" value="10000"></paper-input>
@@ -70,11 +70,6 @@
                 },
 
 
-		editortitle : {
-                    type: Object,
-                     value: function() { return {}; } 
-                },
-
 		displayFields : {
                     type: Object,
                      value: function() { return {}; } 
@@ -119,7 +114,6 @@
 		this.displayFields = '';
 		this.eclcode = '';
 		this.inputeclcode = '';
-		this.editortitle = '';
 		this.$.TabTitle.value = '';
 		this.inputdsname = '';
 		this.outputdsname = '';
@@ -145,7 +139,6 @@ deSerialize : function(tabTtitle){
 			this.displayFields = jsonTabContent.displayFields;
 			this.$.field.items = this.displayFields.split(",");
 			this.$.TabTitle.value = jsonTabContent.title;
-			this.editortitle = jsonTabContent.title;
 			this.eclcode = jsonTabContent.eclcode;
 			this.inputeclcode = jsonTabContent.eclcode;
 			this.inputdsname = jsonTabContent.inputdsname;
@@ -171,7 +164,6 @@ deSerialize : function(tabTtitle){
 serialize : function(){
 	var jsonStr = '{';
 	jsonStr += '\"displayFields\" : \"' + this.displayFields + '\",';
-	jsonStr += '\"editortitle\" : \"' + this.editortitle + '\",';
 	jsonStr += '\"eclcode\" : \"' + this.eclcode.replace(/[\r\n]/g, '') + '\",';
 	jsonStr += '\"inputdsname\" :\" ' + this.inputdsname + '\",';
 	jsonStr += '\"outputdsname\" : \"' + this.outputdsname + '\",';
@@ -195,8 +187,6 @@ loadgrid : function(tabTtitle){
 
 
 open: function () {
-
-	Polymer.dom(this.$.dialog).querySelector("#TabTitle").label = document.querySelector("#tabs").selectedItem.textContent;
 
     this.$.TabTitle.value = document.querySelector("#tabs").selectedItem.textContent;
 
