@@ -88,10 +88,18 @@
 			type: Object,
 			value: function() { return []; }
 		},
-	eclcode: {
+	    eclcode: {
 				type: Object,
 				value: function() { return {}; }
-			}
+		},
+		sortfields: {
+			type : String,
+			value : ""
+		},
+	    inputTab: {
+			type : String,
+			value : ""
+		}
 	},
 
 	ready : function(){
@@ -116,6 +124,8 @@
 		this.inputdsname = '';
 		this.outputdsname = '';
 		this.expression = '';
+		this.sortfields = '';
+		this.inputTab = '';
 		// setTimeout(function () {
         // 	document.querySelector('#btnEditPlugin').fire('click');
         // }, 2000);
@@ -143,12 +153,19 @@ deSerialize : function(tabTtitle){
 			this.pluginId = jsonTabContent.pluginId;
 			this.title = jsonTabContent.title;
 			this.expression = jsonTabContent.expression;
+		    this.$.sortbyfieldsvalue.value = jsonTabContent.sortfields;						
 			this.$.filterformulas.value = jsonTabContent.expression; 
+			this.inputTab = jsonTabContent.inputTab;
 			this.$.filterInputTab.value = jsonTabContent.inputdsname;
 			
 		   break;
 		}
    }
+	for(var cnt = 0; cnt < tabs.length; cnt++){
+		if( this.inputdsname  === tabs[cnt].title){
+			this.$.field.items = tabs[cnt].displayFields.split(",");
+		}
+	}
 },
 
 serialize : function(){
@@ -160,6 +177,8 @@ serialize : function(){
 	jsonStr += '\"outputdsname\" : \"' + this.outputdsname + '\",';
 	jsonStr += '\"expression\" : \"' + this.expression + '\",';
 	jsonStr += '\"title\" : \"' + this.title.trim() + '\",';
+	jsonStr += '\"inputTab\" : \"' + this.inputTab.trim() + '\",';	
+	jsonStr += '\"sortfields\" : \"' + this.sortfields.trim() + '\",';	
 	jsonStr += '\"pluginId\" : \"' + 'common-filter' + '\"}';
 
 	return jsonStr;
@@ -185,15 +204,22 @@ open: function () {
 
 	var tabnames = "";
 
+	var inputidx = 0;
+
 	for(var cnt =0 ; cnt < document.getElementsByTagName("paper-tab").length; cnt++){
 		if(pages.selectedItem.id === document.getElementsByTagName("paper-tab")[cnt].id){
 			break;
 		}
 		tabnames += (tabnames === "" ? "" : ",") + document.getElementsByTagName("paper-tab")[cnt].textContent.trim();
+
+		if(this.inputTab === document.getElementsByTagName("paper-tab")[cnt].textContent.trim()){
+				inputidx = cnt;
+		}
+
 	}
 	this.$.dialog.querySelector("#filterInputTab").items = tabnames.split(",");
 
-
+    this.$.filterInputTab.selectedItem = tabnames.split(",")[inputidx].trim();
 
 	this.$.dialog.open();
 },
@@ -223,6 +249,11 @@ _okHandler: function (e) {
 					":" + infoBox.port;
 
 	currentPage.eclcode = QueryStr1;
+
+	this.inputTab = this.$.filterInputTab.value;
+
+	this.sortfields = this.$.sortbyfieldsvalue.value;
+
 	this.eclcode = QueryStr1;
 
 	return loadGridwithEcl(QueryStr, this.$.filteroutputlimit.value);

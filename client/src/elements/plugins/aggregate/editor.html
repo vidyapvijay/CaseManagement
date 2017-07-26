@@ -71,7 +71,9 @@
 			editortitle : String,
 			displayFields : String,
 			expression : String,
-			title : String
+			title : String,
+			sortfields : String,
+			inputTab : String
 		},
 
 		changeLayoutforFrequency : function(event){
@@ -148,6 +150,8 @@
 			this.inputdsname = '';
 			this.outputdsname = '';
 			this.expression = '';
+			this.sortfields = '';
+			this.inputTab = '';
 			// setTimeout(function () {
 			// 	document.querySelector('#btnEditPlugin').fire('click');
 			// }, 2000);
@@ -161,6 +165,8 @@
             jsonStr += '\"outputdsname\" : \"' + this.outputdsname + '\",';
             jsonStr += '\"expression\" : \"' + this.expression + '\",';
             jsonStr += '\"title\" : \"' + this.title.trim() + '\",';
+			jsonStr += '\"inputTab\" : \"' + this.inputTab.trim() + '\",';			
+			jsonStr += '\"sortfields\" : \"' + this.sortfields.trim() + '\",';			
             jsonStr += '\"pluginId\" : \"' + 'common-aggregate' + '\"}';
 
             return jsonStr;
@@ -191,7 +197,14 @@
 					var formulas = this.expression.split('#');
 					this.$.aggregateformulas.value = formulas[1];
 					this.$.aggregategroupformulas.value = formulas[0];
+					this.inputTab = jsonTabContent.inputTab;
+					this.$.sortbyfieldsvalue.value = jsonTabContent.sortfields;
 					break;
+				}
+			}
+			for(var cnt = 0; cnt < tabs.length; cnt++){
+				if( this.inputdsname  === tabs[cnt].title){
+					this.$.aggregatefield.items = tabs[cnt].displayFields.split(",");
 				}
 			}
 		},
@@ -216,13 +229,22 @@
 
 			var tabnames = "";
 
+			var inputidx = 0;
+
 			for(var cnt =0 ; cnt < document.getElementsByTagName("paper-tab").length; cnt++){
 				if(pages.selectedItem.id === document.getElementsByTagName("paper-tab")[cnt].id){
 					break;
 				}
 				tabnames += (tabnames === "" ? "" : ",") + document.getElementsByTagName("paper-tab")[cnt].textContent.trim();
+
+				if(this.inputTab === document.getElementsByTagName("paper-tab")[cnt].textContent.trim()){
+					inputidx = cnt;
+
+				}
 			}
 			this.$.aggregateInputtab.items = tabnames.split(",");
+
+			this.$.aggregateInputtab.selectedItem = tabnames.split(",")[inputidx].trim();
 
 			this.$.dialog.open();
 		},
@@ -266,6 +288,10 @@
 			currentPage.properties.eclcode = QueryStr1;
 
 			this.eclcode = QueryStr1;
+
+			this.sortfields = this.$.sortbyfieldsvalue.value;
+
+			this.inputTab = this.$.aggregateInputtab.value;
 
             this.expression =  this.$.aggregategroupformulas.value.trim() + '#' + this.$.aggregateformulas.value.trim();
 

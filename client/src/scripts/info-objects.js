@@ -244,7 +244,7 @@ function callForFileDetails(url, filename, subfilename, hpccuser, password, recL
 	var promise = new Promise(function (resolve, reject) {
 		var wuid = '';
 		$.ajax({
-			url: url + "/WsDfu/DFUInfo.json?Name=" + '~' + subfilename,
+			url: url + "/WsDfu/DFUInfo.json?Name=" + ( subfilename.startsWith('~') === false ? '~' : '' ) + subfilename,
 			headers: { 'Access-Control-Allow-Origin': '*' },
 			dataType: "JSONP",
 			jsonp: 'jsonp',

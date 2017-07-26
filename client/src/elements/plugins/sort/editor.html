@@ -52,7 +52,9 @@
 			editortitle : String,
 			displayFields : String,
 			expression : String,
-			title : String
+			title : String,
+			inputTab : String
+			
 		},
 
 		ready : function(){
@@ -79,6 +81,7 @@
 			this.inputdsname = '';
 			this.outputdsname = '';
 			this.expression = '';
+			this.inputTab = '';
 			// setTimeout(function () {
 			// 	document.querySelector('#btnEditPlugin').fire('click');
 			// }, 2000);
@@ -93,6 +96,7 @@
             jsonStr += '\"outputdsname\" : \"' + this.outputdsname + '\",';
             jsonStr += '\"expression\" : \"' + this.expression + '\",';
             jsonStr += '\"title\" : \"' + this.title.trim() + '\",';
+			jsonStr += '\"inputTab\" : \"' + this.inputTab.trim() + '\",';	
             jsonStr += '\"pluginId\" : \"' + 'common-sort' + '\"}';
 
             return jsonStr;
@@ -121,10 +125,16 @@
 						this.pluginId = jsonTabContent.pluginId;
 						this.title = jsonTabContent.title;                            
 						this.expression = jsonTabContent.expression;
+						this.inputTab = jsonTabContent.inputTab;
 						this.$.sortformulas.value = jsonTabContent.expression;
 						this.$.sortInputtab.value = jsonTabContent.inputdsname;
 						break;
 					}
+			}
+		   for(var cnt = 0; cnt < tabs.length; cnt++){
+				if( this.inputdsname  === tabs[cnt].title){
+					this.$.aggregatefield.items = tabs[cnt].displayFields.split(",");
+				}
 			}
 		},
 
@@ -152,13 +162,21 @@
 
 			var tabnames = "";
 
+			var inputidx = 0;
+
 			for(var cnt =0 ; cnt < document.getElementsByTagName("paper-tab").length; cnt++){
 				if(pages.selectedItem.id === document.getElementsByTagName("paper-tab")[cnt].id){
 					break;
 				}
 				tabnames += (tabnames === "" ? "" : ",") + document.getElementsByTagName("paper-tab")[cnt].textContent.trim();
+				if(this.inputTab === document.getElementsByTagName("paper-tab")[cnt].textContent.trim()){
+					inputidx = cnt;
+
+				}				
 			}
 			sortInputtab.items = tabnames.split(",");
+
+			this.$.sortInputtab.selectedItem = tabnames.split(",")[inputidx].trim();			
 
 			this.$.dialog.open();
 		},
@@ -184,12 +202,14 @@
 
 			 var QueryStr =    QueryStr1 +  "\n OUTPUT(" + currentPage.properties.outputdsname  + ");";
 
-        this.expression = this.$.sortformulas.value;
+			this.expression = this.$.sortformulas.value;
 
-		currentPage.properties.eclcode = QueryStr1;
-		this.eclcode = QueryStr1;
+			this.inputTab = this.$.sortInputtab.value;
 
-		return loadGridwithEcl(QueryStr, this.$.sortoutputlimit.value);
+			currentPage.properties.eclcode = QueryStr1;
+			this.eclcode = QueryStr1;
+
+			return loadGridwithEcl(QueryStr, this.$.sortoutputlimit.value);
 		},
 		changeSortInput: function(e){
 

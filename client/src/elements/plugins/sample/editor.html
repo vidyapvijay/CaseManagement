@@ -53,7 +53,9 @@
 		displayFields : String,
 		editortitle : String,
 		expression : String,
-		title : String
+		title : String,
+		sortfields : String,
+		inputTab : String
 	},
 
  ready: function() {
@@ -69,6 +71,10 @@
 	var username = infoBox.properties.username;
 
 	var password = infoBox.properties.password;
+
+	this.sortfields = '';
+
+	this.inputTab = '';
 
 	var credentials = username === null || username === "" ? "" : (
 
@@ -141,13 +147,23 @@ changeSampleInput: function(e){
 
 		var tabnames = "";
 
+		var inputidx = 0;
+
 		for(var cnt =0 ; cnt < document.getElementsByTagName("paper-tab").length; cnt++){
 			if(pages.selectedItem.id === document.getElementsByTagName("paper-tab")[cnt].id){
 				break;
 			}
 			tabnames += (tabnames === "" ? "" : ",") + document.getElementsByTagName("paper-tab")[cnt].textContent.trim();
+
+			if(this.inputTab === document.getElementsByTagName("paper-tab")[cnt].textContent.trim()){
+					inputidx = cnt;
+			}
 		}
-		sampleInputtab.items = tabnames.split(",");
+
+		this.$.sampleInputtab.items = tabnames.split(",");
+
+		this.$.sampleInputtab.selectedItem = tabnames.split(",")[inputidx].trim();
+
 		this.$.dialog.open();
 	},
 
@@ -160,6 +176,8 @@ changeSampleInput: function(e){
             jsonStr += '\"outputdsname\" : \"' + this.outputdsname.trim() + '\",';
             jsonStr += '\"expression\" : \"' + this.expression.trim() + '\",';
             jsonStr += '\"title\" : \"' + this.title.trim() + '\",';
+			jsonStr += '\"inputTab\" : \"' + this.inputTab.trim() + '\",';	
+			jsonStr += '\"sortfields\" : \"' + this.sortfields.trim() + '\",';				
             jsonStr += '\"pluginId\" : \"' +  'common-sample' + '\"}';
 
             return jsonStr;
@@ -190,10 +208,17 @@ changeSampleInput: function(e){
 						  var res = this.expression.split("#");
 						  this.$.samplingInterval.value = res[0];
 						  this.$.ordinalNumber.value = res[1];
+						  this.inputTab = jsonTabContent.inputTab;
 						  this.$.sampleInputtab.value = jsonTabContent.inputdsname;
+					      this.$.sortbyfieldsvalue.value = jsonTabContent.sortfields;
                           break;
                       }
               }
+				for(var cnt = 0; cnt < tabs.length; cnt++){
+					if( this.inputdsname  === tabs[cnt].title){
+						this.$.aggregatefield.items = tabs[cnt].displayFields.split(",");
+					}
+				}
             },
 
       loadgrid : function(tabTtitle){
@@ -246,7 +271,12 @@ changeSampleInput: function(e){
 
 
  		 currentPage.properties.eclcode = QueryStr1;
-         this.eclcode = QueryStr1;
+         
+		 this.eclcode = QueryStr1;
+
+		 this.sortfields = this.$.sortbyfieldsvalue.value;	
+
+	     this.inputTab = this.$.sampleInputtab.value;	 
 
         return loadGridwithEcl(QueryStr, this.$.sampleoutputlimit.value);
 	},
