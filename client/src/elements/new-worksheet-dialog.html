@@ -47,7 +47,7 @@
                                  required auto-validate error-message="Please enter username"></paper-input>
                     <paper-input id='password' label="Password"  on-change = "disableClusternames"  type="password" value="[[password]]" 
                                  required auto-validate error-message="Please enter password"></paper-input>
-                    <vaadin-combo-box id='clusternames' on-selected-item-changed="addSelCluster" class='clusternames' required label="Choose Cluster" items='[]'></vaadin-combo-box>
+                    <vaadin-combo-box id='clusternames' on-selected-item-changed="addSelCluster" required class='clusternames' label="Choose Cluster" items='[]'></vaadin-combo-box>
                     <br>
                 <paper-toggle-button class="toggleBtn" id="httpSecured">
                     <iron-label class="headerLabels">HTTP Secured</iron-label>
@@ -106,17 +106,33 @@
                 var username =  this.$.username.value;
                 var password = this.$.password.value;
                 var that = this;
-                getThorList(eclIP, username, password).then(function(data) {
+                that.loading = true;
+                getThorList(eclIP, username, password).then(function(response) {
+                        var data = response.data;
                         console.log(data);
+                        that.$.toast.close();
                         var vallist = [];
                         for(var cnt = 0 ; cnt < data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType.length; cnt++){
                            vallist.push(data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType[cnt].Name);
                         }
+                        if(vallist.length === 0){
+                            that.loading = false;
+                            that.$.toast.text = "Cluster details provided are invalid! Please check";
+                            that.$.toast.open();
+                            return;
+                        }
+                        that.loading = false;
                         that.$.clusternames.items = vallist;
                         that.$.clusternames.selectedItem = vallist[0];
                         that.$.clusternames.disabled = false;
                         return;
-                    });
+                    }, function(error) {
+                            that.loading = false;
+                            that.$.toast.text = "Cluster details provided are invalid! Please check";
+                            that.$.toast.open();
+                            return;
+                    return;
+                }); 
                 }
              },
              addSelCluster : function(e){

@@ -61,7 +61,7 @@
             <paper-tabs id="tabs" selected="{{selected}}"></paper-tabs>
 
             <paper-icon-button id="btnEditPlugin" disabled="true" icon="create" on-tap="_pluginEditOpenHandler"></paper-icon-button>
-            <paper-tooltip for="btnEditPlugin" offset="0">Edit Plugin</paper-tooltip>
+            <paper-tooltip for="btnEditPlugin" offset="0">Edit Worksheet</paper-tooltip>
             
             
             <paper-menu-button horizontal-align="right" disabled="true" id="pluginMenu">
@@ -146,7 +146,12 @@
                 file : {
                     type : String,
                     value : ''
-                } 
+                } ,
+                fieldDtls :{
+                    type : Map,
+                    value : {}
+
+                }
 
             },
 

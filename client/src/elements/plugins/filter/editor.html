@@ -115,6 +115,7 @@
 		this.eclcode = '';
 		this.inputeclcode = '';
 		this.$.TabTitle.value = '';
+		
 		this.inputdsname = '';
 		this.outputdsname = '';
 		this.expression = '';
@@ -146,7 +147,7 @@ deSerialize : function(tabTtitle){
 			this.pluginId = jsonTabContent.pluginId;
 			this.title = jsonTabContent.title;
 			this.expression = jsonTabContent.expression;
-		    this.$.sortbyfieldsvalue.value = jsonTabContent.sortfields;						
+		    this.$.sortbyfieldsvalue.value = jsonTabContent.sortfields === undefined ? '' : jsonTabContent.sortfields;						
 			this.$.filterformulas.value = jsonTabContent.expression; 
 			this.inputTab = jsonTabContent.inputTab;
 			this.$.filterInputTab.value = jsonTabContent.inputdsname;
@@ -291,7 +292,24 @@ changeInput: function(e){
 
     },
     andFunction: function (e) {
-        this.$.filterformulas.value = this.$.filterformulas.value + (this.$.filterformulas.value.length > 0 ? " AND " : "") + this.$.field.value + ' ' + this.$.operation.value + ' ' + this.$.formulavalue.value ;            
+
+		var infoBox = document.querySelector('#infobox');
+
+		var strFields = ["STRING", "UNICODE"];
+
+		var formula = this.$.formulavalue.value;
+
+		formula = formula.startsWith("'") ? formula.substring(2) : formula;
+
+		formula = formula.endsWith("'") ? formula.substring(0, formula.length -1) : formula;
+
+
+		if(infoBox.fieldDtls.has(this.$.field.value)){
+		 formula = strFields.includes(infoBox.fieldDtls.get(this.$.field.value).toUpperCase()) ? ("'" + formula + "'") : formula;
+		}
+        this.$.filterformulas.value = this.$.filterformulas.value + (this.$.filterformulas.value.length > 0 ? " AND " : "") + this.$.field.value + ' ' + this.$.operation.value + ' ' +  formula;
+		
+		//  this.$.formulavalue.value ;            
     },
 
 	addSortFunction: function (e) {

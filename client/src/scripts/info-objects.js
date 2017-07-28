@@ -54,6 +54,8 @@ function workunitStatus(url, queryparam, hpccuser, password) {
 							grid.removeColumn(cols[0].name);
 						}
 					}
+
+					currentPage.loading = false;
 					grid.items = [];
 					grid.addColumn({ name: "<b>Something went wrong while fetching the data, Please try again or check you filter query again!</b>" });
 					reject('Something went wrong while fetching the data, Please try again or check you filter query again!');
@@ -131,6 +133,7 @@ function loadGridwithEcl(QueryStr, recLimit) {
 
 		grid.items = ajaxResp.Result.Row;
 		if (ajaxResp.Result.Row.length === 0) {
+			currentPage.loading = false;
 			grid.addColumn({ name: "<b>There are no records for your Filter Query</b>" });
 			return;
 		}
@@ -241,6 +244,7 @@ function callAjaxForECL(url, eclCode, hpccuser, password, recLimit) {
 	return promise;
 }
 function callForFileDetails(url, filename, subfilename, hpccuser, password, recLimit) {
+	var infoBox = document.querySelector('#infobox');
 	var promise = new Promise(function (resolve, reject) {
 		var wuid = '';
 		$.ajax({
@@ -265,6 +269,41 @@ function callForFileDetails(url, filename, subfilename, hpccuser, password, recL
 				} else {
 					var QueryStr1 = "#OPTION(\'OUTPUTLIMIT\',2000);\nrecLayout := " + data.DFUInfoResponse.FileDetail.Ecl + "\n" +
 						outputdsname + " := DATASET(\'" + (filename.startsWith('~') ? '' : '~') + filename + "\'," + "recLayout, THOR);\n";
+
+				    var recLayout = data.DFUInfoResponse.FileDetail.Ecl.replace("RECORD", "");
+
+					str = recLayout.replace("[{}]", "").replace(",", ";").trim();
+
+					// HashMap<String, String> fielddts = new HashMap<String, String>();
+					var fields = str.split(";");
+
+					var fielddts = new Map();
+
+					var recordStartEnd = ["RECORD", "END"];
+
+					for(var cnt = 0; cnt < fields.length; cnt++ ){
+						var singlePart = fields[cnt].trim();
+						if(!recordStartEnd.includes(singlePart.trim())){
+							var twoParts = (singlePart.endsWith(";") ? singlePart.substring(0,  singlePart.length() -1) : singlePart).trim().split(" ");
+							fielddts.set(twoParts[1], twoParts[0]);
+						}
+					}
+					
+					infoBox.fieldDtls = fielddts;
+
+					var strFields = ["STRING", "UNICODE"];
+					
+					console.log("Field====>Type ======> IsStringType\n===============================================\n\n");
+					
+					// for(Map.Entry<String, String> maps : fielddts.entrySet()){
+					// 	System.out.println(maps.getKey() + "===>" + maps.getValue() + "==>" + 
+					// 			strtypes.includes(maps.getValue().toUpperCase().replace("[^a-zA-Z]", "")));
+					// }
+
+
+					for (var i in fielddts) {
+						console.log('Key is: ' + i + '. Value is: ' + fielddts[i]);
+					} 
 					var QueryStr = QueryStr1 + "Output(" + outputdsname + ");";
 				}
 				console.log(QueryStr);
