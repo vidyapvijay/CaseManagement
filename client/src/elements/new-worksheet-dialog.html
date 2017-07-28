@@ -106,8 +106,7 @@
                 var password = this.$.password.value;
                 var that = this;
                 that.loading = true;
-                getThorList(eclIP, username, password).then(function(response) {
-                        var data = response.data;
+                getThorList(eclIP, username, password).then(function(data) {
                         console.log(data);
                         that.$.toast.close();
                         var vallist = [];
