@@ -90,8 +90,7 @@
                 // Invalidate all form fields so that the auto-validation does not happen after user reopens the dialog
                 this.invalidateFormFields();
                 
-                var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
-                infoBox.clearWorkBook();
+
 
                 this.$.dialog.open();
             },
@@ -148,6 +147,9 @@
                     return;
                 }
 
+                var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
+                infoBox.clearWorkBook();
+
                 this.loading = true;
 
                 var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
@@ -201,6 +203,7 @@
 
             handleCancel: function() {
                 //  this.toggleAppDrawer();
+                return false;
             },
  
             toggleAppDrawer: function() {

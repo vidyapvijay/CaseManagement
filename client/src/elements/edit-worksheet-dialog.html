@@ -87,17 +87,32 @@
                 var username =  this.$.username.value;
                 var password = this.$.password.value;
                 var that = this;
-                getThorList(eclIP, username, password).then(function(data) {
+                 getThorList(eclIP, username, password).then(function(response) {
+                        var data = response.data;
                         console.log(data);
+                        that.$.toast.close();
                         var vallist = [];
                         for(var cnt = 0 ; cnt < data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType.length; cnt++){
                            vallist.push(data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType[cnt].Name);
                         }
+                        if(vallist.length === 0){
+                            that.loading = false;
+                            that.$.toast.text = "Cluster details provided are invalid! Please check";
+                            that.$.toast.open();
+                            return;
+                        }
+                        that.loading = false;
                         that.$.clusternames.items = vallist;
                         that.$.clusternames.selectedItem = vallist[0];
                         that.$.clusternames.disabled = false;
                         return;
-                    });
+                    }, function(error) {
+                            that.loading = false;
+                            that.$.toast.text = "Cluster details provided are invalid! Please check";
+                            that.$.toast.open();
+                            return;
+                    return;
+                }); 
                 }
 
              },
