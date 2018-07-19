@@ -1,0 +1,236 @@
+<link rel="import" href="../../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../../../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../../../bower_components/vaadin-upload/vaadin-upload.html">
+<link rel="import" href="../../../../bower_components/vaadin-valo-theme/vaadin-combo-box.html">
+<link rel="import" href="../../shared-styles.html">
+
+
+<dom-module id="common-upload-editor">
+    <template>
+        <style include="shared-dialog-styles">
+            vaadin-combo-box {
+                width: 100%;
+                display: block !important;
+            }
+            paper-dropdown-menu {
+                width: 100%;
+            }
+        </style>
+
+        <style include="shared-dialog-styles"></style>
+
+        <iron-ajax id="getDropZoneList" url="/clusterDetails/getDropZoneList" method="POST" handle-as "json" on-response="populateDropZones">
+        </iron-ajax>
+        <iron-ajax id="getFolderList" url="/clusterDetails/getFolderList" method="POST" handle-as "json">
+        </iron-ajax>
+        <paper-dialog id="dialog" modal>
+            <template is="dom-if" if={{loading}}>
+                <paper-progress indeterminate="true" style="width: 90%; margin-top: 2px;"></paper-progress>
+            </template>
+            <iron-label>
+                <div class="headerDiv">
+                    <span>
+                        Upload File to HPCC Cluster
+                    </span>
+                </div>
+            </iron-label>
+
+            <paper-dialog-scrollable>
+                <paper-input id='TabTitle' label="Title" required auto-validate error-message="Title is Required"></paper-input>
+                <paper-dropdown-menu id="dropZoneMenu" label="Choose DropZone" vertical-align="bottom">
+                    <paper-listbox id="dropZoneList" slot="dropdown-content" class="dropdown-content" on-iron-select="loadMachineList" selected={{selectedDropZone}}>
+                        <template is="dom-repeat" items="[[dropZList]]">
+                            <paper-item>[[item.Name]]</paper-item>
+                        </template>
+                    </paper-listbox>
+                </paper-dropdown-menu>
+                <br>
+                <paper-dropdown-menu id="machinesMenu" label="Choose Machines" vertical-align="bottom">
+                    <paper-listbox id="machineList" slot="dropdown-content" class="dropdown-content" on-iron-select="loadFolderList" selected={{selectedMachine}}>
+                        <template is="dom-repeat" items="[[machinesList]]">
+                            <paper-item>[[item.Netaddress]]</paper-item>
+                        </template>
+                    </paper-listbox>
+                </paper-dropdown-menu>
+                <br>
+
+                <vaadin-combo-box id='subfilesgrid' class='subfilesgrid' required label="Select Folder" items='[[foldersList]]'></vaadin-combo-box>
+                <br>
+
+                <vaadin-upload id="manualUpload" with-credentials="true" headers='{"Authorization":"Basic rtrt="}' target={{targetURL}} no-auto method="POST"></vaadin-upload>
+                <iron-icon slot="drop-label-icon" icon="description"></iron-icon>
+                <span slot="drop-label">Drop your csv files here</span>
+                </vaadin-upload>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button raised class="indigo" on-tap="uploadFile">Ok</paper-button>
+                <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
+            </div>
+            <paper-toast id="toast" class="fit-bottom"></paper-toast>
+        </paper-dialog>
+    </template>
+    <script>
+        class CommonUploadEditor extends Polymer.Element {
+            static get is() { return 'common-upload-editor'; }
+            static get properties() {
+                return {
+                    folderTree: Array,
+                    myDropZonePath: String,
+                    foldersList: Array
+                }
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+                this.folderTree = [];
+                this.myDropZonePath = '';
+                this.foldersList = [];
+                this.$.TabTitle.value = '';
+            }
+            open(e) {
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var chosenclusterid = infoBox.clusterid;
+                this.$.TabTitle.value = this.parentNode.selectedItem.textContent;
+                this.loadDropZoneMenu();
+                this.$.dialog.open();
+            }
+            toggleAppDrawer() {
+                Polymer.dom(Polymer.dom(this).parentNode).querySelector('#drawer').toggle();
+            }
+            uploadFile() {
+                debugger;
+
+                var Base64={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",encode:function(e){var t="";var n,r,i,s,o,u,a;var f=0;e=Base64._utf8_encode(e);while(f<e.length){n=e.charCodeAt(f++);r=e.charCodeAt(f++);i=e.charCodeAt(f++);s=n>>2;o=(n&3)<<4|r>>4;u=(r&15)<<2|i>>6;a=i&63;if(isNaN(r)){u=a=64}else if(isNaN(i)){a=64}t=t+this._keyStr.charAt(s)+this._keyStr.charAt(o)+this._keyStr.charAt(u)+this._keyStr.charAt(a)}return t},decode:function(e){var t="";var n,r,i;var s,o,u,a;var f=0;e=e.replace(/[^A-Za-z0-9+/=]/g,"");while(f<e.length){s=this._keyStr.indexOf(e.charAt(f++));o=this._keyStr.indexOf(e.charAt(f++));u=this._keyStr.indexOf(e.charAt(f++));a=this._keyStr.indexOf(e.charAt(f++));n=s<<2|o>>4;r=(o&15)<<4|u>>2;i=(u&3)<<6|a;t=t+String.fromCharCode(n);if(u!=64){t=t+String.fromCharCode(r)}if(a!=64){t=t+String.fromCharCode(i)}}t=Base64._utf8_decode(t);return t},_utf8_encode:function(e){e=e.replace(/rn/g,"n");var t="";for(var n=0;n<e.length;n++){var r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r)}else if(r>127&&r<2048){t+=String.fromCharCode(r>>6|192);t+=String.fromCharCode(r&63|128)}else{t+=String.fromCharCode(r>>12|224);t+=String.fromCharCode(r>>6&63|128);t+=String.fromCharCode(r&63|128)}}return t},_utf8_decode:function(e){var t="";var n=0;var r=c1=c2=0;while(n<e.length){r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r);n++}else if(r>191&&r<224){c2=e.charCodeAt(n+1);t+=String.fromCharCode((r&31)<<6|c2&63);n+=2}else{c2=e.charCodeAt(n+1);c3=e.charCodeAt(n+2);t+=String.fromCharCode((r&15)<<12|(c2&63)<<6|c3&63);n+=3}}return t}}
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var username = infoBox.username;
+                var password = infoBox.password;
+                var credentials=username+":"+password;
+                var encodedcredentials = Base64.encode(credentials);
+
+                this.headerValue="'{\"Authorization\":\"Basic "+encodedcredentials+"=\"}'";
+
+                let selectedDropZoneIndex = this.$.dropZoneList.selected;
+                var myFolderPath = this.dropZList[selectedDropZoneIndex].Path+"/"+ this.$.subfilesgrid.selectedItem + "/";
+                
+                let selectedMachineIndex = this.$.machineList.selected;
+                let netaddress = this.machinesList[selectedMachineIndex].Netaddress;
+                
+                var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + infoBox.cluster_address + ":" + infoBox.port;
+                
+
+                this.targetURL = eclIP + "/FileSpray/UploadFile.json?upload_&rawxml_=1&NetAddress="+netaddress+"&OS=2&Path="+myFolderPath;
+                var upload = this.$.manualUpload;
+                upload.uploadFiles();
+            }
+
+            loadDropZoneMenu(e) {
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+
+                if (infoBox.cluster_address != '' && infoBox.port != '' && infoBox.username != '' && infoBox.password != '') {
+                    var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + infoBox.cluster_address + ":" + infoBox.port;
+                    var username = infoBox.username;
+                    var password = infoBox.password;
+                    this.$.getDropZoneList.contentType = 'application/json';
+                    this.$.getDropZoneList.body = { eclIP: eclIP, username: username, password: password };
+                    this.$.getDropZoneList.generateRequest();
+                }
+            }
+            populateDropZones(e) {
+                if (e.detail.response != null) {
+                    var data = JSON.parse(e.detail.response);
+                    var dropList = data.TpDropZoneQueryResponse.TpDropZones.TpDropZone;
+                    if (dropList.length === 0) {
+                        this.loading = false;
+                        this.$.toast.text = "Cluster details provided are invalid! Please check";
+                        this.$.toast.open();
+                        return;
+                    }
+                    else {
+                        this.dropZList = data.TpDropZoneQueryResponse.TpDropZones.TpDropZone;
+                    }
+                    return;
+                }
+                else {
+                    this.loading = false;
+                    this.$.toast.text = "Cluster details provided are invalid! Please check";
+                    this.$.toast.open();
+                    return;
+                }
+
+            }
+            loadMachineList() {
+                let idx = this.$.dropZoneList.selected;
+                this.machinesList = this.dropZList[idx].TpMachines.TpMachine;
+            }
+            loadFolderList() {
+                let selectedDropZoneIndex = this.$.dropZoneList.selected;
+                this.myDropZonePath = this.dropZList[selectedDropZoneIndex].Path;
+                this.getFolderList(this.dropZList[selectedDropZoneIndex].Path, this);
+            }
+            getFolderList(folderpath, that) {
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                let selectedMachineIndex = this.$.machineList.selected;
+                var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + infoBox.cluster_address + ":" + infoBox.port;
+                var username = infoBox.username;
+                var password = infoBox.password;
+                var path = folderpath;
+                let netaddress = this.machinesList[selectedMachineIndex].Netaddress;
+                this.$.getFolderList.contentType = 'application/json';
+                this.$.getFolderList.body = { eclIP: eclIP, username: username, password: password, path: path, netaddress: netaddress };
+                var folderRequest = this.$.getFolderList.generateRequest();
+                //var that = this;
+                folderRequest.completes.then(function (req) {
+                    var data = JSON.parse(req.response);
+                    // Find the index
+                    var index = -1;
+                    for (var i = 0; i < that.folderTree.length; i++) {
+                        if (that.folderTree[i].Path == data.FileListResponse.Path)
+                            index = i;
+                    }
+                    if (index > -1) that.folderTree[index].ChildLoaded = true;
+                    if (data.FileListResponse.files != undefined) {
+                        var folderArray = data.FileListResponse.files.PhysicalFileStruct;
+                        if (folderArray.length >= 0) {
+                            $(folderArray).each(function () {
+                                that.folderTree.push(
+                                    {
+                                        Name: "/" + this.name,
+                                        Path: data.FileListResponse.Path + "/" + this.name,
+                                        ChildLoaded: false
+                                    }
+                                );
+                                that.getFolderList(data.FileListResponse.Path + "/" + this.name, that);
+                            });
+                        }
+                    }
+                    var allLoaded = that.folderTree.length > 0;
+                    // Find the index
+                    for (var i = 0; i < that.folderTree.length; i++) {
+                        if (!that.folderTree[i].ChildLoaded) allLoaded = false;
+                    }
+                    if (allLoaded) {
+                        debugger;
+                        var tempList = ["/"];
+                        for (var i = 0; i < that.folderTree.length; i++) {
+                            tempList.push(that.folderTree[i].Path.replace(that.myDropZonePath + "/", ''));
+                        }
+                        that.foldersList = tempList.sort();
+                    }
+                });
+            }
+            populateFolderList(e) {
+                var data = JSON.parse(e.detail.response);
+                this.foldersList = data.FileListResponse.files.PhysicalFileStruct;
+            }
+            loadgrid() {
+
+            }
+        }
+        customElements.define(CommonUploadEditor.is, CommonUploadEditor);
+    </script>
+</dom-module>

@@ -27,6 +27,8 @@
 <link rel="import" href="plugins/aggregate/view.html">
 <link rel="import" href="plugins/sample/editor.html">
 <link rel="import" href="plugins/sample/view.html">
+<link rel="import" href="plugins/upload/editor.html">
+<link rel="import" href="plugins/upload/view.html">
 <link rel="import" href="export-project-dialog.html">
 
 <!-- Needed for paper-listbox -->
@@ -345,7 +347,7 @@
                 }
             }
             addTab(id, label, pluginId, reload = false) {
-                if (pluginId === "common-input") {
+                if (pluginId === "common-input" || pluginId ==="common-upload") {
                     this.shadowRoot.querySelector('#export-project-dialog').disabled = true;
                     var tabitems = Polymer.dom(this.$.tabs);
                     var pageitems = Polymer.dom(this.$.pages);
@@ -390,10 +392,11 @@
                     this.viewList = [];
                 };
                 this.viewList.push(view);
+                debugger;
                 if (reload) {
                     editor.deSerialize(label);
                 } else {
-                    this.$.tabs.selectIndex(pluginId == "common-input" ? 0 : this.$.tabs.items.length - 1);//Select the new tab
+                    this.$.tabs.selectIndex((pluginId == "common-input"||"common-upload") ? 0 : this.$.tabs.items.length - 1);//Select the new tab
                     setTimeout(function (that) {
                         that.shadowRoot.querySelector('#btnEditPlugin').fire('click');
                     }, 2000, this);

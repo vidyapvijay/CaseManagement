@@ -11,7 +11,8 @@
 <link rel="import" href="../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
-<link rel="import" href="../../bower_components/vaadin-valo-theme/vaadin-combo-box.html"> 
+<link rel="import" href="../../bower_components/vaadin-valo-theme/vaadin-combo-box.html">
+<link rel="import" href="../../bower_components/paper-radio-group/paper-radio-group.html">
 <link rel="import" href="shared-styles.html">
 
 <!--- ---------------------------------------------filter dialog------------------------------------------------>
@@ -20,9 +21,108 @@
 <dom-module id="new-worksheet-dialog">
     <template>
         <style include="shared-dialog-styles">
-        vaadin-combo-box {
+            vaadin-combo-box {
                 width: 100%;
                 display: block !important;
+            }
+        </style>
+        <style is="custom-style">
+            vaadin-grid.projectMethod {
+                position: relative;
+                font: 300 16px/1.55 "Open Sans", sans-serif;
+                -webkit-font-smoothing: antialiased;
+                --divider-color: #d4d4d4;
+
+                --vaadin-grid-cell: {
+                    padding: 0 18px;
+                    height: 38px;
+                    border-right: 1px solid #d4d4d4;
+                    box-sizing: border-box;
+                }
+                ;
+
+                --vaadin-grid-header-cell: {
+                    border-bottom: 1px solid #d4d4d4;
+                    background-image: linear-gradient(to bottom, #ececec 2%, #d6d6d6 98%);
+                    font-weight: bold;
+                    color: #333;
+                    font-size: 15px;
+                    text-transform: capitalize;
+                }
+                ;
+
+                --vaadin-grid-footer-cell: {
+                    background-image: linear-gradient(to bottom, #fafafa 2%, #efefef 98%);
+                }
+                ;
+
+                --vaadin-grid-cell-last-frozen: {
+                    box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);
+                }
+                ;
+
+                --vaadin-grid-body-row-active-cell: {
+                    background-image: linear-gradient(to bottom, #1b87e3 2%, #166ed5 98%);
+                    color: #c8dbed;
+                    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
+                    border-right-color: #1d69b4;
+                }
+                ;
+
+                --vaadin-grid-body-row-odd-cell: {
+                    background-color: #f5f5f5;
+                }
+                ;
+
+                --vaadin-grid-loading-spinner: {
+                    display: none;
+                }
+                ;
+
+                --vaadin-grid-body-cell: {
+                    transition: opacity 0.2s;
+                    border-bottom: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08));
+                    /* added */
+                }
+                ;
+
+                --vaadin-grid-loading-body-cell: {
+                    opacity: 0.2;
+                }
+                ;
+
+            }
+
+            vaadin-grid.projectMethod input {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            @keyframes loading-expand {
+                0% {
+                    transform: scaleX(0);
+                }
+                100% {
+                    transform: scaleX(1);
+                }
+            }
+
+            vaadin-grid.projectMethod::before {
+                content: "";
+                width: 100%;
+                position: absolute;
+                height: 4px;
+                background: var(--primary-color);
+                z-index: 1;
+                opacity: 0.5;
+                transform-origin: left;
+                opacity: 0;
+                transition: opacity 0.2s;
+            }
+
+            vaadin-grid.projectMethod[loading]::before {
+                opacity: 1;
+                animation: loading-expand 1s linear;
             }
         </style>
         <style include="shared-dialog-styles"></style>
@@ -38,22 +138,22 @@
                 </div>
             </iron-label>
             <paper-dialog-scrollable>
-                <paper-input id='worksheettitle' label="Workbook Title" 
-                             required auto-validate error-message="Please enter workbook title">
+                <paper-input id='worksheettitle' label="Workbook Title" required auto-validate error-message="Please enter workbook title">
                 </paper-input>
-                <h2><iron-label>Cluster Details</iron-label></h2>
-                <paper-input id='cluster_name' label="Cluster Name" value="[[clustername]]" 
-                             required auto-validate error-message="Please enter cluster name"></paper-input>
-                <paper-input id='cluster_address' on-change = "disableClusternames" label="Cluster Address" value="[[clusteraddress]]" 
-                                 required auto-validate pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-                                 invalid="{{invalid}}" error-message="Please enter cluster address"></paper-input>
-                <paper-input id='port' label="Port" value="[[port]]"  on-change = "disableClusternames"  allowed-pattern="[0-9]" 
-                                 required auto-validate error-message="Please enter a valid port number"></paper-input>
-                <paper-input id='username' label="Username"  on-change = "disableClusternames"  value="[[username]]" 
-                                 required auto-validate error-message="Please enter username"></paper-input>
-                <paper-input id='password' label="Password"  on-change = "disableClusternames"  type="password" value="[[password]]" 
-                                 required auto-validate error-message="Please enter password"></paper-input>
-                <vaadin-combo-box id='clusternames' on-selected-item-changed="addSelCluster" required class='clusternames' label="Choose Cluster" items='[]'></vaadin-combo-box>
+                <h2>
+                    <iron-label>Cluster Details</iron-label>
+                </h2>
+                <paper-input id='cluster_name' label="Cluster Name" value="[[clustername]]" required auto-validate error-message="Please enter cluster name"></paper-input>
+                <paper-input id='cluster_address' on-change="disableClusternames" label="Cluster Address" value="[[clusteraddress]]" required
+                    auto-validate pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                    invalid="{{invalid}}" error-message="Please enter cluster address"></paper-input>
+                <paper-input id='port' label="Port" value="[[port]]" on-change="disableClusternames" allowed-pattern="[0-9]" required auto-validate
+                    error-message="Please enter a valid port number"></paper-input>
+                <paper-input id='username' label="Username" on-change="disableClusternames" value="[[username]]" required auto-validate error-message="Please enter username"></paper-input>
+                <paper-input id='password' label="Password" on-change="disableClusternames" type="password" value="[[password]]" required
+                    auto-validate error-message="Please enter password"></paper-input>
+                <vaadin-combo-box id='clusternames' on-selected-item-changed="addSelCluster" required class='clusternames' label="Choose Cluster"
+                    items='[]'></vaadin-combo-box>
                 <br>
                 <paper-toggle-button class="toggleBtn" id="httpSecured">
                     <iron-label class="headerLabels">HTTP Secured</iron-label>
@@ -61,7 +161,7 @@
             </paper-dialog-scrollable>
 
             <div class="buttons">
-                <paper-button raised class="indigo" on-tap="_addNewTab">Ok</paper-button>
+                <paper-button raised class="indigo" on-tap="_openSelect">Ok</paper-button>
                 <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
             </div>
 
@@ -69,60 +169,86 @@
 
         </paper-dialog>
 
+        <paper-dialog id="selectDialog" modal>
+            <p style="font-weight: 500;">
+                Choose one option
+            </p>
+            <div>
+                <paper-radio-group id="selectionMethod" attr-for-selected="value">
+                    <paper-radio-button value="input">Select an input</paper-radio-button>
+                    <paper-radio-button value="upload">Upload a file</paper-radio-button>
+                </paper-radio-group>
+            </div>
+            <div class="buttons">
+                <paper-button raised class="indigo" on-tap="_okSelect">Ok</paper-button>
+                <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
+            </div>
+            <paper-toast id="toast" class="fit-bottom"></paper-toast>
+
+        </paper-dialog>
+
     </template>
 
     <script>
-    class NewWorksheetDialog extends Polymer.Element {
-            static get is() {return 'new-worksheet-dialog'; }
-            
-            static get properties() { return {
-                pluginId: {
-                    type: String,
-                    value: 'common-input'
-                },
-                loading: {
-                    type: Boolean,
-                    value: false,
-                    notify: true
+        class NewWorksheetDialog extends Polymer.Element {
+            static get is() { return 'new-worksheet-dialog'; }
+
+            static get properties() {
+                return {
+                    pluginId: {
+                        type: String,
+                        value: 'common-input'
+                    },
+                    loading: {
+                        type: Boolean,
+                        value: false,
+                        notify: true
+                    },
+                    activeItem: {
+                        observer: '_activeItemChanged'
+                    }
                 }
-             }
             }
-            constructor(){
+            constructor() {
                 super();
             }
             ready() {
                 super.ready();
             }
+            _activeItemChanged(item) {
+                this.$.methodlist.selectedItems = item ? [item] : [];
+            }
             open(e) {
                 this.parentNode.querySelector('#drawer').toggle();
                 //document.querySelector('#drawer').toggle();
                 // Reset all form fields
-                this.resetFormFields();                
+                this.resetFormFields();
                 // Invalidate all form fields so that the auto-validation does not happen after user reopens the dialog
-                this.invalidateFormFields();            
+                this.invalidateFormFields();
                 this.$.dialog.open();
             }
+
             disableClusternames(e) {
-                
-                if(this.$.cluster_name.$.input.value != '' && this.$.cluster_address.$.input.value != '' && this.$.port.$.input.value != '' && this.$.username.$.input.value != '' && this.$.password.$.input.value != ''){
-                    var eclIP = (this.$.httpSecured.value === "true" ? "https://" : "http://") + 
-                                    // (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '')  +
-                                     this.$.cluster_address.$.input.value +
-                                     ":" + this.$.port.$.input.value;
+
+                if (this.$.cluster_name.$.input.value != '' && this.$.cluster_address.$.input.value != '' && this.$.port.$.input.value != '' && this.$.username.$.input.value != '' && this.$.password.$.input.value != '') {
+                    var eclIP = (this.$.httpSecured.value === "true" ? "https://" : "http://") +
+                        // (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '')  +
+                        this.$.cluster_address.$.input.value +
+                        ":" + this.$.port.$.input.value;
                     // var username =  this.$.username.value;
                     // var password = this.$.password.value;
-                    var username =  this.$.username.$.input.value;
+                    var username = this.$.username.$.input.value;
                     var password = this.$.password.$.input.value;
                     var that = this;
                     that.loading = true;
-                    getThorList(eclIP, username, password).then(function(data) {
+                    getThorList(eclIP, username, password).then(function (data) {
                         console.log(data);
                         that.$.toast.close();
                         var vallist = [];
-                        for(var cnt = 0 ; cnt < data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType.length; cnt++){
-                           vallist.push(data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType[cnt].Name);
+                        for (var cnt = 0; cnt < data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType.length; cnt++) {
+                            vallist.push(data.TpListTargetClustersResponse.TargetClusters.TpClusterNameType[cnt].Name);
                         }
-                        if(vallist.length === 0){
+                        if (vallist.length === 0) {
                             that.loading = false;
                             that.$.toast.text = "Cluster details provided are invalid! Please check";
                             that.$.toast.open();
@@ -133,24 +259,77 @@
                         that.$.clusternames.selectedItem = vallist[0];
                         that.$.clusternames.disabled = false;
                         return;
-                    }, function(error) {
-                            that.loading = false;
-                            that.$.toast.text = "Cluster details provided are invalid! Please check";
-                            that.$.toast.open();
-                            return;
-                    //return;
-                    }); 
+                    }, function (error) {
+                        that.loading = false;
+                        that.$.toast.text = "Cluster details provided are invalid! Please check";
+                        that.$.toast.open();
+                        return;
+                        //return;
+                    });
                 }
             }
-            addSelCluster(e){
+            addSelCluster(e) {
                 var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
-                if(this.$.clusternames.items  === undefined || this.$.clusternames.items.length === 0){
+                if (this.$.clusternames.items === undefined || this.$.clusternames.items.length === 0) {
                     return;
                 }
-                infoBox.clusterid =  this.$.clusternames.selectedItem.toString();
+                infoBox.clusterid = this.$.clusternames.selectedItem.toString();
+            }
+            _openSelect() {
+                this.$.dialog.close();
+                this.selectMethod = JSON.parse('[{"value":1,"title":"Upload a file"}, {"value":2,"title":"Select an input"}]');
+                this.$.selectDialog.open();
+            }
+            _okSelect() {
+                if(this.$.selectionMethod.selectedItems[0].value === 'input'){
+                    this._addNewTab();
+                }
+                else if(this.$.selectionMethod.selectedItems[0].value === 'upload'){
+                    this._addUploadPlugin();
+                }                   
+                this.$.selectDialog.close();
+            }
+            _addUploadPlugin() {
+                var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
+                infoBox.clearWorkBook();
+                infoBox.cluster_name = this.$.cluster_name.value;
+                infoBox.cluster_address = this.$.cluster_address.value;
+                infoBox.port = this.$.port.value;
+                infoBox.username = this.$.username.value;
+                infoBox.password = this.$.password.value;
+                infoBox.httpSecured = this.$.httpSecured.value;
+                infoBox.file = '';
+                var projecttitlediv = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#projecttitle');
+                var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") +infoBox.cluster_address +":" + infoBox.port;
+                var titleval = this.$.worksheettitle.value;
+                var that = this;
+                hostReachable(eclIP, infoBox.username, infoBox.password).then(function (response) {
+                    projecttitlediv.textContent = titleval;
+                    //document.querySelector('#btnExportProject').disabled = true;
+                    that.parentNode.querySelector('#infobox').shadowRoot.querySelector('#btnExportProject').disabled = true;
+                    infoBox.title = titleval;
+                    infoBox.addTab('common-upload', "Upload", 'common-upload');
+                    //document.querySelector('#btnEditPlugin').disabled = false; 
+                    that.parentNode.querySelector('#infobox').shadowRoot.querySelector('#btnEditPlugin').disabled = false;
+                    that.parentNode.querySelector('#edit-worksheet-dialog').disabled = false;
+                    that.loading = false;
+                    that.$.clusternames.items = [];
+                    that.$.toast.text = "Cluster details entered validated successfully";
+                    that.$.toast.open();
+                    // setTimeout(function () {
+                    //     that.$.dialog.close();
+                    // }, 1500);
+                    return;
+                }, function (error) {
+                    that.loading = false;
+                    that.$.toast.text = "Cluster details provided are invalid! Please check";
+                    that.$.toast.open();
+                    return;
+                });
+
             }
             _addNewTab(act) {
-                if(!this.validate()) {
+                if (!this.validate()) {
                     return;
                 }
                 var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
@@ -165,64 +344,64 @@
                 infoBox.httpSecured = this.$.httpSecured.value;
                 infoBox.file = '';
                 var projecttitlediv = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#projecttitle');
-                var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + 
-                                    // (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '')  +
-                                     infoBox.cluster_address +
-                                     ":" + infoBox.port;
+                var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") +
+                    // (infoBox.properties.username != '' ? infoBox.properties.username + ':' + infoBox.properties.password + '@' : '')  +
+                    infoBox.cluster_address +
+                    ":" + infoBox.port;
                 var titleval = this.$.worksheettitle.value;
                 /*if(this.$.worksheettitle.value.startsWith('HPCCInfo-')) {
                    titleval = this.$.worksheettitle.value;
                 } else {
                     titleval = 'HPCCInfo-' + this.$.worksheettitle.value;
                 }*/
-                
+
                 var that = this;
-                hostReachable(eclIP, infoBox.username, infoBox.password).then(function(response) {
+                hostReachable(eclIP, infoBox.username, infoBox.password).then(function (response) {
                     projecttitlediv.textContent = titleval;
                     //document.querySelector('#btnExportProject').disabled = true;
-                    that.parentNode.querySelector('#infobox').shadowRoot.querySelector('#btnExportProject').disabled=true;
+                    that.parentNode.querySelector('#infobox').shadowRoot.querySelector('#btnExportProject').disabled = true;
                     infoBox.title = titleval;
                     infoBox.addTab('common-input', "Input", 'common-input');
                     //document.querySelector('#btnEditPlugin').disabled = false; 
-                    that.parentNode.querySelector('#infobox').shadowRoot.querySelector('#btnEditPlugin').disabled=false;
+                    that.parentNode.querySelector('#infobox').shadowRoot.querySelector('#btnEditPlugin').disabled = false;
                     that.parentNode.querySelector('#edit-worksheet-dialog').disabled = false;
                     that.loading = false;
                     that.$.clusternames.items = [];
                     that.$.toast.text = "Cluster details entered validated successfully";
                     that.$.toast.open();
-                    setTimeout(function () {
-                        that.$.dialog.close();
-                    }, 1500);
+                    // setTimeout(function () {
+                    //     that.$.dialog.close();
+                    // }, 1500);
                     return;
-                }, function(error) {
+                }, function (error) {
                     that.loading = false;
                     that.$.toast.text = "Cluster details provided are invalid! Please check";
                     that.$.toast.open();
                     return;
-                });                                                 
+                });
             }
             handleCancel() {
                 //  this.toggleAppDrawer();
                 return false;
             }
- 
+
             toggleAppDrawer() {
                 Polymer.dom(Polymer.dom(this).parentNode).querySelector('#drawer').toggle();
             }
             validate() {
-                var Worksheettitle=this.$.worksheettitle.value.trim();
-                var ClusterName=this.$.cluster_name.value.trim();
-                var ClusterAddress=this.$.cluster_address.value.trim();
-                var Port=this.$.port.value.trim();
-                var Username=this.$.username.value.trim();
-                var Password=this.$.password.value.trim();
-                var clusterid=this.$.clusternames.value.trim();
+                var Worksheettitle = this.$.worksheettitle.value.trim();
+                var ClusterName = this.$.cluster_name.value.trim();
+                var ClusterAddress = this.$.cluster_address.value.trim();
+                var Port = this.$.port.value.trim();
+                var Username = this.$.username.value.trim();
+                var Password = this.$.password.value.trim();
+                var clusterid = this.$.clusternames.value.trim();
                 var isValidWorksheettitle;
-                var isValidClusterName ;
-                var isValidClusterAddress ;
-                var isValidPort ;
+                var isValidClusterName;
+                var isValidClusterAddress;
+                var isValidPort;
                 var isValidUsername;
-                var isValidPassword ;
+                var isValidPassword;
                 var isValidclusterid;
                 if (Worksheettitle === undefined || Worksheettitle === null || Worksheettitle === '') {
                     isValidWorksheettitle = false;
@@ -280,7 +459,7 @@
                     isValidclusterid = true;
                     this.$.clusternames.invalid = false;
                 }
-                if(isValidWorksheettitle && isValidClusterName && isValidClusterAddress 
+                if (isValidWorksheettitle && isValidClusterName && isValidClusterAddress
                     && isValidPort && isValidUsername && isValidPassword && isValidclusterid) {
                     console.log('returning true');
                     return true;
@@ -309,10 +488,9 @@
                 this.$.httpSecured.invalid = false;
                 this.$.clusternames.invalid = false;
             }
- 
+
         }
         customElements.define(NewWorksheetDialog.is, NewWorksheetDialog);
     </script>
-
 
 </dom-module>
