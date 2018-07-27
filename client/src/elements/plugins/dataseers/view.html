@@ -5,7 +5,7 @@
 <link rel="import" href="../../shared-styles.html">
 <link rel="import" href="../../../../bower_components/vaadin-valo-theme/vaadin-grid.html"> 
 
-<dom-module id="common-upload-view">
+<dom-module id="common-dataseers-view">
     <template>
         <style include="shared-grid-styles"></style>
         <style is="custom-style">
@@ -97,22 +97,34 @@
             }
         
           </style>
-        <template is="dom-if" if={{loading}}>
+        <!-- <template is="dom-if" if={{loading}}>
             <paper-progress indeterminate="true" style="width: 100%;"></paper-progress>
             <h4 style="margin-left: 20px; color: #767676">Please Wait. Fetching data from server.</h4>
         </template>
         <div>
             <vaadin-grid class="projectworksheet" name="worksheet" items="[[projectData]]" page-size="10"></vaadin-grid>
-        </div>
+        </div> -->
+        
+<template is="dom-if" if={{loading}}>
+  <h4 style="margin-left: 20px; color: #767676; text-align: center; padding-top: 10%;">You can click on edit button,if you want to upload more files.</h4>
+</template>
+<!-- <div>
+  <vaadin-grid class="projectworksheet" name="worksheet" items="[[projectData]]" page-size="10"></vaadin-grid>
+</div> -->
+<!-- <h4 style="margin-left: 20px; color: #767676">You can edit the pluggin if you want to upload more files.</h4> -->
     </template>
 
+
+
+    
+
     <script>
-        class CommonUploadView extends Polymer.Element {
-            static get is() {return 'common-upload-view'; }
+        class CommonDataseersView extends Polymer.Element {
+            static get is() {return 'common-dataseers-view'; }
             
             static get properties() { return {
    
-                pluginId : String,
+              pluginId : String,
                 label : String,
                 id : String,
                 editor : Object,
@@ -132,9 +144,9 @@
             }
             ready(e) {
              
-                super.ready();
-                var grid = this.shadowRoot.querySelector(".projectworksheet");
-                grid.items = [];
+              super.ready();              
+                // var grid = this.shadowRoot.querySelector(".projectworksheet");
+                // grid.items = [];
                 //grid.addColumn({name: "<b>Please use this Edit button to select an Input file!</b>"});
             }
             setGeneralProperties(properties) {
@@ -146,7 +158,7 @@
             refresh() {
             }
         }
-        customElements.define(CommonUploadView.is, CommonUploadView);
+        customElements.define(CommonDataseersView.is, CommonDataseersView);
     </script>
 
 </dom-module>

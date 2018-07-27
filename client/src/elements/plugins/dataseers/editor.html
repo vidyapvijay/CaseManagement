@@ -1,0 +1,532 @@
+<link rel="import" href="../../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../../../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../../../bower_components/vaadin-upload/vaadin-upload.html">
+<link rel="import" href="../../../../bower_components/vaadin-valo-theme/vaadin-combo-box.html">
+<link rel="import" href="../../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../shared-styles.html">
+
+<dom-module id="overlay" theme-for="vaadin-combo-box-overlay">
+    <template>
+        <style>
+            [part="overlay"] {
+                overflow: hidden;
+            }
+        </style>
+    </template>
+</dom-module>
+<dom-module id="common-dataseers-editor">
+    <template>
+        <style include="shared-dialog-styles">
+            vaadin-combo-box {
+                width: 100%;
+                display: block !important;
+            }
+
+            paper-dropdown-menu {
+                width: 100%;
+            }
+
+            paper-listbox {
+                width: 100%;
+                left: 0;
+                right: 0;
+            }
+
+            paper-input-container {
+                width: 100%;
+                left: 0;
+                right: 0;
+            }
+
+            paper-dropdown-content {
+                width: 100%;
+                left: 0;
+                right: 0;
+            }
+
+            .validation-error {
+                margin: 0;
+                width: 90%;
+                color: #dd2c00;
+                font-size: 12px;
+                font-weight: 400;
+            }
+
+            .modal-progress {
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .modal-progress .p-txt {
+                margin-bottom: 15px;
+                margin-top: 10px;
+                padding: 0;
+            }
+
+            .modal-progress .p-btn {
+                margin-bottom: 0;
+                margin-top: 5px;
+                padding: 0;
+                text-align: right;
+            }
+
+            .modal-progress button.close {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                background: transparent;
+                border: 0;
+                font-size: 20px;
+                width: 27px;
+                height: 27px;
+                text-align: center;
+                margin: 0;
+                padding: 0;
+                cursor: pointer;
+            }paper-dialog-scrollable {
+                max-height: 440px;
+    overflow-y: auto;
+}
+            paper-dialog {
+    margin-top: -20px !important;
+}
+           
+        </style>
+
+        <style include="shared-dialog-styles"></style>
+        <iron-ajax id="dataseers" url="/hpcc/dataseersService" method="GET" handle-as "json" on-response="processFileResponse">
+        </iron-ajax>
+        <iron-ajax id="downloadFileFromServer" url="/hpcc/downloadFileFromServer" method="POST" handle-as="blob" timeout=10000 on-response="downloadFileFromServerResponse">
+        </iron-ajax>
+        <iron-ajax id="getFolderList" url="/clusterDetails/getFolderList" method="POST" handle-as "json">
+        </iron-ajax>
+        <iron-ajax id="dataseersGetConfig" url="/hpcc/getconfig" method="GET" handle-as "json" on-response="setConfigParameters">
+        </iron-ajax>
+        <paper-dialog id="dialog" modal>
+            <template is="dom-if" if={{loading}}>
+                <paper-progress indeterminate="true" style="width: 90%; margin-top: 2px;"></paper-progress>
+            </template>
+            <iron-label>
+                <div class="headerDiv">
+                    <span>
+                        Upload File to HPCC Cluster
+                    </span>
+                </div>
+            </iron-label>
+
+            <paper-dialog-scrollable>
+                <paper-input id='TabTitle' label="Title" required auto-validate error-message="Title is Required"></paper-input>
+                <vaadin-combo-box id='FileType' class='subfilesgrid' required label="Select File Type" items='[[fileList]]'></vaadin-combo-box>
+                <template is="dom-if" if="[[FileTypeError]]">
+                    <p class="validation-error">[[FileTypeError]]</p>
+                </template>
+                <paper-radio-group id="reportType" selected="Account" attr-for-selected="value">
+                    <paper-radio-button value="Account">Account</paper-radio-button>
+                    <paper-radio-button value="Transaction">Transaction</paper-radio-button>
+                </paper-radio-group>
+                <vaadin-combo-box id='subfilesgrid' class='subfilesgrid' required label="Select Folder" items='[[foldersList]]'></vaadin-combo-box>
+                <template is="dom-if" if="[[subFilesGridError]]">
+                    <p class="validation-error">[[subFilesGridError]]</p>
+                </template>
+                <br>
+                <vaadin-upload id="manualUpload" with-credentials="true" target={{targetURL}} no-auto method="POST"></vaadin-upload>
+                <iron-icon slot="drop-label-icon" icon="description"> sdfsd </iron-icon>
+                <span slot="drop-label">Drop your csv files here</span>
+                </vaadin-upload>
+                <template is="dom-if" if="[[UploadFileError]]">
+                    <p class="validation-error">[[UploadFileError]]</p>
+                </template>                
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button raised class="indigo" on-tap="uploadFile">Ok</paper-button>
+                <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
+            </div>
+            
+        </paper-dialog>
+        <paper-toast id="toast" class="fit-bottom"></paper-toast>
+        <paper-dialog id="processDialog" modal class="modal-progress">
+            <div class="p-txt" id="divprogress"> The file is processing.. Please wait </div>
+            <template is="dom-if" if={{processing}}>
+                <paper-progress id="progress" indeterminate="true" style="width: 90%; margin-top: 2px;"></paper-progress>
+            </template>
+        </paper-dialog>
+        <paper-dialog id="processSuessfulDialog" modal class="modal-progress">
+            <button type="button" class="close" data-dismiss="modal" on-tap="closedialog">&times;</button>
+            <div class="p-txt"> The file has been processed. Now you can download the File.</div>
+            <div class="p-btn">
+                <paper-button raised class="indigo" hidden$="{{hideDownload}}" on-tap="downloadFileFromServer">Download File</paper-button>
+            </div>
+        </paper-dialog>
+        <paper-dialog id="processFailedDialog" modal class="modal-progress">
+            <button type="button" class="close" data-dismiss="modal" on-tap="closeFailuredialog">&times;</button>
+            <div class="p-txt"> The file already exists. </div>
+        </paper-dialog>
+
+    </template>
+    <script>
+        class CommonDataseersEditor extends Polymer.Element {
+            static get is() { return 'common-dataseers-editor'; }
+            static get properties() {
+                return {
+                    folderTree: Array,
+                    myDropZonePath: String,
+                    ipInternal: String,
+                    foldersList: Array,
+                    subFilesGridError: String,
+                    FileTypeError: String,
+                    UploadFileError: String,
+                    fileList: Array,
+                    hideDownload: {
+                        type: Boolean,
+                        value: true
+                    },
+                    processing: {
+                        type: Boolean,
+                        value: false,
+                        notify: true
+                    }
+                }
+            }
+            constructor() {
+                super();
+            }
+            ready() {
+                super.ready();
+                this.folderTree = [];
+                this.myDropZonePath = '';
+                this.foldersList = [];
+
+                //File types 
+                this.fileList = ['Account Number', 'Card Number', 'Person ID', 'SSN'];
+
+                this.$.TabTitle.value = '';
+
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var username = infoBox.username;
+                var password = infoBox.password;
+
+                //Calling getConfig service initilaising constants.
+                this.$.dataseersGetConfig.contentType = 'application/json';
+                this.$.dataseersGetConfig.params = { username: username, password: password };
+                this.$.dataseersGetConfig.generateRequest();
+
+                //Event Listeners for upload element
+                var upload = this.$.manualUpload;
+                upload.addEventListener('upload-success', (e) => this.processFile(e));
+                upload.addEventListener('upload-error', (e) => this.errorInUpload(e));
+
+            }
+
+            //Setting values returning from getConfig service to property elements.
+            setConfigParameters(e) {
+                var data = JSON.parse(e.detail.response);
+                var dropzonePath = data.getconfigResponse.Results.DROPZONE.Row[0].DROPZONE;
+
+                //Remove last character slash(/) from dropzone path
+                var lastChar = dropzonePath[dropzonePath.length - 1];
+                if (lastChar == '/')
+                    dropzonePath = dropzonePath.substring(0, dropzonePath.length - 1);
+
+                this.myDropZonePath = dropzonePath;
+                this.ipInternal = data.getconfigResponse.Results.ESPIPINTERNAL.Row[0].ESPIPINTERNAL;
+            }
+
+            open(e) {
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                this.$.TabTitle.value = this.parentNode.selectedItem.textContent;
+                this.loadFolderList();
+                this.$.dialog.open();
+            }
+
+            //Function to list all folders in dropzone
+            loadFolderList() {
+                this.getFolderList(this.myDropZonePath, this);
+            }
+
+            //Recursive function to get inner folders.
+            getFolderList(folderpath, that) {
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + infoBox.cluster_address + ":" + infoBox.port;
+
+                var username = infoBox.username;
+                var password = infoBox.password;
+
+                var path = folderpath;
+                let netaddress = this.ipInternal;
+
+                this.$.getFolderList.contentType = 'application/json';
+                this.$.getFolderList.body = { eclIP: eclIP, username: username, password: password, path: path, netaddress: netaddress };
+                var folderRequest = this.$.getFolderList.generateRequest();
+
+                folderRequest.completes.then(function (req) {
+                    var data = JSON.parse(req.response);
+                    // Find the index
+                    var index = -1;
+                    for (var i = 0; i < that.folderTree.length; i++) {
+                        if (that.folderTree[i].Path == data.FileListResponse.Path)
+                            index = i;
+                    }
+                    if (index > -1) that.folderTree[index].ChildLoaded = true;
+                    if (data.FileListResponse.files != undefined) {
+                        var folderArray = data.FileListResponse.files.PhysicalFileStruct;
+                        if (folderArray.length >= 0) {
+                            $(folderArray).each(function () {
+                                that.folderTree.push(
+                                    {
+                                        Name: "/" + this.name,
+                                        Path: data.FileListResponse.Path + "/" + this.name,
+                                        ChildLoaded: false
+                                    }
+                                );
+                                that.getFolderList(data.FileListResponse.Path + "/" + this.name, that);
+                            });
+                        }
+                    }
+
+                    var allLoaded = that.folderTree.length > 0;
+                    for (var i = 0; i < that.folderTree.length; i++) {
+                        if (!that.folderTree[i].ChildLoaded) allLoaded = false;
+                    }
+
+                    if (allLoaded) {
+                        var tempList = ["/"];
+                        for (var i = 0; i < that.folderTree.length; i++) {
+                            tempList.push(that.folderTree[i].Path.replace(that.myDropZonePath + "/", ''));
+                        }
+                        that.foldersList = tempList.sort();
+                    }
+                });
+            }
+
+            //Function to upload the file to the server
+            uploadFile() {
+
+                //validating all the fields and the browse button                
+                if (!this.validate() || this.$.manualUpload.files.length == 0) {
+                    if (this.$.manualUpload.files.length == 0) {
+                        this.UploadFileError = 'Please browse the file to upload';
+                    }
+                    return;
+                }
+                else {
+                    this.UploadFileError = null;
+                }
+
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var username = infoBox.username;
+                var password = infoBox.password;
+                this.$.manualUpload.headers['Authorization'] = this.makeAuthorizationHeaders(username, password);
+
+                var myFolderPath = this.myDropZonePath + "/" + this.$.subfilesgrid.selectedItem + "/";
+                let netaddress = this.ipInternal;
+                var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + infoBox.cluster_address + ":" + infoBox.port;
+
+                this.targetURL = eclIP + "/FileSpray/UploadFile.json?upload_&rawxml_=1&NetAddress=" + netaddress + "&OS=2&Path=" + myFolderPath;
+                var upload = this.$.manualUpload;
+                upload.uploadFiles();
+            }
+
+            /**
+                * Process the uploaded file according to the given compiled query
+                * Function call on Upload - Success 
+            */
+            processFile(e) {
+                this.$.toast.text = "The file uploaded successfully";
+                this.$.toast.open();
+
+                this.$.dialog.close();
+                this.$.processDialog.open();
+
+                this.processing = true;
+                var file = e.detail.file;
+                var filename = file.name;
+
+                //Remove extention from file name
+                var index = filename.lastIndexOf('.');
+                var filenameWithoutExtention = index == -1 ? filename : filename.substring(0, index);
+
+                var myFolderPath = this.$.subfilesgrid.selectedItem;
+
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var username = infoBox.username;
+                var password = infoBox.password;
+
+                if (filename != null && filename != undefined) {
+                    this.$.dataseers.contentType = 'application/json';
+                    this.$.dataseers.params = { filename: filenameWithoutExtention, foldername: myFolderPath, username: username, password: password };
+                    this.$.dataseers.generateRequest();
+                }
+            }
+
+            //Response after processing the file.
+            processFileResponse(e) {
+                var that = this;
+                debugger;
+
+                var data = JSON.parse(e.detail.response);
+                if (data.accountnumber_accountResponse.Results["Result 1"] != null && data.accountnumber_accountResponse.Results["Result 1"] != undefined) {
+                    var WUID = data.accountnumber_accountResponse.Results["Result 1"].Row[0].Result_1;
+                    var outpuFilename = data.accountnumber_accountResponse.Results["Result 6"].Row[0].Result_6;
+                    var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                    var url = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + infoBox.cluster_address + ":" + infoBox.port;
+                    var hpccuser = infoBox.username;
+                    var password = infoBox.username;
+                    infoBox.filename = outpuFilename.replace('/output/', '');;
+                    var wustatus = new Promise(function (res, rej) {
+                        infoBox.workunitStatus(url, WUID, hpccuser, password).then(function (data) {
+                            res(data);
+                        })
+                    });
+                    wustatus.then(function (result) {
+                        if (data.accountnumber_accountResponse.Results["Result 6"] != null && data.accountnumber_accountResponse.Results["Result 6"] != undefined) {
+                            that.hideDownload = false;
+                            that.processing = false;
+                            that.$.processSuessfulDialog.open();
+                            that.$.processDialog.close();
+                        }
+                        else {
+                            that.$.processDialog.close();
+                            alert("Something went wrong. The processing failed");
+                            var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                            var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+                            currentPage.loading = true;
+                        }
+                    });
+                }
+                else {
+                    that.$.processDialog.close();
+                    that.$.processFailedDialog.open();                    
+
+                    var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                    var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+                    currentPage.loading = true;
+                }
+            }
+
+
+
+            //This will be called if there is any error in file uploading .
+            errorInUpload(e) {
+                this.$.toast.text = "Something went wrong. Please upload again";
+                this.$.toast.open();
+            }
+
+            //Function to validate the folder list dropdown
+            validateSubFilesGrid() {
+                var subFileVal = this.$.subfilesgrid.value.trim();
+                if (subFileVal === undefined || subFileVal === null || subFileVal === "" || this.$.subfilesgrid.disabled === true) {
+                    this.subFilesGridError = 'Please select folder';
+                    this.$.subfilesgrid.invalid = true;
+                    return false;
+                }
+                else {
+                    this.subFilesGridError = null;
+                    this.$.subfilesgrid.invalid = false;
+                    return true;
+                }
+            }
+
+            //Function to validate file type dropdown
+            validateFileType() {
+                var fileTypeVal = this.$.FileType.value.trim();
+                if (fileTypeVal === undefined || fileTypeVal === null || fileTypeVal === "" || this.$.FileType.disabled === true) {
+                    this.FileTypeError = 'Please select file type';
+                    this.$.FileType.invalid = true;
+                    return false;
+                }
+                else {
+                    this.FileTypeError = null;
+                    this.$.FileType.invalid = false;
+                    return true;
+                }
+            }
+
+            //Function to vlaidate file upload UI
+            validate() {
+                var title = this.$.TabTitle.validate();
+                var isValidtitle;
+                var validateSubFilesGrid = this.validateSubFilesGrid();
+                var validateFileType = this.validateFileType();
+                if (title === undefined || title === null || title === '') {
+                    isValidtitle = false;
+                    this.$.TabTitle.invalid = true;
+                }
+                else {
+                    isValidtitle = true;
+                    this.$.TabTitle.invalid = false;
+                }
+                if (isValidtitle && validateSubFilesGrid && validateFileType) {
+                    return true;
+                } else {
+                    return false;
+                }
+
+            }
+
+            /**
+                * Extract filename value from Content-disposition header
+            */
+            getFileNameFromHttpResponse(contentDispositionHeader) {
+                var result = contentDispositionHeader.split(';')[1].trim().split('=')[1];
+                return result.replace(/"/g, '');
+            }
+
+
+            downloadFileFromServer() {
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var eclIP = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + infoBox.cluster_address + ":" + infoBox.port;
+                var username = infoBox.username;
+                var password = infoBox.password;
+                let netaddress = this.ipInternal;
+                var lzppath = this.myDropZonePath + "/" + this.$.subfilesgrid.selectedItem + "/" + "output";
+                var filename = infoBox.filename;
+                
+                this.$.downloadFileFromServer.contentType = 'application/json';
+                this.$.downloadFileFromServer.body = { url: eclIP, username: username, password: password, lzpath: lzppath, netaddress: netaddress, filename: filename };
+                this.$.downloadFileFromServer.generateRequest();
+            }
+
+            
+            downloadFileFromServerResponse(e, request) {
+                console.log(e.detail.response);
+                var disposition = request.xhr.getResponseHeader('content-disposition');
+                var filename = this.getFileNameFromHttpResponse(disposition);
+                // The actual download
+                var blob = new Blob([e.detail.response], { type: 'text/csv; charset=utf-8' });
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                this.$.processSuessfulDialog.close();
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+                currentPage.loading = true;
+            }
+
+            closedialog() {
+                this.$.processSuessfulDialog.close();
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+                currentPage.loading = true;
+            }
+            closeFailuredialog() {
+                this.$.processFailedDialog.close();
+                var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
+                var currentPage = infoBox.shadowRoot.querySelector('#pages').selectedItem;
+                currentPage.loading = true;
+            }
+
+            makeAuthorizationHeaders(user, password) {
+                return "Basic " + window.btoa(user + ":" + password);
+            }
+
+        }
+        customElements.define(CommonDataseersEditor.is, CommonDataseersEditor);
+    </script>
+</dom-module>

@@ -1,9 +1,10 @@
 //Dependencies
-var express = require('express');
-var router = express.Router();
-const rp = require('request-promise');
-const logger = require("../utils/logger");
-var superagent = require("superagent");
+import * as express from "express";
+import {Router} from "express";
+let router = Router();
+import * as rp from "request-promise";
+import * as logger from "../utils/logger";
+import * as superagent from "superagent";
 
 //Routes
 router.post('/checkConnection', function(req, res, next) {
@@ -30,12 +31,12 @@ router.post('/checkConnection', function(req, res, next) {
 });
 
 router.post('/getDropZoneList', function (request, response) {
-    try {
+   try {
 		let url = request.body.eclIP;
 		let username = request.body.username;
 		let password = request.body.password;
         url = url + "/WsTopology/TpDropZoneQuery.json";
-        superagent
+       superagent
 			.get(url)
 			.auth(username,password)
             .end((err, res1) => {
@@ -46,30 +47,28 @@ router.post('/getDropZoneList', function (request, response) {
     } catch (err) {
         console.log('err', err);
     }
-});
-
-router.post('/getFolderList', function (request, response) {
-    try {
-	   	let url = request.body.eclIP;
-		let username = request.body.username;
-		let password = request.body.password;
-		let path =  request.body.path;
-		let netaddress = request.body.netaddress;
-		console.log("netaddress",netaddress);
-        url = url + "/FileSpray/FileList.json";
-        superagent
-            .get(url)
-            .query({ Path: path, Netaddr:netaddress,DirectoryOnly:true })
-            .auth(username,password)
-            .end((err, res1) => {
-                if (err) { return console.log('Error: ', err); }
-                console.log('Body: ', res1.body);
-                response.json(res1.body);
-            });
-    } catch (err) {
-        console.log('err', err);
-    }
-});
+	});
+	
+	router.post('/getFolderList', function (request, response) {
+	    try {
+		   	let url = request.body.eclIP;
+			let username = request.body.username;
+			let password = request.body.password;
+			let path =  request.body.path;
+			let netaddress = request.body.netaddress;
+	        url = url + "/FileSpray/FileList.json";
+	        superagent
+	           .get(url)
+	           .query({ Path: path, Netaddr:netaddress,DirectoryOnly:true })
+	           .auth(username,password)
+	            .end((err, res1) => {
+	                if (err) { return console.log('Error: ', err); }
+	                response.json(res1.body);
+	            });
+	    } catch (err) {
+	        console.log('err', err);
+	    }
+	});
 
 //Return router
-module.exports = router;
+export {router};
