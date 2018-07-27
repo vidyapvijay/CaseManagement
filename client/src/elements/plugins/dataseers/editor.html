@@ -374,7 +374,7 @@
                     var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
                     var url = (infoBox.isHpccSecured === "true" ? "https://" : "http://") + infoBox.cluster_address + ":" + infoBox.port;
                     var hpccuser = infoBox.username;
-                    var password = infoBox.username;
+                    var password = infoBox.password;
                     infoBox.filename = outpuFilename.replace('/output/', '');;
                     var wustatus = new Promise(function (res, rej) {
                         infoBox.workunitStatus(url, WUID, hpccuser, password).then(function (data) {
