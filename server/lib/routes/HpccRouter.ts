@@ -13,10 +13,12 @@ router.post('/getThorList', function (request, response) {
         let username = request.body.username;
         let password = request.body.password;
         let myTopology = new Topology({ baseUrl: url, userID: username, password: password });
-        myTopology.fetchTargetClusters().then((targetClusterList) => {
-            response.json(targetClusterList);
-        });
-
+        myTopology.fetchTargetClusters().then((targetClusterList) => {          
+            response.json({Status: "Success", Resp: targetClusterList});
+        }).catch((err)=>{
+            console.log("Error");
+            response.json({Status: "Error", Resp: err});
+        });        
     } catch (err) {
         console.log('err', err);
     }
@@ -196,37 +198,6 @@ router.get('/getconfig', function (request, response) {
     }
 });
 
-// router.post('/downloadFileFromServer', function (req, res) {
-//     console.log('Calling downloadFileFromServer');
-//     try {
-//         const filename = 'adhoc_results.csv'; // You will get this in the ouput after the service executes and creates a file
-//         const netaddress = '192.168.1.226';
-//         const lzpath =  '/mnt/dropzone/dev/adhoc/output'; //Directory from where the file needs to be downloaded 
-//         const os = '2';
-//         const username = '';
-//         const password = '';
-//         let url = 'http://corp.dataseers.us:8010';
-//         url = url + "/FileSpray/DownloadFile?Name="+ filename + "&NetAddress=" + netaddress + "&Path=" + lzpath + "&OS=" + os;
-//         console.log(url);
-//         const superagentreq = superagent
-//             .get(url)
-//             .auth(username, password)
-//             .timeout({
-//                 response: 10000,  // Wait 10 seconds for the server to start sending,
-//                 deadline: 120000, // but allow 2 minute for the file to finish downloading.
-//             })
-            
-//         superagentreq.pipe(res);
-        
-//         res.setHeader('Content-disposition', 'attachment; filename=' + filename);
-//         res.set('Content-Type', 'text/csv');
-        
-//     } catch (err) {
-//         console.log('err', err);
-//     }
-// });
-
-
 
 router.post('/downloadFileFromServer', function (req, res) {
     console.log('Calling downloadFileFromServer');
@@ -238,13 +209,7 @@ router.post('/downloadFileFromServer', function (req, res) {
         const netaddress = req.body.netaddress;
         const filename = req.body.filename;
         const os = '2';
-        // const filename = 'adhoc_results.csv'; // You will get this in the ouput after the service executes and creates a file
-        // const netaddress = '192.168.1.226';
-        // const lzpath =  '/mnt/dropzone/dev/adhoc/output'; //Directory from where the file needs to be downloaded 
-        // const os = '2';
-        // const username = '';
-        // const password = '';
-        // let url = 'http://corp.dataseers.us:8010';
+       
         url = url + "/FileSpray/DownloadFile?Name="+ filename + "&NetAddress=" + netaddress + "&Path=" + lzpath + "&OS=" + os;
         console.log(url);
         const superagentreq = superagent

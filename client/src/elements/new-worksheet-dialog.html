@@ -24,7 +24,8 @@
             method="POST" 
             url="/hpcc/getThorList" 
             handle-as="json"             
-            on-response="getThorListResponse">
+            on-response="getThorListResponse"
+            on-error="_handleErrorResponse">
             </iron-ajax>
         <style include="shared-dialog-styles">
         vaadin-combo-box {
@@ -148,18 +149,18 @@
                              required auto-validate error-message="Please enter workbook title">
                 </paper-input>
                 <h2><iron-label>Cluster Details</iron-label></h2>
-                <paper-input id='cluster_name' label="Cluster Name" value="[[clustername]]" 
+                <paper-input id='cluster_name' style="display:none;"  label="Cluster Name" value="[[clustername]]" 
                              required auto-validate error-message="Please enter cluster name"></paper-input>
-                <paper-input id='cluster_address' on-change = "disableClusternames" label="Cluster Address" value="[[clusteraddress]]" 
+                <paper-input id='cluster_address' style="display:none;" on-change = "disableClusternames" label="Cluster Address" value="[[clusteraddress]]" 
                                  required auto-validate pattern="(^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$)|(^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$)"
                                  invalid="{{invalid}}" error-message="Please enter cluster address"></paper-input>
-                <paper-input id='port' label="Port" value="[[port]]"  on-change = "disableClusternames"  allowed-pattern="[0-9]" 
+                <paper-input id='port' label="Port" value="[[port]]" style="display:none;"  on-change = "disableClusternames"  allowed-pattern="[0-9]" 
                                  required auto-validate error-message="Please enter a valid port number"></paper-input>
                 <paper-input id='username' label="Username"  on-change = "disableClusternames"  value="[[username]]" 
                                  required auto-validate error-message="Please enter username"></paper-input>
                 <paper-input id='password' label="Password"  on-change = "disableClusternames"  type="password" value="[[password]]" 
                                  required auto-validate error-message="Please enter password"></paper-input>
-                <vaadin-combo-box id='clusternames' on-selected-item-changed="addSelCluster" required class='clusternames' label="Choose Cluster" items='[]'></vaadin-combo-box>
+                <vaadin-combo-box id='clusternames' style="display:none ! important" on-selected-item-changed="addSelCluster" required class='clusternames' label="Choose Cluster" items='[]'></vaadin-combo-box>
                 <br>
                 <paper-toggle-button class="toggleBtn" id="httpSecured">
                     <iron-label class="headerLabels">HTTP Secured</iron-label>
@@ -167,13 +168,14 @@
             </paper-dialog-scrollable>
 
             <div class="buttons">
-                <paper-button raised class="indigo" on-tap="_openSelect">Ok</paper-button>
+                <paper-button raised class="indigo" on-tap="disableClusternames">Ok</paper-button>
                 <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
             </div>
 
-            <paper-toast id="toast" class="fit-bottom"></paper-toast>
+            
 
         </paper-dialog>
+        <paper-toast id="toast" class="fit-bottom"></paper-toast>
         <paper-dialog id="selectDialog" modal>
             <p style="text-align: center;font-size: x-large;text-transform: none;border-bottom: 1px solid #eee;padding-bottom: 20px;margin: 20px 0;">
                 Choose one option
@@ -188,7 +190,7 @@
                 <paper-button raised class="indigo" on-tap="_okSelect">Ok</paper-button>
                 <paper-button dialog-dismiss raised class="green" on-tap="handleCancel">Cancel</paper-button>
             </div>
-            <paper-toast id="toast" class="fit-bottom"></paper-toast>
+            <!-- <paper-toast id="toast" class="fit-bottom"></paper-toast> -->
 
         </paper-dialog>
 
@@ -218,6 +220,7 @@
             }
             ready() {
                 super.ready();
+                
             }
             _activeItemChanged(item) {
                 this.$.methodlist.selectedItems = item ? [item] : [];
@@ -228,7 +231,13 @@
                 // Reset all form fields
                 this.resetFormFields();                
                 // Invalidate all form fields so that the auto-validation does not happen after user reopens the dialog
-                this.invalidateFormFields();                     
+                this.invalidateFormFields();  
+                
+                //Hard coding cluster details.. 
+                this.clustername="Cluster";
+                //this.$.clustername=this.clustername
+                this.clusteraddress = "corp.dataseers.us";
+                this.port = "8010";                
                 this.$.dialog.open();
             }
             
@@ -252,10 +261,10 @@
 
             getThorListResponse(e){
                 console.log('response');
-                if(e.detail.response != null) {
+                if(e.detail.response != null && e.detail.response.Status=="Success") {
                         this.$.toast.close();
                         var vallist = [];
-                        var data = e.detail.response;
+                        var data = e.detail.response.Resp;
                         for(var cnt = 0 ; cnt < data.length; cnt++){
                            vallist.push(data[cnt]._espState.Name);
                         }
@@ -268,30 +277,37 @@
                         this.loading = false;
                         this.$.clusternames.items = vallist;
                         this.$.clusternames.selectedItem = vallist[0];
+                        this.$.clusternames.value ="thor";
+                        this.$.clusternames.selectedItem = "thor";
+                        //this.$.clusternames.value="thor";
                         this.$.clusternames.disabled = false;
-                        return;
+                        this._openSelect();
+                        //return;
                     }
                     else {
+                        debugger;
                         this.loading = false;
                         this.$.toast.text = "Cluster details provided are invalid! Please check";
                         this.$.toast.open();
-                        return;
-                    //return;
+                        //return;
                     } 
+            }
+            _handleErrorResponse(e){
+                this.loading = false;
+                this.$.toast.text = "Cluster details provided are invalid! Please check";
+                this.$.toast.open();
+                return;
             }
             addSelCluster(e){
                 var infoBox = Polymer.dom(Polymer.dom(this).parentNode).querySelector('#infobox');
                 if(this.$.clusternames.items  === undefined || this.$.clusternames.items.length === 0){
                     return;
                 }
-                infoBox.clusterid =  this.$.clusternames.selectedItem.toString();
+                infoBox.clusterid =  this.$.clusternames.selectedItem;
             }
-                      _openSelect() {
-                this.$.dialog.close();
-               this.selectMethod = JSON.parse('[{"value":1,"title":"Upload a file"}, {"value":2,"title":"Select an input"}]');
-                this.$.selectDialog.open();
-            }
+            
             _openSelect() {
+                //disableClusternames();
                 if (!this.validate()) {
                     return;
                 }

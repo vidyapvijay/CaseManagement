@@ -3,7 +3,7 @@ A Workbook (like an Excel workbook) to view HPCC data files and apply simple dat
 
 ## Requirements
 
-For development, you will only need [Node.js](http://nodejs.org/) and [MYSQL Server](https://dev.mysql.com/downloads/mysql/) installed on your environment.
+For development, you will only need TypeScript, [Node.js](http://nodejs.org/) and [MYSQL Server](https://dev.mysql.com/downloads/mysql/) installed on your environment.
 
 
 ### Node
@@ -29,6 +29,9 @@ PM2 is a production process manager for Node.js / io.js applications with a buil
 
 	$ npm install pm2 -g
 
+Install TypeScript using the command 
+	pm2 install typescript
+
 Execute myql script located in folder HPCCInfo/server/HPCCInfo_schema.sql
 Update the MySql connection properties in HPCCInfo/server/DBConnection.js
 
@@ -37,10 +40,11 @@ Update the MySql connection properties in HPCCInfo/server/DBConnection.js
 
 ## Start the application
 
-	$ cd HPCCInfo/server
-	$ pm2 start server.js
+	$ cd HPCCInfo/server/lib
+	$ pm2 start server.ts
 
 ## Stop the application
+
 	$ pm2 stop server
 
 ## Current Processes

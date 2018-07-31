@@ -238,12 +238,18 @@
             open(e) {
                 var infoBox = document.querySelector('my-app').shadowRoot.querySelector('hpcc-info-app').shadowRoot.querySelector('#infobox');
                 this.$.TabTitle.value = this.parentNode.selectedItem.textContent;
+                var upload=this.$.manualUpload;
+                upload.files = []; 
+                this.$.FileType.selectedItem="";
+                this.$.subfilesgrid.selectedItem="";  
                 this.loadFolderList();
                 this.$.dialog.open();
             }
 
             //Function to list all folders in dropzone
             loadFolderList() {
+                this.foldersList= [];
+                this.folderTree = [];
                 this.getFolderList(this.myDropZonePath, this);
             }
 
